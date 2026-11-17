@@ -1,0 +1,250 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cast & Blast | Explore Outdoors</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #101710;
+      color: #f3f4ed;
+    }
+
+    header {
+      background: #18251a;
+      padding: 22px 7%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      border-bottom: 1px solid #344735;
+    }
+
+    .logo {
+      font-size: 27px;
+      font-weight: bold;
+      color: #b7d18b;
+    }
+
+    nav a {
+      color: #e5e9df;
+      text-decoration: none;
+      margin-left: 20px;
+      font-size: 14px;
+    }
+
+    nav a:hover {
+      color: #b7d18b;
+    }
+
+    .hero {
+      padding: 85px 7%;
+      text-align: center;
+      background: linear-gradient(135deg, #243c29, #111b13);
+    }
+
+    .hero h1 {
+      font-size: clamp(38px, 7vw, 65px);
+      margin-bottom: 18px;
+    }
+
+    .hero h1 span {
+      color: #b7d18b;
+    }
+
+    .hero p {
+      color: #c5cdbf;
+      font-size: 18px;
+      line-height: 1.6;
+      max-width: 650px;
+      margin: 0 auto 28px;
+    }
+
+    .button {
+      display: inline-block;
+      background: #9fbd70;
+      color: #142014;
+      padding: 14px 25px;
+      border-radius: 7px;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    section {
+      padding: 55px 7%;
+    }
+
+    .section-title {
+      font-size: 30px;
+      margin-bottom: 25px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: #1b281d;
+      padding: 28px;
+      border: 1px solid #344735;
+      border-radius: 12px;
+    }
+
+    .card .emoji {
+      font-size: 35px;
+      margin-bottom: 15px;
+    }
+
+    .card h3 {
+      color: #b7d18b;
+      margin-bottom: 12px;
+    }
+
+    .card p {
+      color: #c0c9bd;
+      line-height: 1.6;
+    }
+
+    .map-box {
+      background: #1b281d;
+      border: 1px solid #465b43;
+      border-radius: 12px;
+      padding: 50px 20px;
+      text-align: center;
+    }
+
+    .map-box h3 {
+      color: #b7d18b;
+      margin-bottom: 12px;
+    }
+
+    .map-box p {
+      color: #c0c9bd;
+      line-height: 1.6;
+    }
+
+    footer {
+      background: #18251a;
+      padding: 25px;
+      text-align: center;
+      color: #9da998;
+      font-size: 13px;
+    }
+
+    @media (max-width: 600px) {
+      header {
+        justify-content: center;
+      }
+
+      nav a {
+        margin: 0 8px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="logo">🎣 CAST & BLAST</div>
+    <nav>
+      <a href="#fishing">Fishing</a>
+      <a href="#hunting">Hunting</a>
+      <a href="#maps">Maps</a>
+      <a href="#community">Community</a>
+    </nav>
+  </header>
+
+  <div class="hero">
+    <h1>EXPLORE THE <span>OUTDOORS.</span></h1>
+    <p>
+      Your outdoor adventure starts here.
+      Discover fishing locations, explore public lands,
+      learn about hunting regulations, and connect with
+      the outdoor community.
+    </p>
+    <a href="#maps" class="button">EXPLORE THE MAP</a>
+  </div>
+
+  <section id="fishing">
+    <h2 class="section-title">🎣 Fishing</h2>
+    <div class="cards">
+      <div class="card">
+        <div class="emoji">🐟</div>
+        <h3>Fishing Locations</h3>
+        <p>Explore lakes, rivers, reservoirs, and fishing access locations.</p>
+      </div>
+      <div class="card">
+        <div class="emoji">📸</div>
+        <h3>Share Your Catches</h3>
+        <p>Share fishing stories, photos, species, and memorable catches.</p>
+      </div>
+      <div class="card">
+        <div class="emoji">🧭</div>
+        <h3>Fishing Guides</h3>
+        <p>Learn about fishing techniques, equipment, and local regulations.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="hunting">
+    <h2 class="section-title">🏹 Hunting</h2>
+    <div class="cards">
+      <div class="card">
+        <div class="emoji">🌲</div>
+        <h3>Public Lands</h3>
+        <p>Explore public land information and official access resources.</p>
+      </div>
+      <div class="card">
+        <div class="emoji">📅</div>
+        <h3>Seasons & Regulations</h3>
+        <p>Find official hunting seasons, licensing information, and regulations.</p>
+      </div>
+      <div class="card">
+        <div class="emoji">🦌</div>
+        <h3>Outdoor Community</h3>
+        <p>Connect with other outdoor enthusiasts and share experiences.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="maps">
+    <h2 class="section-title">🗺️ Explore Maps</h2>
+    <div class="map-box">
+      <h3>CAST & BLAST MAP</h3>
+      <p>
+        Our interactive outdoor map is coming soon.
+        Explore fishing locations, public land boundaries,
+        topographic maps, and more.
+      </p>
+    </div>
+  </section>
+
+  <section id="community">
+    <h2 class="section-title">🌎 Outdoor Community</h2>
+    <div class="card">
+      <h3>Built for the Outdoors</h3>
+      <p>
+        A place for anglers and hunters to share experiences,
+        learn from one another, and explore responsibly.
+      </p>
+    </div>
+  </section>
+
+  <footer>
+    © 2026 Cast & Blast | Explore. Discover. Respect the Outdoors.
+  </footer>
+
+</body>
+</html>
