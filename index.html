@@ -2,249 +2,409 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cast & Blast | Explore Outdoors</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cast & Blast | Explore Outdoors</title>
 
-    body {
-      font-family: Arial, sans-serif;
-      background: #101710;
-      color: #f3f4ed;
-    }
+<style>
+:root {
+  --bg: #101710;
+  --panel: #1b281e;
+  --panel2: #243529;
+  --green: #a9c77b;
+  --white: #f1f4ec;
+  --muted: #aab6a7;
+  --border: #354735;
+}
 
-    header {
-      background: #18251a;
-      padding: 22px 7%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 15px;
-      border-bottom: 1px solid #344735;
-    }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-    .logo {
-      font-size: 27px;
-      font-weight: bold;
-      color: #b7d18b;
-    }
+html { scroll-behavior: smooth; }
 
-    nav a {
-      color: #e5e9df;
-      text-decoration: none;
-      margin-left: 20px;
-      font-size: 14px;
-    }
+body {
+  background: var(--bg);
+  color: var(--white);
+  font-family: Arial, sans-serif;
+}
 
-    nav a:hover {
-      color: #b7d18b;
-    }
+header {
+  min-height: 78px;
+  padding: 15px 7%;
+  background: #172319;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
 
-    .hero {
-      padding: 85px 7%;
-      text-align: center;
-      background: linear-gradient(135deg, #243c29, #111b13);
-    }
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 23px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
 
-    .hero h1 {
-      font-size: clamp(38px, 7vw, 65px);
-      margin-bottom: 18px;
-    }
+.logo-mark {
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--green);
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  color: var(--green);
+}
 
-    .hero h1 span {
-      color: #b7d18b;
-    }
+.logo-mark svg {
+  width: 26px;
+  height: 26px;
+}
 
-    .hero p {
-      color: #c5cdbf;
-      font-size: 18px;
-      line-height: 1.6;
-      max-width: 650px;
-      margin: 0 auto 28px;
-    }
+.logo span { color: var(--green); }
 
-    .button {
-      display: inline-block;
-      background: #9fbd70;
-      color: #142014;
-      padding: 14px 25px;
-      border-radius: 7px;
-      font-weight: bold;
-      text-decoration: none;
-    }
+nav {
+  display: flex;
+  gap: 25px;
+  flex-wrap: wrap;
+}
 
-    section {
-      padding: 55px 7%;
-    }
+nav a {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+}
 
-    .section-title {
-      font-size: 30px;
-      margin-bottom: 25px;
-    }
+nav a:hover { color: var(--green); }
 
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-      gap: 20px;
-    }
+.hero {
+  padding: 105px 7%;
+  text-align: center;
+  background:
+    radial-gradient(ellipse at center, #2c4930 0%, #17271b 48%, #101710 100%);
+}
 
-    .card {
-      background: #1b281d;
-      padding: 28px;
-      border: 1px solid #344735;
-      border-radius: 12px;
-    }
+.eyebrow {
+  color: var(--green);
+  font-size: 12px;
+  letter-spacing: 3px;
+  font-weight: bold;
+  margin-bottom: 22px;
+}
 
-    .card .emoji {
-      font-size: 35px;
-      margin-bottom: 15px;
-    }
+.hero h1 {
+  font-size: clamp(40px, 7vw, 76px);
+  line-height: 1.08;
+  margin-bottom: 22px;
+}
 
-    .card h3 {
-      color: #b7d18b;
-      margin-bottom: 12px;
-    }
+.hero h1 span { color: var(--green); }
 
-    .card p {
-      color: #c0c9bd;
-      line-height: 1.6;
-    }
+.hero p {
+  max-width: 620px;
+  margin: auto;
+  color: #c2cdbf;
+  font-size: 17px;
+  line-height: 1.8;
+}
 
-    .map-box {
-      background: #1b281d;
-      border: 1px solid #465b43;
-      border-radius: 12px;
-      padding: 50px 20px;
-      text-align: center;
-    }
+.primary-button {
+  display: inline-block;
+  margin-top: 32px;
+  padding: 15px 25px;
+  border-radius: 6px;
+  background: var(--green);
+  color: #142016;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
 
-    .map-box h3 {
-      color: #b7d18b;
-      margin-bottom: 12px;
-    }
+.primary-button:hover {
+  background: #c2dc9a;
+}
 
-    .map-box p {
-      color: #c0c9bd;
-      line-height: 1.6;
-    }
+section { padding: 65px 7%; }
 
-    footer {
-      background: #18251a;
-      padding: 25px;
-      text-align: center;
-      color: #9da998;
-      font-size: 13px;
-    }
+.section-heading { margin-bottom: 30px; }
 
-    @media (max-width: 600px) {
-      header {
-        justify-content: center;
-      }
+.section-heading small {
+  color: var(--green);
+  font-weight: bold;
+  letter-spacing: 2px;
+  font-size: 11px;
+}
 
-      nav a {
-        margin: 0 8px;
-      }
-    }
-  </style>
+.section-heading h2 {
+  font-size: 30px;
+  margin-top: 9px;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  padding: 28px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  transition: transform .2s, border-color .2s;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  border-color: var(--green);
+}
+
+.card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  background: var(--panel2);
+  color: var(--green);
+  margin-bottom: 22px;
+}
+
+.card-icon svg {
+  width: 25px;
+  height: 25px;
+}
+
+.card h3 {
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+.card p {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.map-box {
+  background: linear-gradient(135deg, #24382a, #17251b);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 65px 20px;
+  text-align: center;
+}
+
+.map-box svg {
+  width: 48px;
+  height: 48px;
+  color: var(--green);
+  margin-bottom: 18px;
+}
+
+.map-box h3 {
+  font-size: 24px;
+  margin-bottom: 12px;
+}
+
+.map-box p {
+  max-width: 530px;
+  margin: auto;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.community {
+  background: #172319;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+footer {
+  text-align: center;
+  padding: 30px 15px;
+  color: #899687;
+  font-size: 12px;
+}
+
+@media(max-width: 600px) {
+  header { justify-content: center; }
+  nav { justify-content: center; gap: 16px; }
+  .hero { padding: 75px 6%; }
+  section { padding: 48px 6%; }
+}
+</style>
 </head>
 
 <body>
 
-  <header>
-    <div class="logo">🎣 CAST & BLAST</div>
-    <nav>
-      <a href="#fishing">Fishing</a>
-      <a href="#hunting">Hunting</a>
-      <a href="#maps">Maps</a>
-      <a href="#community">Community</a>
-    </nav>
-  </header>
-
-  <div class="hero">
-    <h1>EXPLORE THE <span>OUTDOORS.</span></h1>
-    <p>
-      Your outdoor adventure starts here.
-      Discover fishing locations, explore public lands,
-      learn about hunting regulations, and connect with
-      the outdoor community.
-    </p>
-    <a href="#maps" class="button">EXPLORE THE MAP</a>
+<header>
+  <div class="logo">
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+        <path d="M3 19L10 7l4 6 3-4 4 10H3Z"/>
+        <path d="M8 19l4-6 4 6"/>
+      </svg>
+    </div>
+    <div>CAST <span>&</span> BLAST</div>
   </div>
 
-  <section id="fishing">
-    <h2 class="section-title">🎣 Fishing</h2>
-    <div class="cards">
-      <div class="card">
-        <div class="emoji">🐟</div>
-        <h3>Fishing Locations</h3>
-        <p>Explore lakes, rivers, reservoirs, and fishing access locations.</p>
-      </div>
-      <div class="card">
-        <div class="emoji">📸</div>
-        <h3>Share Your Catches</h3>
-        <p>Share fishing stories, photos, species, and memorable catches.</p>
-      </div>
-      <div class="card">
-        <div class="emoji">🧭</div>
-        <h3>Fishing Guides</h3>
-        <p>Learn about fishing techniques, equipment, and local regulations.</p>
-      </div>
-    </div>
-  </section>
+  <nav>
+    <a href="#fishing">Fishing</a>
+    <a href="#hunting">Hunting</a>
+    <a href="#maps">Maps</a>
+    <a href="#community">Community</a>
+  </nav>
+</header>
 
-  <section id="hunting">
-    <h2 class="section-title">🏹 Hunting</h2>
-    <div class="cards">
-      <div class="card">
-        <div class="emoji">🌲</div>
-        <h3>Public Lands</h3>
-        <p>Explore public land information and official access resources.</p>
-      </div>
-      <div class="card">
-        <div class="emoji">📅</div>
-        <h3>Seasons & Regulations</h3>
-        <p>Find official hunting seasons, licensing information, and regulations.</p>
-      </div>
-      <div class="card">
-        <div class="emoji">🦌</div>
-        <h3>Outdoor Community</h3>
-        <p>Connect with other outdoor enthusiasts and share experiences.</p>
-      </div>
-    </div>
-  </section>
+<main>
 
-  <section id="maps">
-    <h2 class="section-title">🗺️ Explore Maps</h2>
-    <div class="map-box">
-      <h3>CAST & BLAST MAP</h3>
-      <p>
-        Our interactive outdoor map is coming soon.
-        Explore fishing locations, public land boundaries,
-        topographic maps, and more.
-      </p>
-    </div>
-  </section>
+<div class="hero">
+  <div class="eyebrow">YOUR OUTDOOR ADVENTURE STARTS HERE</div>
+  <h1>EXPLORE THE<br><span>OUTDOORS.</span></h1>
+  <p>
+    Discover new places, explore the outdoors,
+    share your experiences, and connect with
+    a community built around adventure.
+  </p>
+  <a href="#maps" class="primary-button">EXPLORE THE MAP</a>
+</div>
 
-  <section id="community">
-    <h2 class="section-title">🌎 Outdoor Community</h2>
+<section id="fishing">
+  <div class="section-heading">
+    <small>ON THE WATER</small>
+    <h2>Fishing</h2>
+  </div>
+
+  <div class="cards">
     <div class="card">
-      <h3>Built for the Outdoors</h3>
-      <p>
-        A place for anglers and hunters to share experiences,
-        learn from one another, and explore responsibly.
-      </p>
+      <div class="card-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+          <path d="M3 12s4-6 11-6c3 0 5 2 7 6-2 4-4 6-7 6-7 0-11-6-11-6Z"/>
+          <path d="M3 12 1 8v8l2-4Zm11-2h.01"/>
+        </svg>
+      </div>
+      <h3>Fishing Locations</h3>
+      <p>Discover lakes, rivers, reservoirs, and fishing access locations.</p>
     </div>
-  </section>
 
-  <footer>
-    © 2026 Cast & Blast | Explore. Discover. Respect the Outdoors.
-  </footer>
+    <div class="card">
+      <div class="card-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+          <rect x="3" y="3" width="18" height="18" rx="3"/>
+          <circle cx="8.5" cy="8.5" r="1.5"/>
+          <path d="m21 15-5-5L5 21"/>
+        </svg>
+      </div>
+      <h3>Share Your Catches</h3>
+      <p>Share fishing photos, catches, species, and memorable experiences.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+          <path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6 5.6 18.4"/>
+          <circle cx="12" cy="12" r="9"/>
+        </svg>
+      </div>
+      <h3>Fishing Guides</h3>
+      <p>Learn about fishing techniques, equipment, and local regulations.</p>
+    </div>
+  </div>
+</section>
+
+<section id="hunting">
+  <div class="section-heading">
+    <small>IN THE FIELD</small>
+    <h2>Hunting</h2>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+          <path d="M3 20 9 8l4 6 3-5 5 11H3Z"/>
+          <path d="M8 20 12 14l4 6"/>
+        </svg>
+      </div>
+      <h3>Public Lands</h3>
+      <p>Explore public land information and official access resources.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+          <rect x="3" y="4" width="18" height="17" rx="2"/>
+          <path d="M16 2v4M8 2v4M3 10h18M8 14h3M8 17h6"/>
+        </svg>
+      </div>
+      <h3>Seasons & Regulations</h3>
+      <p>Find official hunting seasons, licensing information, and regulations.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+          <path d="M12 3 14.5 9.5 21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3Z"/>
+        </svg>
+      </div>
+      <h3>Outdoor Community</h3>
+      <p>Connect with other outdoor enthusiasts and share experiences.</p>
+    </div>
+  </div>
+</section>
+
+<section id="maps">
+  <div class="section-heading">
+    <small>FIND YOUR NEXT ADVENTURE</small>
+    <h2>Explore Maps</h2>
+  </div>
+
+  <div class="map-box">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3V6Z"/>
+      <path d="M9 3v15m6-12v15"/>
+    </svg>
+    <h3>CAST & BLAST MAP</h3>
+    <p>
+      Your outdoor map is coming soon.
+      Explore fishing locations, public land information,
+      terrain maps, and more.
+    </p>
+  </div>
+</section>
+
+<section id="community" class="community">
+  <div class="section-heading">
+    <small>CONNECT & SHARE</small>
+    <h2>Outdoor Community</h2>
+  </div>
+
+  <div class="card">
+    <h3>Built for the Outdoors</h3>
+    <p>
+      A place for anglers and outdoor enthusiasts to
+      share experiences, learn, and explore responsibly.
+    </p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  CAST & BLAST &nbsp; | &nbsp; EXPLORE. DISCOVER. RESPECT THE OUTDOORS.
+  <br><br>© 2026 Cast & Blast
+</footer>
 
 </body>
 </html>
+
+
+
