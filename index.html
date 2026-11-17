@@ -11,15 +11,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cast & Blast | Explore Outdoors</title>
 
-<style>
-:root {
-  --bg: #101710;
-  --panel: #1b281e;
-  --panel2: #243529;
-  --green: #a9c77b;
-  --white: #f1f4ec;
-  --muted: #aab6a7;
-  --border: #354735;
+#map {
+  width: 100%;
+  height: 500px;
+  margin-top: 25px;
+  border-radius: 10px;
+  border: 1px solid #465b43;
+  z-index: 1;
 }
 
 * {
@@ -372,18 +370,16 @@ footer {
     <h2>Explore Maps</h2>
   </div>
 
-  <div class="map-box">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-      <path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3V6Z"/>
-      <path d="M9 3v15m6-12v15"/>
-    </svg>
-    <h3>CAST & BLAST MAP</h3>
-    <p>
-      Your outdoor map is coming soon.
-      Explore fishing locations, public land information,
-      terrain maps, and more.
-    </p>
-  </div>
+  
+<div class="map-box">
+  <h3>CAST & BLAST MAP</h3>
+  <p>
+    Explore the outdoors with interactive maps,
+    fishing locations, and terrain information.
+  </p>
+  <div id="map"></div>
+</div>
+
 </section>
 
 <section id="community" class="community">
