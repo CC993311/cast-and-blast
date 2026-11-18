@@ -156,7 +156,23 @@ const fishingSpots = [
 ];
 
 fishingSpots.forEach(spot => {
-  L.marker(spot.coordinates)
+  const marker = L.circleMarker(spot.coordinates, {
+    radius: 9,
+    color: '#ffffff',
+    weight: 2,
+    fillColor: '#a9c77b',
+    fillOpacity: 1
+  });
+
+  marker.bindPopup(
+    `<strong>${spot.name}</strong><br>
+     Type: ${spot.type}<br>
+     Example waterbody marker.<br>
+     Verify public access and fishing regulations before visiting.`
+  );
+
+  marker.addTo(fishingMarkers);
+});
     .bindPopup(
       `<strong>${spot.name}</strong><br>
        Type: ${spot.type}<br>
