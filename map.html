@@ -7,6 +7,8 @@
 <title>Cast & Blast | Outdoor Map</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
 
 <style>
 * { box-sizing: border-box; }
@@ -126,6 +128,20 @@ footer {
 .leaflet-popup-content {
   line-height: 1.5;
 }
+
+.marker-cluster-small,
+.marker-cluster-medium,
+.marker-cluster-large {
+  background-color: rgba(57,139,255,0.25);
+}
+
+.marker-cluster-small div,
+.marker-cluster-medium div,
+.marker-cluster-large div {
+  background-color: #398bff;
+  color: white;
+  font-weight: bold;
+}
 </style>
 </head>
 
@@ -167,8 +183,8 @@ footer {
 
 <div class="legend">
   <span><span class="dot" style="background:#36c76a"></span>Fishing</span>
-  <span><span class="dot" style="background:#398bff"></span>BLM Recreation</span>
-  <span><span class="dot" style="background:#ff963d"></span>Wildlife Viewing</span>
+  <span><span class="dot" style="background:#398bff"></span>BLM Hunting</span>
+  <span><span class="dot" style="background:#ff963d"></span>Wildlife Area</span>
 </div>
 
 <div id="status">Map ready. Zoom in to load nearby locations.</div>
@@ -176,12 +192,14 @@ footer {
 <footer>
   Location information comes from public mapping datasets and may not show every available location.
   Always check current rules, access, and closures before visiting.
-  BLM recreation markers identify recreation facilities and destinations, not general land boundaries.
+  BLM markers identify recreation facilities and hunting areas, not general land boundaries.
 </footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
 <script>
+
 /* ---------------- MAP SETUP ---------------- */
 
 const map = L.map("map").setView([39.5, -98.35], 4);
@@ -221,10 +239,19 @@ document.getElementById("terrainButton").onclick = () => {
   terrain.addTo(map);
 };
 
+
 /* ---------------- MARKER LAYERS ---------------- */
 
 const fishingLayer = L.layerGroup().addTo(map);
-const blmLayer = L.layerGroup().addTo(map);
+
+/* BLM markers automatically group together */
+const blmLayer = L.markerClusterGroup({
+  showCoverageOnHover: false,
+  spiderfyOnMaxZoom: true,
+  maxClusterRadius: 55,
+  disableClusteringAtZoom: 14
+}).addTo(map);
+
 const wildlifeLayer = L.layerGroup().addTo(map);
 
 const statusBox = document.getElementById("status");
@@ -259,6 +286,9 @@ function markerIcon(color) {
 }
 
 function addMarker(layer, lat, lon, color, title, details) {
+  lat = Number(lat);
+  lon = Number(lon);
+
   if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
 
   L.marker([lat, lon], {
@@ -270,6 +300,7 @@ function addMarker(layer, lat, lon, color, title, details) {
   )
   .addTo(layer);
 }
+
 
 /* ---------------- FISHING + WILDLIFE DATA ---------------- */
 
@@ -286,14 +317,25 @@ async function fetchOverpass(query) {
     try {
       const response = await fetch(server, {
         method: "POST",
-        body: "data=" + encodeURIComponent(query)
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+        },
+        body: new URLSearchParams({
+          data: query
+        })
       });
 
       if (!response.ok) {
-        throw new Error("Overpass server error");
+        throw new Error("Mapping server returned " + response.status);
       }
 
-      return await response.json();
+      const data = await response.json();
+
+      if (data.remark) {
+        throw new Error(data.remark);
+      }
+
+      return data;
 
     } catch (error) {
       lastError = error;
@@ -304,11 +346,14 @@ async function fetchOverpass(query) {
 }
 
 function elementPosition(element) {
-  if (element.lat && element.lon) {
+  if (Number.isFinite(element.lat) &&
+      Number.isFinite(element.lon)) {
     return [element.lat, element.lon];
   }
 
-  if (element.center) {
+  if (element.center &&
+      Number.isFinite(element.center.lat) &&
+      Number.isFinite(element.center.lon)) {
     return [element.center.lat, element.center.lon];
   }
 
@@ -320,23 +365,27 @@ function elementName(element) {
 }
 
 async function loadFishingAndWildlife(bounds) {
-  const south = bounds.getSouth();
-  const west = bounds.getWest();
-  const north = bounds.getNorth();
-  const east = bounds.getEast();
 
-  const box = `${south},${west},${north},${east}`;
+  const box = [
+    bounds.getSouth(),
+    bounds.getWest(),
+    bounds.getNorth(),
+    bounds.getEast()
+  ].join(",");
 
   const query = `
-    [out:json][timeout:30];
+    [out:json][timeout:40];
     (
       nwr["leisure"="fishing"](${box});
       nwr["sport"="fishing"](${box});
       nwr["amenity"="boat_ramp"](${box});
-      nwr["fishing"="yes"](${box});
+      nwr["fishing"~"yes|permitted|permit"](${box});
+
       nwr["leisure"="bird_hide"](${box});
       nwr["wildlife"="watching"](${box});
-      nwr["tourism"="attraction"]["attraction"~"animal|wildlife"](${box});
+      nwr["bird_hide"="yes"](${box});
+      nwr["information"~"wildlife|birdwatching|birds|nature",i](${box});
+      nwr["attraction"~"wildlife|animal|bird",i](${box});
     );
     out center tags;
   `;
@@ -346,7 +395,15 @@ async function loadFishingAndWildlife(bounds) {
   let fishingCount = 0;
   let wildlifeCount = 0;
 
+  const seen = new Set();
+
   for (const element of data.elements || []) {
+
+    const uniqueKey = element.type + "/" + element.id;
+
+    if (seen.has(uniqueKey)) continue;
+    seen.add(uniqueKey);
+
     const tags = element.tags || {};
     const position = elementPosition(element);
 
@@ -355,25 +412,31 @@ async function loadFishingAndWildlife(bounds) {
     const isWildlife =
       tags.leisure === "bird_hide" ||
       tags.wildlife === "watching" ||
-      (tags.tourism === "attraction" &&
-       /animal|wildlife/i.test(tags.attraction || ""));
+      tags.bird_hide === "yes" ||
+      /wildlife|birdwatching|birds|nature/i.test(tags.information || "") ||
+      /wildlife|animal|bird/i.test(tags.attraction || "");
 
     const isFishing =
       tags.leisure === "fishing" ||
       tags.sport === "fishing" ||
       tags.amenity === "boat_ramp" ||
-      tags.fishing === "yes";
+      /yes|permitted|permit/.test(tags.fishing || "");
 
-    if (isWildlife && document.getElementById("wildlifeToggle").checked) {
+    if (
+      isWildlife &&
+      document.getElementById("wildlifeToggle").checked
+    ) {
       addMarker(
         wildlifeLayer,
         position[0],
         position[1],
         "#ff963d",
         elementName(element),
-        "Wildlife viewing location"
+        "Wildlife viewing location. Check access and visiting rules."
       );
+
       wildlifeCount++;
+
     } else if (
       isFishing &&
       document.getElementById("fishingToggle").checked
@@ -384,23 +447,26 @@ async function loadFishingAndWildlife(bounds) {
         position[1],
         "#36c76a",
         elementName(element),
-        "Fishing-related location. Check local rules and access."
+        "Fishing-related location. Check local fishing rules and access."
       );
+
       fishingCount++;
     }
   }
 
-  return { fishingCount, wildlifeCount };
+  return {
+    fishingCount,
+    wildlifeCount
+  };
 }
 
-/* ---------------- BLM RECREATION DATA ---------------- */
 
-/* Official BLM recreation point service.
-   Only selected general recreation facility categories are used.
-   Hunting and OHV categories are not included. */
+/* ---------------- BLM HUNTING DATA ---------------- */
 
 const blmService =
-  "https://gis.blm.gov/natl/rest/services/recreation/BLM_Natl_Recs_pts/MapServer";
+  "https://gis.blm.gov/arcgis/rest/services/recreation/BLM_Natl_Recs_pts/MapServer";
+
+/* Only general recreation facility layers are included. */
 
 const blmCategories = [
   { id: 1, name: "Boat Ramp" },
@@ -416,92 +482,97 @@ const blmCategories = [
   { id: 15, name: "Visitor Center" }
 ];
 
-function getBlmName(properties, fallback) {
-  const possibleNames = [
-    "NAME",
-    "SITE_NAME",
-    "RECSITE_NAME",
-    "FACILITY_NAME",
-    "UNIT_NAME",
-    "POI_NAME"
-  ];
+async function loadBlmCategory(bounds, category) {
 
-  for (const field of possibleNames) {
-    if (properties[field]) return properties[field];
+  const geometry = [
+    bounds.getWest(),
+    bounds.getSouth(),
+    bounds.getEast(),
+    bounds.getNorth()
+  ].join(",");
+
+  const params = new URLSearchParams({
+    where: "1=1",
+    geometry: geometry,
+    geometryType: "esriGeometryEnvelope",
+    inSR: "4326",
+    spatialRel: "esriSpatialRelIntersects",
+    outFields: "OBJECTID,FET_NAME,FET_SUBTYPE,DESCRIPTION,WEB_LINK,UNIT_NAME",
+    returnGeometry: "true",
+    outSR: "4326",
+    f: "json",
+    resultRecordCount: "2000"
+  });
+
+  const url =
+    `${blmService}/${category.id}/query?${params.toString()}`;
+
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error("BLM server returned " + response.status);
   }
 
-  return fallback;
+  const data = await response.json();
+
+  if (data.error) {
+    throw new Error(data.error.message || "BLM query failed");
+  }
+
+  let count = 0;
+
+  for (const feature of data.features || []) {
+
+    const attributes = feature.attributes || {};
+    const geometry = feature.geometry || {};
+
+    const lat = Number(geometry.y);
+    const lon = Number(geometry.x);
+
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+      continue;
+    }
+
+    const name =
+      attributes.FET_NAME ||
+      attributes.UNIT_NAME ||
+      category.name;
+
+    const subtype =
+      attributes.FET_SUBTYPE || category.name;
+
+    addMarker(
+      blmLayer,
+      lat,
+      lon,
+      "#398bff",
+      name,
+      "BLM Recreation: " + subtype +
+      ". " + (attributes.DESCRIPTION || "Check current access information.")
+    );
+
+    count++;
+  }
+
+  return count;
 }
 
 async function loadBlm(bounds) {
-  const b = bounds;
-  const geometry = [
-    b.getWest(),
-    b.getSouth(),
-    b.getEast(),
-    b.getNorth()
-  ].join(",");
 
-  let total = 0;
+  const results = await Promise.all(
+    blmCategories.map(category =>
+      loadBlmCategory(bounds, category)
+    )
+  );
 
-  const requests = blmCategories.map(async category => {
-    const params = new URLSearchParams({
-      where: "1=1",
-      geometry: geometry,
-      geometryType: "esriGeometryEnvelope",
-      inSR: "4326",
-      spatialRel: "esriSpatialRelIntersects",
-      outFields: "*",
-      returnGeometry: "true",
-      outSR: "4326",
-      f: "geojson"
-    });
-
-    const url =
-      `${blmService}/${category.id}/query?${params.toString()}`;
-
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error("BLM data request failed");
-    }
-
-    const data = await response.json();
-
-    for (const feature of data.features || []) {
-      const coordinates = feature.geometry?.coordinates;
-
-      if (!coordinates || coordinates.length < 2) continue;
-
-      const lon = coordinates[0];
-      const lat = coordinates[1];
-
-      const name = getBlmName(
-        feature.properties || {},
-        category.name
-      );
-
-      addMarker(
-        blmLayer,
-        lat,
-        lon,
-        "#398bff",
-        name,
-        "BLM recreation: " + category.name +
-        ". Check the official site for current access information."
-      );
-
-      total++;
-    }
-  });
-
-  await Promise.all(requests);
-  return total;
+  return results.reduce((sum, count) => sum + count, 0);
 }
 
-/* ---------------- LOAD DATA WHEN ZOOMED IN ---------------- */
+
+/* ---------------- MAP DATA LOADING ---------------- */
 
 let loading = false;
+let pendingReload = false;
 let lastBoundsKey = "";
 
 function boundsKey(bounds) {
@@ -515,10 +586,16 @@ function boundsKey(bounds) {
 }
 
 async function loadMapData(force = false) {
-  if (loading) return;
+
+  if (loading) {
+    pendingReload = true;
+    return;
+  }
 
   if (map.getZoom() < 8) {
-    setStatus("Zoom in closer to load nearby fishing, BLM recreation, and wildlife-viewing locations.");
+    setStatus(
+      "Zoom in closer to load fishing, BLM hunting, and wildlife area locations."
+    );
     return;
   }
 
@@ -539,8 +616,8 @@ async function loadMapData(force = false) {
   let fishingCount = 0;
   let wildlifeCount = 0;
   let blmCount = 0;
-  const errors = [];
 
+  const errors = [];
   const jobs = [];
 
   if (
@@ -553,15 +630,23 @@ async function loadMapData(force = false) {
           fishingCount = result.fishingCount;
           wildlifeCount = result.wildlifeCount;
         })
-        .catch(() => errors.push("Fishing/wildlife data unavailable"))
+        .catch(error => {
+          console.error("Fishing/wildlife error:", error);
+          errors.push("Fishing/wildlife data could not load");
+        })
     );
   }
 
   if (document.getElementById("blmToggle").checked) {
     jobs.push(
       loadBlm(bounds)
-        .then(count => blmCount = count)
-        .catch(() => errors.push("BLM data unavailable"))
+        .then(count => {
+          blmCount = count;
+        })
+        .catch(error => {
+          console.error("BLM error:", error);
+          errors.push("BLM data could not load");
+        })
     );
   }
 
@@ -570,17 +655,23 @@ async function loadMapData(force = false) {
   loading = false;
 
   let message =
-    `Loaded ${fishingCount} fishing, ${blmCount} BLM recreation, ` +
+    `Loaded ${fishingCount} fishing, ${blmCount} BLM hunting, ` +
     `and ${wildlifeCount} wildlife-viewing locations.`;
 
   if (errors.length) {
-    message += " Some data could not load: " + errors.join("; ") + ".";
+    message += " " + errors.join("; ") + ".";
   }
 
   setStatus(message);
+
+  if (pendingReload) {
+    pendingReload = false;
+    loadMapData(true);
+  }
 }
 
 map.on("moveend", () => loadMapData());
+
 
 /* ---------------- LAYER CONTROLS ---------------- */
 
@@ -590,6 +681,7 @@ document.getElementById("fishingToggle").onchange = event => {
   } else {
     map.removeLayer(fishingLayer);
   }
+
   loadMapData(true);
 };
 
@@ -599,6 +691,7 @@ document.getElementById("blmToggle").onchange = event => {
   } else {
     map.removeLayer(blmLayer);
   }
+
   loadMapData(true);
 };
 
@@ -608,24 +701,34 @@ document.getElementById("wildlifeToggle").onchange = event => {
   } else {
     map.removeLayer(wildlifeLayer);
   }
+
   loadMapData(true);
 };
+
 
 /* ---------------- SEARCH ---------------- */
 
 async function searchPlace() {
-  const search = document.getElementById("searchBox").value.trim();
+
+  const search =
+    document.getElementById("searchBox").value.trim();
 
   if (!search) return;
 
   setStatus("Searching for " + search + "...");
 
   try {
+
     const url =
       "https://nominatim.openstreetmap.org/search?format=json&limit=1&q=" +
       encodeURIComponent(search);
 
     const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error("Search request failed");
+    }
+
     const results = await response.json();
 
     if (!results.length) {
@@ -649,9 +752,11 @@ document.getElementById("searchBox").addEventListener("keydown", event => {
   if (event.key === "Enter") searchPlace();
 });
 
+
 /* ---------------- MY LOCATION ---------------- */
 
 document.getElementById("locationButton").onclick = () => {
+
   if (!navigator.geolocation) {
     setStatus("Location is not supported by this browser.");
     return;
@@ -660,7 +765,9 @@ document.getElementById("locationButton").onclick = () => {
   setStatus("Finding your location...");
 
   navigator.geolocation.getCurrentPosition(
+
     position => {
+
       const lat = position.coords.latitude;
       const lon = position.coords.longitude;
 
@@ -671,7 +778,12 @@ document.getElementById("locationButton").onclick = () => {
         .bindPopup("Your location")
         .openPopup();
     },
-    () => setStatus("Could not access your location. Check browser permissions.")
+
+    () => {
+      setStatus(
+        "Could not access your location. Check browser permissions."
+      );
+    }
   );
 };
 
