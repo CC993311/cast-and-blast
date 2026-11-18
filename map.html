@@ -115,7 +115,11 @@ footer {
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 
-const map = L.map('map').setView([39.5, -98.35], 4);
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+const map = L.map('map').setView([38.5, -120], 6);
 
 const street = L.tileLayer(
   'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -134,7 +138,7 @@ const terrain = L.tileLayer(
 
 street.addTo(map);
 
-// Example waterbody markers
+// Fishing location markers
 const fishingMarkers = L.layerGroup();
 
 const fishingSpots = [
@@ -157,7 +161,7 @@ const fishingSpots = [
 
 fishingSpots.forEach(spot => {
   const marker = L.circleMarker(spot.coordinates, {
-    radius: 9,
+    radius: 10,
     color: '#ffffff',
     weight: 2,
     fillColor: '#a9c77b',
@@ -165,28 +169,19 @@ fishingSpots.forEach(spot => {
   });
 
   marker.bindPopup(
-    `<strong>${spot.name}</strong><br>
-     Type: ${spot.type}<br>
-     Example waterbody marker.<br>
-     Verify public access and fishing regulations before visiting.`
+    '<strong>' + spot.name + '</strong><br>' +
+    'Type: ' + spot.type + '<br>' +
+    'Example waterbody location.<br>' +
+    'Check public access and fishing regulations before visiting.'
   );
 
   marker.addTo(fishingMarkers);
 });
-    .bindPopup(
-      `<strong>${spot.name}</strong><br>
-       Type: ${spot.type}<br>
-       <br>
-       Example waterbody marker.<br>
-       Verify public access and fishing regulations before visiting.`
-    )
-    .addTo(fishingMarkers);
-});
 
 fishingMarkers.addTo(map);
 
+// Switch map styles without removing fishing markers
 function showStreet() {
-  map.removeLayer(street);
   map.removeLayer(satellite);
   map.removeLayer(terrain);
   street.addTo(map);
@@ -194,7 +189,6 @@ function showStreet() {
 
 function showSatellite() {
   map.removeLayer(street);
-  map.removeLayer(satellite);
   map.removeLayer(terrain);
   satellite.addTo(map);
 }
@@ -202,45 +196,12 @@ function showSatellite() {
 function showTerrain() {
   map.removeLayer(street);
   map.removeLayer(satellite);
-  map.removeLayer(terrain);
   terrain.addTo(map);
 }
 
 L.control.scale().addTo(map);
+</script>
 
-const street = L.tileLayer(
-  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-  { attribution: '&copy; OpenStreetMap contributors' }
-);
-
-const satellite = L.tileLayer(
-  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-  { attribution: 'Tiles &copy; Esri' }
-);
-
-const terrain = L.tileLayer(
-  'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
-  { attribution: 'Map data: OpenStreetMap contributors, SRTM | Map style: OpenTopoMap' }
-);
-
-street.addTo(map);
-
-function showStreet() {
-  map.eachLayer(layer => map.removeLayer(layer));
-  street.addTo(map);
-}
-
-function showSatellite() {
-  map.eachLayer(layer => map.removeLayer(layer));
-  satellite.addTo(map);
-}
-
-function showTerrain() {
-  map.eachLayer(layer => map.removeLayer(layer));
-  terrain.addTo(map);
-}
-
-L.control.scale().addTo(map);
 </script>
 </body>
 </html>
