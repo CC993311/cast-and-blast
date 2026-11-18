@@ -3,84 +3,108 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cast & Blast | Outdoor Map</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Cast & Blast | Nationwide Outdoor Map</title>
+
+<link rel="stylesheet"
+href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
 <style>
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 body {
   margin: 0;
+  font-family: Arial, sans-serif;
   background: #101810;
   color: white;
-  font-family: Arial, sans-serif;
 }
 
 header {
-  background: #17251a;
+  background: #172719;
   padding: 18px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #40553e;
+  text-align: center;
+  border-bottom: 2px solid #4b773e;
 }
 
-.logo {
-  color: #b5d68a;
-  font-size: 22px;
-  font-weight: bold;
+header h1 {
+  margin: 0;
+  color: #a9d18e;
+  font-size: 27px;
 }
 
-.home {
-  color: white;
-  text-decoration: none;
-  background: #314b32;
-  padding: 10px 14px;
-  border-radius: 6px;
+header p {
+  margin: 7px 0 0;
+  color: #d1ddc9;
 }
-
-.intro { padding: 20px; }
-.intro h1 { color: #b5d68a; }
 
 .controls {
+  padding: 12px;
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 9px;
-  padding: 0 20px 18px;
+  background: #1b291b;
 }
 
 button {
-  background: #263c29;
+  background: #365b32;
+  border: 1px solid #719c61;
   color: white;
-  border: 1px solid #66815b;
-  padding: 11px 17px;
+  padding: 10px 16px;
   border-radius: 7px;
   cursor: pointer;
+  font-weight: bold;
 }
 
+button:hover,
 button.active {
-  background: #587c45;
-  border-color: #b5d68a;
+  background: #78a957;
+  color: #10200e;
+}
+
+#status {
+  text-align: center;
+  padding: 10px;
+  color: #c9d9bd;
+  background: #142014;
+  font-size: 13px;
 }
 
 #map {
-  height: 65vh;
-  min-height: 380px;
+  height: calc(100vh - 170px);
+  min-height: 450px;
   width: 100%;
-  background: #263c29;
 }
 
-.legend {
-  padding: 18px 20px;
-  color: #c1cbbd;
-  line-height: 1.8;
+.leaflet-popup-content-wrapper {
+  background: #172719;
+  color: white;
 }
 
-footer {
+.leaflet-popup-tip {
+  background: #172719;
+}
+
+.popup-title {
+  font-weight: bold;
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+
+.popup-link {
+  display: inline-block;
+  margin-top: 8px;
+  color: #a9d18e;
+}
+
+.note {
+  padding: 12px;
   text-align: center;
-  padding: 20px;
-  color: #81917e;
+  font-size: 12px;
+  color: #b9c9b0;
 }
 </style>
 </head>
@@ -88,143 +112,357 @@ footer {
 <body>
 
 <header>
-  <div class="logo">CAST & BLAST</div>
-  <a class="home" href="index.html">Back to Home</a>
+  <h1>CAST & BLAST</h1>
+  <p>Explore Fishing Locations Across America</p>
 </header>
 
-<section class="intro">
-  <h1>Outdoor Explorer Map</h1>
-  <p>Explore fishing waters and outdoor destinations.</p>
-</section>
-
 <div class="controls">
-  <button id="streetButton" onclick="showStreet()">Street Map</button>
-  <button id="satelliteButton" onclick="showSatellite()">Satellite</button>
-  <button id="fishingButton" onclick="showFishing()">Fishing</button>
-  <button id="huntingButton" onclick="showHunting()">Hunting</button>
-  <button id="bothButton" onclick="showBoth()">Both</button>
+  <button id="streetButton" class="active">Street Map</button>
+  <button id="satelliteButton">Satellite</button>
+  <button id="fishingButton" class="active">Fishing</button>
+  <button id="wildlifeButton">Wildlife Viewing</button>
+  <button id="bothButton">Both</button>
+  <button id="locateButton">My Location</button>
+</div>
+
+<div id="status">
+  Zoom in to discover mapped fishing locations.
 </div>
 
 <div id="map"></div>
 
-<div class="legend">
-  <strong>Map Guide</strong><br>
-  <span style="color:#a9c77b">●</span> Fishing waterbodies<br>
-  <span style="color:#e4a04b">●</span> Example public-land research areas<br>
-  Always verify public access, boundaries, permissions, seasons and regulations before visiting.
+<div class="note">
+  Fishing data is community-mapped and may be incomplete.
+  Always check local access rules, regulations, and closures.
 </div>
-
-<footer>CAST & BLAST | Explore Responsibly</footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-const map = L.map('map').setView([39.5, -98.35], 4);
+// ---------------- MAP ----------------
+
+const map = L.map("map").setView([39.5, -98.35], 4);
 
 const street = L.tileLayer(
-  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-  { attribution: '&copy; OpenStreetMap contributors' }
-);
+  "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+  {
+    attribution: '&copy; OpenStreetMap contributors',
+    maxZoom: 19
+  }
+).addTo(map);
 
 const satellite = L.tileLayer(
-  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-  { attribution: 'Tiles &copy; Esri' }
+  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+  {
+    attribution: "Tiles &copy; Esri",
+    maxZoom: 19
+  }
 );
 
-street.addTo(map);
-
-const fishingLayer = L.layerGroup().addTo(map);
-const huntingLayer = L.layerGroup();
-
-const fishingSpots = [
-  { name: "Lake Tahoe", type: "Lake", coordinates: [39.0968,-120.0324] },
-  { name: "Sacramento River", type: "River", coordinates: [38.5816,-121.4944] },
-  { name: "San Francisco Bay", type: "Bay", coordinates: [37.7749,-122.4194] },
-  { name: "Clear Lake", type: "Lake", coordinates: [39.0157,-122.7800] },
-  { name: "Columbia River", type: "River", coordinates: [45.6387,-121.1770] },
-  { name: "Lake Washington", type: "Lake", coordinates: [47.6094,-122.2650] },
-  { name: "Lake Travis", type: "Lake", coordinates: [30.3890,-97.9070] },
-  { name: "Lake Okeechobee", type: "Lake", coordinates: [26.9500,-80.8000] }
-];
-
-fishingSpots.forEach(function(spot) {
-  L.circleMarker(spot.coordinates, {
-    radius: 9,
-    color: "#ffffff",
-    weight: 2,
-    fillColor: "#a9c77b",
-    fillOpacity: 1
-  })
-  .bindPopup(
-    "<strong>" + spot.name + "</strong><br>" +
-    "Type: " + spot.type + "<br>" +
-    "Example waterbody location. Verify public access and fishing regulations."
-  )
-  .addTo(fishingLayer);
-});
-
-// Illustrative research-area markers, NOT verified hunting access sites.
-const huntingSpots = [
-  { name: "California", coordinates: [36.7783,-119.4179] },
-  { name: "Oregon", coordinates: [43.8041,-120.5542] },
-  { name: "Texas", coordinates: [31.0000,-99.0000] },
-  { name: "Florida", coordinates: [27.6648,-81.5158] }
-];
-
-huntingSpots.forEach(function(spot) {
-  L.circleMarker(spot.coordinates, {
-    radius: 10,
-    color: "#ffffff",
-    weight: 2,
-    fillColor: "#e4a04b",
-    fillOpacity: 1
-  })
-  .bindPopup(
-    "<strong>" + spot.name + "</strong><br>" +
-    "Example state research marker.<br>" +
-    "Consult official wildlife agencies for public-land boundaries, access and current regulations."
-  )
-  .addTo(huntingLayer);
-});
-
-function setActive(buttonId) {
-  document.querySelectorAll(".controls button").forEach(function(button) {
-    button.classList.remove("active");
-  });
-  document.getElementById(buttonId).classList.add("active");
-}
-
-function showStreet() {
+document.getElementById("streetButton").onclick = () => {
   map.removeLayer(satellite);
   street.addTo(map);
   setActive("streetButton");
-}
+};
 
-function showSatellite() {
+document.getElementById("satelliteButton").onclick = () => {
   map.removeLayer(street);
   satellite.addTo(map);
   setActive("satelliteButton");
+};
+
+function setActive(id) {
+  document.querySelectorAll(".controls button").forEach(button => {
+    button.classList.remove("active");
+  });
+  document.getElementById(id).classList.add("active");
 }
 
-function showFishing() {
-  map.removeLayer(huntingLayer);
-  fishingLayer.addTo(map);
-  setActive("fishingButton");
+// ---------------- LAYERS ----------------
+
+const fishingLayer = L.layerGroup().addTo(map);
+const wildlifeLayer = L.layerGroup().addTo(map);
+
+let currentFilter = "fishing";
+let lastRequest = null;
+let requestController = null;
+
+function updateFilter(filter) {
+  currentFilter = filter;
+
+  if (filter === "fishing" || filter === "both") {
+    if (!map.hasLayer(fishingLayer)) {
+      fishingLayer.addTo(map);
+    }
+  } else {
+    map.removeLayer(fishingLayer);
+  }
+
+  if (filter === "wildlife" || filter === "both") {
+    if (!map.hasLayer(wildlifeLayer)) {
+      wildlifeLayer.addTo(map);
+    }
+  } else {
+    map.removeLayer(wildlifeLayer);
+  }
+
+  document.querySelectorAll(".controls button").forEach(button => {
+    button.classList.remove("active");
+  });
+
+  document.getElementById(
+    filter === "fishing" ? "fishingButton" :
+    filter === "wildlife" ? "wildlifeButton" :
+    "bothButton"
+  ).classList.add("active");
+
+  loadFishing();
 }
 
-function showHunting() {
-  map.removeLayer(fishingLayer);
-  huntingLayer.addTo(map);
-  setActive("huntingButton");
+document.getElementById("fishingButton").onclick =
+  () => updateFilter("fishing");
+
+document.getElementById("wildlifeButton").onclick =
+  () => updateFilter("wildlife");
+
+document.getElementById("bothButton").onclick =
+  () => updateFilter("both");
+
+// ---------------- FISHING DATA ----------------
+
+// Search the visible map area instead of trying to
+// download the entire country in one enormous request.
+
+async function loadFishing() {
+  if (currentFilter === "wildlife") return;
+
+  if (map.getZoom() < 7) {
+    document.getElementById("status").textContent =
+      "Zoom in closer to discover fishing locations.";
+    return;
+  }
+
+  const bounds = map.getBounds();
+
+  const south = bounds.getSouth();
+  const west = bounds.getWest();
+  const north = bounds.getNorth();
+  const east = bounds.getEast();
+
+  // Avoid huge searches when the map covers too much area.
+  if ((north - south) * (east - west) > 25) {
+    document.getElementById("status").textContent =
+      "Zoom in further to search a smaller area.";
+    return;
+  }
+
+  const box = `${south},${west},${north},${east}`;
+
+  if (box === lastRequest) return;
+  lastRequest = box;
+
+  if (requestController) {
+    requestController.abort();
+  }
+
+  requestController = new AbortController();
+
+  document.getElementById("status").textContent =
+    "Searching for fishing locations...";
+
+  const query = `
+    [out:json][timeout:25];
+    (
+      nwr["leisure"="fishing"](${box});
+      nwr["sport"="fishing"](${box});
+      nwr["amenity"="boat_ramp"](${box});
+      nwr["fishing"](${box});
+    );
+    out center tags;
+  `;
+
+  const endpoints = [
+    "https://overpass-api.de/api/interpreter",
+    "https://overpass.kumi.systems/api/interpreter"
+  ];
+
+  let data = null;
+
+  for (const endpoint of endpoints) {
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: "data=" + encodeURIComponent(query),
+        signal: requestController.signal
+      });
+
+      if (!response.ok) {
+        throw new Error("Map data service unavailable");
+      }
+
+      data = await response.json();
+      break;
+
+    } catch (error) {
+      if (error.name === "AbortError") return;
+    }
+  }
+
+  if (!data) {
+    document.getElementById("status").textContent =
+      "Fishing data could not load. Try again in a moment.";
+    lastRequest = null;
+    return;
+  }
+
+  fishingLayer.clearLayers();
+
+  let count = 0;
+
+  data.elements.forEach(place => {
+    const lat = place.lat ?? place.center?.lat;
+    const lon = place.lon ?? place.center?.lon;
+
+    if (lat == null || lon == null) return;
+
+    const tags = place.tags || {};
+
+    const name = tags.name || "Unnamed Fishing Location";
+
+    const marker = L.circleMarker([lat, lon], {
+      radius: 7,
+      color: "#ffffff",
+      weight: 1,
+      fillColor: "#35b85b",
+      fillOpacity: 0.95
+    });
+
+    const popup = document.createElement("div");
+
+    const title = document.createElement("div");
+    title.className = "popup-title";
+    title.textContent = name;
+    popup.appendChild(title);
+
+    const details = document.createElement("div");
+    details.textContent =
+      "Mapped fishing location. Check access and local rules before visiting.";
+    popup.appendChild(details);
+
+    const source = document.createElement("div");
+    source.textContent = "Source: OpenStreetMap";
+    popup.appendChild(source);
+
+    const link = document.createElement("a");
+    link.className = "popup-link";
+    link.href =
+      "https://www.openstreetmap.org/" +
+      place.type + "/" + place.id;
+    link.target = "_blank";
+    link.rel = "noopener";
+    link.textContent = "View map information";
+    popup.appendChild(link);
+
+    marker.bindPopup(popup);
+    marker.addTo(fishingLayer);
+
+    count++;
+  });
+
+  document.getElementById("status").textContent =
+    count + " mapped fishing locations found in this area.";
 }
 
-function showBoth() {
-  fishingLayer.addTo(map);
-  huntingLayer.addTo(map);
-  setActive("bothButton");
-}
+// ---------------- WILDLIFE VIEWING ----------------
 
-L.control.scale().addTo(map);
+// These are examples, not a complete nationwide
+// wildlife-viewing directory.
+
+const wildlifePlaces = [
+  {
+    name: "Sacramento National Wildlife Refuge",
+    lat: 40.15,
+    lon: -122.0,
+    url: "https://www.fws.gov/refuge/sacramento"
+  },
+  {
+    name: "San Luis National Wildlife Refuge",
+    lat: 37.18,
+    lon: -120.8,
+    url: "https://www.fws.gov/refuge/san-luis"
+  }
+];
+
+wildlifePlaces.forEach(place => {
+  const marker = L.circleMarker(
+    [place.lat, place.lon],
+    {
+      radius: 9,
+      color: "#ffffff",
+      fillColor: "#f0a52b",
+      fillOpacity: 0.95
+    }
+  );
+
+  const popup = document.createElement("div");
+
+  const title = document.createElement("div");
+  title.className = "popup-title";
+  title.textContent = place.name;
+  popup.appendChild(title);
+
+  const details = document.createElement("div");
+  details.textContent =
+    "Wildlife viewing destination. Check visitor access and hours.";
+  popup.appendChild(details);
+
+  const link = document.createElement("a");
+  link.className = "popup-link";
+  link.href = place.url;
+  link.target = "_blank";
+  link.rel = "noopener";
+  link.textContent = "Official visitor information";
+  popup.appendChild(link);
+
+  marker.bindPopup(popup);
+  marker.addTo(wildlifeLayer);
+});
+
+// ---------------- MAP MOVEMENT ----------------
+
+map.on("moveend", () => {
+  loadFishing();
+});
+
+map.on("zoomend", () => {
+  lastRequest = null;
+  loadFishing();
+});
+
+// ---------------- MY LOCATION ----------------
+
+document.getElementById("locateButton").onclick = () => {
+  if (!navigator.geolocation) {
+    alert("Location is not available in this browser.");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    position => {
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+
+      map.setView([lat, lon], 11);
+    },
+    () => {
+      alert("Could not access your location. Check browser permissions.");
+    }
+  );
+};
+
 </script>
 
 </body>
