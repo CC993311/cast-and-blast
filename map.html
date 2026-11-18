@@ -114,8 +114,83 @@ footer {
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<script>
+
 const map = L.map('map').setView([39.5, -98.35], 4);
+
+const street = L.tileLayer(
+  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  { attribution: '&copy; OpenStreetMap contributors' }
+);
+
+const satellite = L.tileLayer(
+  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+  { attribution: 'Tiles &copy; Esri' }
+);
+
+const terrain = L.tileLayer(
+  'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+  { attribution: 'Map data: OpenStreetMap contributors, SRTM | Map style: OpenTopoMap' }
+);
+
+street.addTo(map);
+
+// Example waterbody markers
+const fishingMarkers = L.layerGroup();
+
+const fishingSpots = [
+  {
+    name: "Lake Tahoe",
+    type: "Lake",
+    coordinates: [39.0968, -120.0324]
+  },
+  {
+    name: "Sacramento River",
+    type: "River",
+    coordinates: [38.5816, -121.4944]
+  },
+  {
+    name: "San Francisco Bay",
+    type: "Bay",
+    coordinates: [37.7749, -122.4194]
+  }
+];
+
+fishingSpots.forEach(spot => {
+  L.marker(spot.coordinates)
+    .bindPopup(
+      `<strong>${spot.name}</strong><br>
+       Type: ${spot.type}<br>
+       <br>
+       Example waterbody marker.<br>
+       Verify public access and fishing regulations before visiting.`
+    )
+    .addTo(fishingMarkers);
+});
+
+fishingMarkers.addTo(map);
+
+function showStreet() {
+  map.removeLayer(street);
+  map.removeLayer(satellite);
+  map.removeLayer(terrain);
+  street.addTo(map);
+}
+
+function showSatellite() {
+  map.removeLayer(street);
+  map.removeLayer(satellite);
+  map.removeLayer(terrain);
+  satellite.addTo(map);
+}
+
+function showTerrain() {
+  map.removeLayer(street);
+  map.removeLayer(satellite);
+  map.removeLayer(terrain);
+  terrain.addTo(map);
+}
+
+L.control.scale().addTo(map);
 
 const street = L.tileLayer(
   'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
