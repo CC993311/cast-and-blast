@@ -214,7 +214,8 @@ const fishingSpots = [
     coordinates: [26.9500, -80.8000]
   }
 ];
-
+const fishingLayer = L.layerGroup().addTo(map);
+const wildlifeLayer = L.layerGroup();
 // Create markers
 fishingSpots.forEach(function(spot) {
   const marker = L.circleMarker(spot.coordinates, {
@@ -232,7 +233,7 @@ fishingSpots.forEach(function(spot) {
     "Check public access and regulations before visiting."
   );
 
-  marker.addTo(map);
+marker.addTo(fishingLayer);
 });
 
 // Map buttons
@@ -253,7 +254,20 @@ function showTerrain() {
   map.removeLayer(satellite);
   terrain.addTo(map);
 }
+function showFishing() {
+  map.removeLayer(wildlifeLayer);
+  fishingLayer.addTo(map);
+}
 
+function showHunting() {
+  map.removeLayer(fishingLayer);
+  wildlifeLayer.addTo(map);
+}
+
+function showBoth() {
+  fishingLayer.addTo(map);
+  wildlifeLayer.addTo(map);
+}
 L.control.scale().addTo(map);
 </script>
 
