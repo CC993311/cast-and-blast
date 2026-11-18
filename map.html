@@ -4,16 +4,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Cast & Blast | Nationwide Outdoor Map</title>
 
 <link rel="stylesheet"
 href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
 <style>
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
   margin: 0;
@@ -53,45 +50,42 @@ button {
   background: #365b32;
   border: 1px solid #719c61;
   color: white;
-  padding: 10px 16px;
+  padding: 10px 14px;
   border-radius: 7px;
   cursor: pointer;
   font-weight: bold;
 }
 
-button:hover,
-button.active {
+button.active,
+button:hover {
   background: #78a957;
   color: #10200e;
 }
 
 #status {
   text-align: center;
-  padding: 10px;
+  padding: 11px;
   color: #c9d9bd;
   background: #142014;
   font-size: 13px;
 }
 
 #map {
-  height: calc(100vh - 170px);
+  height: calc(100vh - 175px);
   min-height: 450px;
   width: 100%;
 }
 
-.leaflet-popup-content-wrapper {
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
   background: #172719;
   color: white;
 }
 
-.leaflet-popup-tip {
-  background: #172719;
-}
-
 .popup-title {
-  font-weight: bold;
   font-size: 16px;
-  margin-bottom: 6px;
+  font-weight: bold;
+  margin-bottom: 7px;
 }
 
 .popup-link {
@@ -113,40 +107,44 @@ button.active {
 
 <header>
   <h1>CAST & BLAST</h1>
-  <p>Explore Fishing Locations Across America</p>
+  <p>Explore America's Outdoor Destinations</p>
 </header>
 
 <div class="controls">
   <button id="streetButton" class="active">Street Map</button>
   <button id="satelliteButton">Satellite</button>
   <button id="fishingButton" class="active">Fishing</button>
-  <button id="wildlifeButton">Wildlife Viewing</button>
-  <button id="bothButton">Both</button>
+  <button id="blmButton">BLM Recreation</button>
+  <button id="wildlifeButton">Wildlife</button>
+  <button id="allButton">All Layers</button>
   <button id="locateButton">My Location</button>
 </div>
 
 <div id="status">
-  Zoom in to discover mapped fishing locations.
+  Zoom in to discover fishing and recreation locations.
 </div>
 
 <div id="map"></div>
 
 <div class="note">
-  Fishing data is community-mapped and may be incomplete.
-  Always check local access rules, regulations, and closures.
+  Green = fishing | Blue = BLM recreation | Orange = wildlife viewing.
+  Always verify public access, closures, and local rules.
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-// ---------------- MAP ----------------
+
+// ======================================
+// MAP
+// ======================================
 
 const map = L.map("map").setView([39.5, -98.35], 4);
 
 const street = L.tileLayer(
   "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
   {
-    attribution: '&copy; OpenStreetMap contributors',
+    attribution: "&copy; OpenStreetMap contributors",
     maxZoom: 19
   }
 ).addTo(map);
@@ -162,86 +160,109 @@ const satellite = L.tileLayer(
 document.getElementById("streetButton").onclick = () => {
   map.removeLayer(satellite);
   street.addTo(map);
-  setActive("streetButton");
+  setBaseButton("streetButton");
 };
 
 document.getElementById("satelliteButton").onclick = () => {
   map.removeLayer(street);
   satellite.addTo(map);
-  setActive("satelliteButton");
+  setBaseButton("satelliteButton");
 };
 
-function setActive(id) {
-  document.querySelectorAll(".controls button").forEach(button => {
-    button.classList.remove("active");
-  });
+function setBaseButton(id) {
+  document.getElementById("streetButton").classList.remove("active");
+  document.getElementById("satelliteButton").classList.remove("active");
   document.getElementById(id).classList.add("active");
 }
 
-// ---------------- LAYERS ----------------
+// ======================================
+// MAP LAYERS
+// ======================================
 
 const fishingLayer = L.layerGroup().addTo(map);
-const wildlifeLayer = L.layerGroup().addTo(map);
+const blmLayer = L.layerGroup();
+const wildlifeLayer = L.layerGroup();
 
 let currentFilter = "fishing";
-let lastRequest = null;
-let requestController = null;
+
+let fishingRequest = null;
+let fishingRequestNumber = 0;
+let lastFishingBox = "";
+
+let blmRequest = null;
+let blmRequestNumber = 0;
+let lastBlmBox = "";
+
+let moveTimer = null;
+
+function setStatus(message) {
+  document.getElementById("status").textContent = message;
+}
 
 function updateFilter(filter) {
   currentFilter = filter;
 
-  if (filter === "fishing" || filter === "both") {
-    if (!map.hasLayer(fishingLayer)) {
-      fishingLayer.addTo(map);
-    }
-  } else {
-    map.removeLayer(fishingLayer);
+  map.removeLayer(fishingLayer);
+  map.removeLayer(blmLayer);
+  map.removeLayer(wildlifeLayer);
+
+  if (filter === "fishing" || filter === "all") {
+    fishingLayer.addTo(map);
   }
 
-  if (filter === "wildlife" || filter === "both") {
-    if (!map.hasLayer(wildlifeLayer)) {
-      wildlifeLayer.addTo(map);
-    }
-  } else {
-    map.removeLayer(wildlifeLayer);
+  if (filter === "blm" || filter === "all") {
+    blmLayer.addTo(map);
+  }
+
+  if (filter === "wildlife" || filter === "all") {
+    wildlifeLayer.addTo(map);
   }
 
   document.querySelectorAll(".controls button").forEach(button => {
     button.classList.remove("active");
   });
 
-  document.getElementById(
-    filter === "fishing" ? "fishingButton" :
-    filter === "wildlife" ? "wildlifeButton" :
-    "bothButton"
-  ).classList.add("active");
+  const activeButton = {
+    fishing: "fishingButton",
+    blm: "blmButton",
+    wildlife: "wildlifeButton",
+    all: "allButton"
+  }[filter];
 
-  loadFishing();
+  document.getElementById(activeButton).classList.add("active");
+
+  if (filter === "fishing" || filter === "all") {
+    lastFishingBox = "";
+    loadFishing();
+  }
+
+  if (filter === "blm" || filter === "all") {
+    lastBlmBox = "";
+    loadBLM();
+  }
+
+  if (filter === "wildlife") {
+    setStatus("Showing wildlife-viewing destinations.");
+  }
 }
 
 document.getElementById("fishingButton").onclick =
   () => updateFilter("fishing");
 
+document.getElementById("blmButton").onclick =
+  () => updateFilter("blm");
+
 document.getElementById("wildlifeButton").onclick =
   () => updateFilter("wildlife");
 
-document.getElementById("bothButton").onclick =
-  () => updateFilter("both");
+document.getElementById("allButton").onclick =
+  () => updateFilter("all");
 
-// ---------------- FISHING DATA ----------------
+// ======================================
+// SHARED MAP BOUNDS
+// ======================================
 
-// Search the visible map area instead of trying to
-// download the entire country in one enormous request.
-
-async function loadFishing() {
-  if (currentFilter === "wildlife") return;
-
-  if (map.getZoom() < 7) {
-    document.getElementById("status").textContent =
-      "Zoom in closer to discover fishing locations.";
-    return;
-  }
-
+function getMapArea() {
   const bounds = map.getBounds();
 
   const south = bounds.getSouth();
@@ -249,77 +270,109 @@ async function loadFishing() {
   const north = bounds.getNorth();
   const east = bounds.getEast();
 
-  // Avoid huge searches when the map covers too much area.
-  if ((north - south) * (east - west) > 25) {
-    document.getElementById("status").textContent =
-      "Zoom in further to search a smaller area.";
+  return {
+    south,
+    west,
+    north,
+    east,
+    box: `${south},${west},${north},${east}`,
+    area: (north - south) * (east - west)
+  };
+}
+
+// ======================================
+// FISHING LOCATIONS
+// ======================================
+
+async function loadFishing() {
+
+  if (currentFilter !== "fishing" &&
+      currentFilter !== "all") return;
+
+  const area = getMapArea();
+
+  if (map.getZoom() < 8 || area.area > 25) {
+    setStatus("Zoom in closer to discover fishing locations.");
     return;
   }
 
-  const box = `${south},${west},${north},${east}`;
+  if (area.box === lastFishingBox) return;
 
-  if (box === lastRequest) return;
-  lastRequest = box;
+  lastFishingBox = area.box;
 
-  if (requestController) {
-    requestController.abort();
-  }
+  if (fishingRequest) fishingRequest.abort();
 
-  requestController = new AbortController();
+  const controller = new AbortController();
+  fishingRequest = controller;
 
-  document.getElementById("status").textContent =
-    "Searching for fishing locations...";
+  const thisRequest = ++fishingRequestNumber;
+
+  setStatus("Searching for fishing locations...");
 
   const query = `
-    [out:json][timeout:25];
+    [out:json][timeout:20];
     (
-      nwr["leisure"="fishing"](${box});
-      nwr["sport"="fishing"](${box});
-      nwr["amenity"="boat_ramp"](${box});
-      nwr["fishing"](${box});
+      nwr["leisure"="fishing"](${area.box});
+      nwr["sport"="fishing"](${area.box});
+      nwr["amenity"="boat_ramp"](${area.box});
+      nwr["fishing"="yes"](${area.box});
     );
     out center tags;
   `;
 
-  const endpoints = [
+  const servers = [
     "https://overpass-api.de/api/interpreter",
-    "https://overpass.kumi.systems/api/interpreter"
+    "https://overpass.kumi.systems/api/interpreter",
+    "https://overpass.private.coffee/api/interpreter"
   ];
 
   let data = null;
 
-  for (const endpoint of endpoints) {
+  for (const server of servers) {
+    const timeout = setTimeout(() => controller.abort(), 18000);
+
     try {
-      const response = await fetch(endpoint, {
+      const response = await fetch(server, {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded"
         },
         body: "data=" + encodeURIComponent(query),
-        signal: requestController.signal
+        signal: controller.signal
       });
 
-      if (!response.ok) {
-        throw new Error("Map data service unavailable");
+      if (response.ok) {
+        const result = await response.json();
+
+        if (Array.isArray(result.elements)) {
+          data = result;
+          clearTimeout(timeout);
+          break;
+        }
       }
 
-      data = await response.json();
-      break;
-
     } catch (error) {
-      if (error.name === "AbortError") return;
+      if (error.name === "AbortError" &&
+          thisRequest !== fishingRequestNumber) {
+        clearTimeout(timeout);
+        return;
+      }
     }
+
+    clearTimeout(timeout);
   }
 
+  if (thisRequest !== fishingRequestNumber) return;
+
   if (!data) {
-    document.getElementById("status").textContent =
-      "Fishing data could not load. Try again in a moment.";
-    lastRequest = null;
+    lastFishingBox = "";
+    setStatus("Fishing data unavailable. Try moving the map or retry later.");
     return;
   }
 
   fishingLayer.clearLayers();
 
+  const seen = new Set();
   let count = 0;
 
   data.elements.forEach(place => {
@@ -328,8 +381,11 @@ async function loadFishing() {
 
     if (lat == null || lon == null) return;
 
-    const tags = place.tags || {};
+    const key = place.type + "-" + place.id;
+    if (seen.has(key)) return;
+    seen.add(key);
 
+    const tags = place.tags || {};
     const name = tags.name || "Unnamed Fishing Location";
 
     const marker = L.circleMarker([lat, lon], {
@@ -349,7 +405,7 @@ async function loadFishing() {
 
     const details = document.createElement("div");
     details.textContent =
-      "Mapped fishing location. Check access and local rules before visiting.";
+      "Fishing-related mapped location. Check public access and local regulations.";
     popup.appendChild(details);
 
     const source = document.createElement("div");
@@ -372,36 +428,192 @@ async function loadFishing() {
     count++;
   });
 
-  document.getElementById("status").textContent =
-    count + " mapped fishing locations found in this area.";
+  setStatus(count + " mapped fishing locations found in this area.");
 }
 
-// ---------------- WILDLIFE VIEWING ----------------
+// ======================================
+// BLM RECREATION LOCATIONS
+// ======================================
 
-// These are examples, not a complete nationwide
-// wildlife-viewing directory.
+// Official BLM recreation points service.
+// This displays recreation facilities, not land
+// ownership boundaries or hunting locations.
+
+const BLM_SERVICE =
+  "https://gis.blm.gov/natl/rest/services/recreation/BLM_Natl_Recs_pts/MapServer/23";
+
+async function loadBLM() {
+
+  if (currentFilter !== "blm" &&
+      currentFilter !== "all") return;
+
+  const area = getMapArea();
+
+  if (map.getZoom() < 6 || area.area > 100) {
+    setStatus("Zoom in to discover BLM recreation facilities.");
+    return;
+  }
+
+  if (area.box === lastBlmBox) return;
+
+  lastBlmBox = area.box;
+
+  if (blmRequest) blmRequest.abort();
+
+  const controller = new AbortController();
+  blmRequest = controller;
+
+  const thisRequest = ++blmRequestNumber;
+
+  setStatus("Loading official BLM recreation locations...");
+
+  const params = new URLSearchParams({
+    where: "1=1",
+    geometry: area.box,
+    geometryType: "esriGeometryEnvelope",
+    inSR: "4326",
+    spatialRel: "esriSpatialRelIntersects",
+    outFields: "*",
+    returnGeometry: "true",
+    outSR: "4326",
+    resultRecordCount: "1000",
+    f: "geojson"
+  });
+
+  try {
+
+    const response = await fetch(
+      BLM_SERVICE + "/query?" + params.toString(),
+      { signal: controller.signal }
+    );
+
+    if (!response.ok) {
+      throw new Error("BLM service unavailable");
+    }
+
+    const data = await response.json();
+
+    if (thisRequest !== blmRequestNumber) return;
+
+    if (!data.features) {
+      throw new Error("No BLM features returned");
+    }
+
+    blmLayer.clearLayers();
+
+    let count = 0;
+
+    data.features.forEach(feature => {
+
+      const coordinates = feature.geometry?.coordinates;
+
+      if (!coordinates || coordinates.length < 2) return;
+
+      const lon = coordinates[0];
+      const lat = coordinates[1];
+
+      if (!Number.isFinite(lat) ||
+          !Number.isFinite(lon)) return;
+
+      const properties = feature.properties || {};
+
+      const name =
+        properties.RECSITE_NAME ||
+        properties.RECNAME ||
+        properties.SITE_NAME ||
+        properties.NAME ||
+        properties.Name ||
+        properties.FACILITY_NAME ||
+        properties.RecAreaName ||
+        "BLM Recreation Site";
+
+      const marker = L.circleMarker([lat, lon], {
+        radius: 7,
+        color: "#ffffff",
+        weight: 1,
+        fillColor: "#3399ff",
+        fillOpacity: 0.95
+      });
+
+      const popup = document.createElement("div");
+
+      const title = document.createElement("div");
+      title.className = "popup-title";
+      title.textContent = name;
+      popup.appendChild(title);
+
+      const details = document.createElement("div");
+      details.textContent =
+        "BLM recreation location. Confirm current visitor access, facilities, and closures before visiting.";
+      popup.appendChild(details);
+
+      const source = document.createElement("div");
+      source.textContent = "Source: Bureau of Land Management";
+      popup.appendChild(source);
+
+      const link = document.createElement("a");
+      link.className = "popup-link";
+      link.href = "https://www.blm.gov/programs/recreation";
+      link.target = "_blank";
+      link.rel = "noopener";
+      link.textContent = "Official BLM recreation information";
+      popup.appendChild(link);
+
+      marker.bindPopup(popup);
+      marker.addTo(blmLayer);
+
+      count++;
+
+    });
+
+    setStatus(count + " BLM recreation locations found in this area.");
+
+  } catch (error) {
+
+    if (error.name === "AbortError") return;
+
+    if (thisRequest !== blmRequestNumber) return;
+
+    lastBlmBox = "";
+
+    setStatus("BLM recreation data unavailable. Try again later.");
+
+  }
+}
+
+// ======================================
+// WILDLIFE VIEWING DESTINATIONS
+// ======================================
+
+// These are visitor destinations, not a complete
+// national refuge directory.
 
 const wildlifePlaces = [
+
   {
     name: "Sacramento National Wildlife Refuge",
     lat: 40.15,
     lon: -122.0,
     url: "https://www.fws.gov/refuge/sacramento"
   },
+
   {
     name: "San Luis National Wildlife Refuge",
     lat: 37.18,
     lon: -120.8,
     url: "https://www.fws.gov/refuge/san-luis"
   }
+
 ];
 
 wildlifePlaces.forEach(place => {
+
   const marker = L.circleMarker(
     [place.lat, place.lon],
     {
       radius: 9,
       color: "#ffffff",
+      weight: 1,
       fillColor: "#f0a52b",
       fillOpacity: 0.95
     }
@@ -416,7 +628,7 @@ wildlifePlaces.forEach(place => {
 
   const details = document.createElement("div");
   details.textContent =
-    "Wildlife viewing destination. Check visitor access and hours.";
+    "Wildlife-viewing destination. Check visitor access and hours.";
   popup.appendChild(details);
 
   const link = document.createElement("a");
@@ -429,38 +641,61 @@ wildlifePlaces.forEach(place => {
 
   marker.bindPopup(popup);
   marker.addTo(wildlifeLayer);
+
 });
 
-// ---------------- MAP MOVEMENT ----------------
+// ======================================
+// MAP MOVEMENT
+// ======================================
 
-map.on("moveend", () => {
-  loadFishing();
-});
+function scheduleSearch() {
 
-map.on("zoomend", () => {
-  lastRequest = null;
-  loadFishing();
-});
+  clearTimeout(moveTimer);
 
-// ---------------- MY LOCATION ----------------
+  moveTimer = setTimeout(() => {
+
+    if (currentFilter === "fishing" ||
+        currentFilter === "all") {
+      loadFishing();
+    }
+
+    if (currentFilter === "blm" ||
+        currentFilter === "all") {
+      loadBLM();
+    }
+
+  }, 700);
+}
+
+map.on("moveend", scheduleSearch);
+map.on("zoomend", scheduleSearch);
+
+// ======================================
+// MY LOCATION
+// ======================================
 
 document.getElementById("locateButton").onclick = () => {
+
   if (!navigator.geolocation) {
-    alert("Location is not available in this browser.");
+    alert("Location is unavailable in this browser.");
     return;
   }
 
   navigator.geolocation.getCurrentPosition(
     position => {
-      const lat = position.coords.latitude;
-      const lon = position.coords.longitude;
-
-      map.setView([lat, lon], 11);
+      map.setView(
+        [
+          position.coords.latitude,
+          position.coords.longitude
+        ],
+        10
+      );
     },
     () => {
-      alert("Could not access your location. Check browser permissions.");
+      alert("Could not access your location.");
     }
   );
+
 };
 
 </script>
