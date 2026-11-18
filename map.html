@@ -1,0 +1,156 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cast & Blast | Outdoor Map</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: #101710;
+  color: #f1f4ec;
+  font-family: Arial, sans-serif;
+}
+
+header {
+  padding: 18px 6%;
+  background: #172319;
+  border-bottom: 1px solid #354735;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.logo {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.logo span { color: #a9c77b; }
+
+a { color: #a9c77b; }
+
+main { padding: 28px 6%; }
+
+h1 { margin-bottom: 8px; }
+
+.description {
+  color: #aab6a7;
+  line-height: 1.6;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 20px 0;
+}
+
+button {
+  background: #243529;
+  color: #f1f4ec;
+  border: 1px solid #52664d;
+  padding: 12px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+button:hover {
+  background: #354735;
+}
+
+#map {
+  width: 100%;
+  height: 65vh;
+  min-height: 350px;
+  border: 1px solid #52664d;
+  border-radius: 10px;
+}
+
+footer {
+  padding: 25px;
+  text-align: center;
+  color: #aab6a7;
+  font-size: 12px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">CAST <span>&</span> BLAST</div>
+  <a href="index.html">Back to Home</a>
+</header>
+
+<main>
+  <h1>Explore Outdoor Maps</h1>
+  <p class="description">
+    Explore lakes, rivers, terrain, and outdoor areas across the United States.
+  </p>
+
+  <div class="controls">
+    <button onclick="showStreet()">Street Map</button>
+    <button onclick="showSatellite()">Satellite Map</button>
+    <button onclick="showTerrain()">Terrain Map</button>
+  </div>
+
+  <div id="map"></div>
+</main>
+
+<footer>
+  CAST & BLAST | EXPLORE. DISCOVER. RESPECT THE OUTDOORS.
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+const map = L.map('map').setView([39.5, -98.35], 4);
+
+const street = L.tileLayer(
+  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  { attribution: '&copy; OpenStreetMap contributors' }
+);
+
+const satellite = L.tileLayer(
+  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+  { attribution: 'Tiles &copy; Esri' }
+);
+
+const terrain = L.tileLayer(
+  'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+  { attribution: 'Map data: OpenStreetMap contributors, SRTM | Map style: OpenTopoMap' }
+);
+
+street.addTo(map);
+
+function showStreet() {
+  map.eachLayer(layer => map.removeLayer(layer));
+  street.addTo(map);
+}
+
+function showSatellite() {
+  map.eachLayer(layer => map.removeLayer(layer));
+  satellite.addTo(map);
+}
+
+function showTerrain() {
+  map.eachLayer(layer => map.removeLayer(layer));
+  terrain.addTo(map);
+}
+
+L.control.scale().addTo(map);
+</script>
+
+</body>
+</html>
