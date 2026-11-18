@@ -3,103 +3,84 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cast & Blast | Outdoor Map</title>
-
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
 <style>
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
   margin: 0;
   background: #101810;
-  color: #ffffff;
+  color: white;
   font-family: Arial, sans-serif;
 }
 
 header {
   background: #17251a;
   padding: 18px;
-  border-bottom: 1px solid #344b35;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
+  border-bottom: 1px solid #40553e;
 }
 
 .logo {
-  font-size: 23px;
-  font-weight: bold;
   color: #b5d68a;
+  font-size: 22px;
+  font-weight: bold;
 }
 
 .home {
   color: white;
   text-decoration: none;
   background: #314b32;
-  padding: 10px 16px;
-  border-radius: 7px;
+  padding: 10px 14px;
+  border-radius: 6px;
 }
 
-.intro {
-  padding: 22px;
-}
-
-.intro h1 {
-  margin: 0 0 8px;
-  color: #b5d68a;
-}
-
-.intro p {
-  color: #c1cbbd;
-  margin: 0;
-}
+.intro { padding: 20px; }
+.intro h1 { color: #b5d68a; }
 
 .controls {
   display: flex;
-  gap: 10px;
-  padding: 0 20px 18px;
   flex-wrap: wrap;
+  gap: 9px;
+  padding: 0 20px 18px;
 }
 
-.controls button {
+button {
   background: #263c29;
   color: white;
-  border: 1px solid #54734b;
-  padding: 11px 18px;
+  border: 1px solid #66815b;
+  padding: 11px 17px;
   border-radius: 7px;
   cursor: pointer;
-  font-size: 14px;
 }
 
-.controls button:hover {
-  background: #405e3c;
+button.active {
+  background: #587c45;
+  border-color: #b5d68a;
 }
 
 #map {
-  width: 100%;
   height: 65vh;
   min-height: 380px;
+  width: 100%;
   background: #263c29;
 }
 
 .legend {
-  padding: 18px 22px;
+  padding: 18px 20px;
   color: #c1cbbd;
-  line-height: 1.7;
+  line-height: 1.8;
 }
 
 footer {
   text-align: center;
   padding: 20px;
   color: #81917e;
-  border-top: 1px solid #344b35;
-  font-size: 13px;
 }
 </style>
 </head>
@@ -113,161 +94,136 @@ footer {
 
 <section class="intro">
   <h1>Outdoor Explorer Map</h1>
-  <p>Explore fishing waters and outdoor destinations across America.</p>
+  <p>Explore fishing waters and outdoor destinations.</p>
 </section>
 
 <div class="controls">
-  <button onclick="showStreet()">Street Map</button>
-  <button onclick="showSatellite()">Satellite</button>
-  <button onclick="showFishing()">Fishing</button>
-<button onclick="showHunting()">Hunting</button>
-<button onclick="showBoth()">Both</button>
+  <button id="streetButton" onclick="showStreet()">Street Map</button>
+  <button id="satelliteButton" onclick="showSatellite()">Satellite</button>
+  <button id="fishingButton" onclick="showFishing()">Fishing</button>
+  <button id="huntingButton" onclick="showHunting()">Hunting</button>
+  <button id="bothButton" onclick="showBoth()">Both</button>
 </div>
 
 <div id="map"></div>
 
 <div class="legend">
   <strong>Map Guide</strong><br>
-  <span style="color:#b5d68a">●</span> Example fishing waterbody locations<br>
-  Locations are illustrative. Always verify public access, local regulations, and permissions before visiting.
+  <span style="color:#a9c77b">●</span> Fishing waterbodies<br>
+  <span style="color:#e4a04b">●</span> Example public-land research areas<br>
+  Always verify public access, boundaries, permissions, seasons and regulations before visiting.
 </div>
 
-<footer>
-  CAST & BLAST | Explore Responsibly
-</footer>
+<footer>CAST & BLAST | Explore Responsibly</footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
 const map = L.map('map').setView([39.5, -98.35], 4);
 
-// Street map
 const street = L.tileLayer(
   'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-  {
-    attribution: '&copy; OpenStreetMap contributors',
-    maxZoom: 19
-  }
+  { attribution: '&copy; OpenStreetMap contributors' }
 );
 
-// Satellite map
 const satellite = L.tileLayer(
   'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-  {
-    attribution: 'Tiles &copy; Esri',
-    maxZoom: 19
-  }
+  { attribution: 'Tiles &copy; Esri' }
 );
 
-// Terrain map
-const terrain = L.tileLayer(
-  'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
-  {
-    attribution: 'Map data: OpenStreetMap contributors, SRTM',
-    maxZoom: 17
-  }
-);
-
-// Start with street view
 street.addTo(map);
 
-// Example waterbody locations
-const fishingSpots = [
-  {
-    name: "Lake Tahoe",
-    type: "Lake",
-    coordinates: [39.0968, -120.0324]
-  },
-  {
-    name: "Sacramento River",
-    type: "River",
-    coordinates: [38.5816, -121.4944]
-  },
-  {
-    name: "San Francisco Bay",
-    type: "Bay",
-    coordinates: [37.7749, -122.4194]
-  },
-  {
-    name: "Clear Lake",
-    type: "Lake",
-    coordinates: [39.0157, -122.7800]
-  },
-  {
-    name: "Columbia River",
-    type: "River",
-    coordinates: [45.6387, -121.1770]
-  },
-  {
-    name: "Lake Washington",
-    type: "Lake",
-    coordinates: [47.6094, -122.2650]
-  },
-  {
-    name: "Lake Travis",
-    type: "Lake",
-    coordinates: [30.3890, -97.9070]
-  },
-  {
-    name: "Lake Okeechobee",
-    type: "Lake",
-    coordinates: [26.9500, -80.8000]
-  }
-];
 const fishingLayer = L.layerGroup().addTo(map);
-const wildlifeLayer = L.layerGroup();
-// Create markers
+const huntingLayer = L.layerGroup();
+
+const fishingSpots = [
+  { name: "Lake Tahoe", type: "Lake", coordinates: [39.0968,-120.0324] },
+  { name: "Sacramento River", type: "River", coordinates: [38.5816,-121.4944] },
+  { name: "San Francisco Bay", type: "Bay", coordinates: [37.7749,-122.4194] },
+  { name: "Clear Lake", type: "Lake", coordinates: [39.0157,-122.7800] },
+  { name: "Columbia River", type: "River", coordinates: [45.6387,-121.1770] },
+  { name: "Lake Washington", type: "Lake", coordinates: [47.6094,-122.2650] },
+  { name: "Lake Travis", type: "Lake", coordinates: [30.3890,-97.9070] },
+  { name: "Lake Okeechobee", type: "Lake", coordinates: [26.9500,-80.8000] }
+];
+
 fishingSpots.forEach(function(spot) {
-  const marker = L.circleMarker(spot.coordinates, {
+  L.circleMarker(spot.coordinates, {
     radius: 9,
     color: "#ffffff",
     weight: 2,
     fillColor: "#a9c77b",
     fillOpacity: 1
-  });
-
-  marker.bindPopup(
+  })
+  .bindPopup(
     "<strong>" + spot.name + "</strong><br>" +
     "Type: " + spot.type + "<br>" +
-    "Example waterbody location.<br>" +
-    "Check public access and regulations before visiting."
-  );
-
-marker.addTo(fishingLayer);
+    "Example waterbody location. Verify public access and fishing regulations."
+  )
+  .addTo(fishingLayer);
 });
 
-// Map buttons
+// Illustrative research-area markers, NOT verified hunting access sites.
+const huntingSpots = [
+  { name: "California", coordinates: [36.7783,-119.4179] },
+  { name: "Oregon", coordinates: [43.8041,-120.5542] },
+  { name: "Texas", coordinates: [31.0000,-99.0000] },
+  { name: "Florida", coordinates: [27.6648,-81.5158] }
+];
+
+huntingSpots.forEach(function(spot) {
+  L.circleMarker(spot.coordinates, {
+    radius: 10,
+    color: "#ffffff",
+    weight: 2,
+    fillColor: "#e4a04b",
+    fillOpacity: 1
+  })
+  .bindPopup(
+    "<strong>" + spot.name + "</strong><br>" +
+    "Example state research marker.<br>" +
+    "Consult official wildlife agencies for public-land boundaries, access and current regulations."
+  )
+  .addTo(huntingLayer);
+});
+
+function setActive(buttonId) {
+  document.querySelectorAll(".controls button").forEach(function(button) {
+    button.classList.remove("active");
+  });
+  document.getElementById(buttonId).classList.add("active");
+}
+
 function showStreet() {
   map.removeLayer(satellite);
-  map.removeLayer(terrain);
   street.addTo(map);
+  setActive("streetButton");
 }
 
 function showSatellite() {
   map.removeLayer(street);
-  map.removeLayer(terrain);
   satellite.addTo(map);
+  setActive("satelliteButton");
 }
 
-function showTerrain() {
-  map.removeLayer(street);
-  map.removeLayer(satellite);
-  terrain.addTo(map);
-}
 function showFishing() {
-  map.removeLayer(wildlifeLayer);
+  map.removeLayer(huntingLayer);
   fishingLayer.addTo(map);
+  setActive("fishingButton");
 }
 
 function showHunting() {
   map.removeLayer(fishingLayer);
-  wildlifeLayer.addTo(map);
+  huntingLayer.addTo(map);
+  setActive("huntingButton");
 }
 
 function showBoth() {
   fishingLayer.addTo(map);
-  wildlifeLayer.addTo(map);
+  huntingLayer.addTo(map);
+  setActive("bothButton");
 }
+
 L.control.scale().addTo(map);
 </script>
 
