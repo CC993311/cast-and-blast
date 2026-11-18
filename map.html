@@ -364,8 +364,8 @@ function elementName(element) {
   return element.tags?.name || "Unnamed location";
 }
 
-async function loadFishingAndWildlife(bounds) {
 
+async function loadFishingAndWildlife(bounds) {
   const box = [
     bounds.getSouth(),
     bounds.getWest(),
@@ -373,14 +373,21 @@ async function loadFishingAndWildlife(bounds) {
     bounds.getEast()
   ].join(",");
 
-  const query = `
+  const fishingQuery = `
     [out:json][timeout:40];
     (
       nwr["leisure"="fishing"](${box});
       nwr["sport"="fishing"](${box});
       nwr["amenity"="boat_ramp"](${box});
-      nwr["fishing"~"yes|permitted|permit"](${box});
+      nwr["fishing"~"yes|permitted|permit",i](${box});
+      nwr["waterway"="access_point"]["fishing"~"yes|permitted|permit",i](${box});
+    );
+    out center tags;
+  `;
 
+  const wildlifeQuery = `
+    [out:json][timeout:40];
+    (
       nwr["leisure"="bird_hide"](${box});
       nwr["wildlife"="watching"](${box});
       nwr["bird_hide"="yes"](${box});
@@ -390,75 +397,99 @@ async function loadFishingAndWildlife(bounds) {
     out center tags;
   `;
 
-  const data = await fetchOverpass(query);
+  fishingLayer.clearLayers();
+  wildlifeLayer.clearLayers();
 
   let fishingCount = 0;
   let wildlifeCount = 0;
 
-  const seen = new Set();
+  async function loadLayer(query, layer, type) {
+    try {
+      const data = await fetchOverpass(query);
+      const seen = new Set();
+      let count = 0;
 
-  for (const element of data.elements || []) {
+      for (const element of data.elements || []) {
+        const key = element.type + "/" + element.id;
 
-    const uniqueKey = element.type + "/" + element.id;
+        if (seen.has(key)) continue;
+        seen.add(key);
 
-    if (seen.has(uniqueKey)) continue;
-    seen.add(uniqueKey);
+        const tags = element.tags || {};
+        const position = elementPosition(element);
 
-    const tags = element.tags || {};
-    const position = elementPosition(element);
+        if (!position) continue;
 
-    if (!position) continue;
+        if (type === "fishing") {
+          const isFishing =
+            tags.leisure === "fishing" ||
+            tags.sport === "fishing" ||
+            tags.amenity === "boat_ramp" ||
+            /yes|permitted|permit/i.test(tags.fishing || "");
 
-    const isWildlife =
-      tags.leisure === "bird_hide" ||
-      tags.wildlife === "watching" ||
-      tags.bird_hide === "yes" ||
-      /wildlife|birdwatching|birds|nature/i.test(tags.information || "") ||
-      /wildlife|animal|bird/i.test(tags.attraction || "");
+          if (!isFishing) continue;
 
-    const isFishing =
-      tags.leisure === "fishing" ||
-      tags.sport === "fishing" ||
-      tags.amenity === "boat_ramp" ||
-      /yes|permitted|permit/.test(tags.fishing || "");
+          if (!document.getElementById("fishingToggle").checked) {
+            continue;
+          }
 
-    if (
-      isWildlife &&
-      document.getElementById("wildlifeToggle").checked
-    ) {
-      addMarker(
-        wildlifeLayer,
-        position[0],
-        position[1],
-        "#ff963d",
-        elementName(element),
-        "Wildlife viewing location. Check access and visiting rules."
-      );
+          addMarker(
+            layer,
+            position[0],
+            position[1],
+            "#36c76a",
+            elementName(element),
+            "Fishing-related location. Check local rules and public access."
+          );
+        } else {
+          const isWildlife =
+            tags.leisure === "bird_hide" ||
+            tags.wildlife === "watching" ||
+            tags.bird_hide === "yes" ||
+            /wildlife|birdwatching|birds|nature/i.test(tags.information || "") ||
+            /wildlife|animal|bird/i.test(tags.attraction || "");
 
-      wildlifeCount++;
+          if (!isWildlife) continue;
 
-    } else if (
-      isFishing &&
-      document.getElementById("fishingToggle").checked
-    ) {
-      addMarker(
-        fishingLayer,
-        position[0],
-        position[1],
-        "#36c76a",
-        elementName(element),
-        "Fishing-related location. Check local fishing rules and access."
-      );
+          if (!document.getElementById("wildlifeToggle").checked) {
+            continue;
+          }
 
-      fishingCount++;
+          addMarker(
+            layer,
+            position[0],
+            position[1],
+            "#ff963d",
+            elementName(element),
+            "Wildlife viewing location. Check access and visiting rules."
+          );
+        }
+
+        count++;
+      }
+
+      return count;
+
+    } catch (error) {
+      console.error(type + " search failed:", error);
+      return 0;
     }
   }
+
+  const results = await Promise.all([
+    loadLayer(fishingQuery, fishingLayer, "fishing"),
+    loadLayer(wildlifeQuery, wildlifeLayer, "wildlife")
+  ]);
+
+  fishingCount = results[0];
+  wildlifeCount = results[1];
 
   return {
     fishingCount,
     wildlifeCount
   };
 }
+
 
 
 /* ---------------- BLM HUNTING DATA ---------------- */
