@@ -243,7 +243,6 @@ let selectedLake = null;
 let selectedLakeDatabaseId = null;
 
 
-
 // ==========================================
 // MAP SETUP - STREET, SATELLITE, TERRAIN
 // ==========================================
@@ -282,8 +281,8 @@ const terrain = L.tileLayer(
   }
 );
 
-// START WITH STREET MAP
-street.addTo(map);
+// START WITH SATELLITE MAP
+satellite.addTo(map);
 
 // VISIBLE MAP STYLE SELECTOR
 L.control.layers(
@@ -309,18 +308,12 @@ L.control.scale().addTo(map);
 });
 
 
-
 // ==========================================
 // DATA SOURCES
 // ==========================================
 
-// Correct current USGS 3DHP service address.
-// Layer 60 is the Waterbody layer.
-
 const USGS_URL =
 "https://3dhp.nationalmap.gov/arcgis/rest/services/usgs_3dhp_all/FeatureServer/60";
-
-// BLM Recreation Locations - All, layer 23.
 
 const BLM_URL =
 "https://gis.blm.gov/natl/rest/services/recreation/BLM_Natl_Recs_pts/MapServer/23/query";
@@ -554,8 +547,6 @@ async function loadLakes(){
       lakeCount+=newFeatures.length;
     }
 
-    // If the server says more results were available,
-    // do not mark this whole area as complete.
     if(data.exceededTransferLimit){
       setStatus(
         "Loaded "+lakeCount.toLocaleString()+
@@ -938,9 +929,6 @@ async function selectLake(feature){
 
   updateReviewForm();
 
-  // First look for an existing lake record.
-  // This allows visitors to read reviews without signing in.
-
   const {data:existingLake,error:lookupError}=await supabaseClient
     .from("lakes")
     .select("id,name,waterbody_id")
@@ -974,9 +962,6 @@ async function selectLake(feature){
     await loadReviews(selectedLakeDatabaseId);
     return;
   }
-
-  // A new lake row requires an authenticated user.
-  // The database's existing security rules are preserved.
 
   if(!currentUser){
     document.getElementById("selectedLake").innerHTML=`
