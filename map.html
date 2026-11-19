@@ -161,7 +161,7 @@ footer {
 
   <label class="layer-option">
     <input type="checkbox" id="blmToggle" checked>
-    <span>🔵 BLM Recreation</span>
+    <span>🔵 BLM Hunting</span>
   </label>
 
   <button id="streetButton">Street</button>
@@ -178,7 +178,7 @@ footer {
 
 <div class="legend">
   <span><span class="dot" style="background:#36c76a"></span>Fishing</span>
-  <span><span class="dot" style="background:#398bff"></span>BLM Recreation</span>
+  <span><span class="dot" style="background:#398bff"></span>BLM Hunting</span>
 </div>
 
 <div id="status">Map ready. Zoom in to load nearby locations.</div>
@@ -418,7 +418,7 @@ async function loadFishing(bounds) {
 }
 
 
-/* ---------------- BLM RECREATION DATA ---------------- */
+/* ---------------- BLM HUNTING DATA ---------------- */
 
 const blmService =
   "https://gis.blm.gov/arcgis/rest/services/recreation/BLM_Natl_Recs_pts/MapServer";
@@ -502,7 +502,7 @@ async function loadBlmCategory(bounds, category) {
       lon,
       "#398bff",
       name,
-      "BLM Recreation: " + subtype +
+      "BLM Hunting: " + subtype +
       ". " + (attributes.DESCRIPTION || "Check current access information.")
     );
 
@@ -549,7 +549,7 @@ async function loadMapData(force = false) {
 
   if (map.getZoom() < 8) {
     setStatus(
-      "Zoom in closer to load fishing and BLM recreation locations."
+      "Zoom in closer to load fishing and BLM Hunting locations."
     );
     return;
   }
@@ -565,7 +565,7 @@ async function loadMapData(force = false) {
   fishingLayer.clearLayers();
   blmLayer.clearLayers();
 
-  setStatus("Loading fishing and BLM recreation locations in this map area...");
+  setStatus("Loading fishing and BLM Hunting locations in this map area...");
 
   let fishingCount = 0;
   let blmCount = 0;
@@ -592,8 +592,8 @@ async function loadMapData(force = false) {
           blmCount = count;
         })
         .catch(error => {
-          console.error("BLM recreation error:", error);
-          errors.push("BLM recreation data could not load: " + error.message);
+          console.error("BLM Hunting error:", error);
+          errors.push("BLM Hunting data could not load: " + error.message);
         })
     );
   }
@@ -603,7 +603,7 @@ async function loadMapData(force = false) {
   loading = false;
 
   let message =
-    `Loaded ${fishingCount} fishing and ${blmCount} BLM recreation locations.`;
+    `Loaded ${fishingCount} fishing and ${blmCount} BLM Hunting locations.`;
 
   if (errors.length) {
     message += " " + errors.join("; ") + ".";
