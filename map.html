@@ -161,12 +161,7 @@ footer {
 
   <label class="layer-option">
     <input type="checkbox" id="blmToggle" checked>
-    <span>🔵 BLM Hunting</span>
-  </label>
-
-  <label class="layer-option">
-    <input type="checkbox" id="wildlifeToggle" checked>
-    <span>🟠 Wildlife Area</span>
+    <span>🔵 BLM Recreation</span>
   </label>
 
   <button id="streetButton">Street</button>
@@ -183,8 +178,7 @@ footer {
 
 <div class="legend">
   <span><span class="dot" style="background:#36c76a"></span>Fishing</span>
-  <span><span class="dot" style="background:#398bff"></span>BLM Hunting</span>
-  <span><span class="dot" style="background:#ff963d"></span>Wildlife Area</span>
+  <span><span class="dot" style="background:#398bff"></span>BLM Recreation</span>
 </div>
 
 <div id="status">Map ready. Zoom in to load nearby locations.</div>
@@ -192,7 +186,7 @@ footer {
 <footer>
   Location information comes from public mapping datasets and may not show every available location.
   Always check current rules, access, and closures before visiting.
-  BLM markers identify recreation facilities and hunting areas, not general land boundaries.
+  BLM markers identify recreation facilities, not general land boundaries or hunting locations.
 </footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -244,15 +238,12 @@ document.getElementById("terrainButton").onclick = () => {
 
 const fishingLayer = L.layerGroup().addTo(map);
 
-/* BLM markers automatically group together */
 const blmLayer = L.markerClusterGroup({
   showCoverageOnHover: false,
   spiderfyOnMaxZoom: true,
   maxClusterRadius: 55,
   disableClusteringAtZoom: 14
 }).addTo(map);
-
-const wildlifeLayer = L.layerGroup().addTo(map);
 
 const statusBox = document.getElementById("status");
 
@@ -302,15 +293,13 @@ function addMarker(layer, lat, lon, color, title, details) {
 }
 
 
-/* ---------------- FISHING + WILDLIFE DATA ---------------- */
-
+/* ---------------- FISHING DATA ---------------- */
 
 const overpassServers = [
   "https://overpass-api.de/api/interpreter",
   "https://overpass.private.coffee/api/interpreter",
   "https://ovp.dresel.systems/api-na/interpreter"
 ];
-
 
 async function fetchOverpass(query) {
   let lastError;
@@ -322,9 +311,7 @@ async function fetchOverpass(query) {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
         },
-        body: new URLSearchParams({
-          data: query
-        })
+        body: new URLSearchParams({ data: query })
       });
 
       if (!response.ok) {
@@ -363,11 +350,11 @@ function elementPosition(element) {
 }
 
 function elementName(element) {
-  return element.tags?.name || "Unnamed location";
+  return element.tags?.name || "Unnamed fishing location";
 }
 
+async function loadFishing(bounds) {
 
-async function loadFishingAndWildlife(bounds) {
   const box = [
     bounds.getSouth(),
     bounds.getWest(),
@@ -387,119 +374,54 @@ async function loadFishingAndWildlife(bounds) {
     out center tags;
   `;
 
-  const wildlifeQuery = `
-    [out:json][timeout:40];
-    (
-      nwr["leisure"="bird_hide"](${box});
-      nwr["wildlife"="watching"](${box});
-      nwr["bird_hide"="yes"](${box});
-      nwr["information"~"wildlife|birdwatching|birds|nature",i](${box});
-      nwr["attraction"~"wildlife|animal|bird",i](${box});
-    );
-    out center tags;
-  `;
-
   fishingLayer.clearLayers();
-  wildlifeLayer.clearLayers();
 
-  let fishingCount = 0;
-  let wildlifeCount = 0;
+  const data = await fetchOverpass(fishingQuery);
+  const seen = new Set();
+  let count = 0;
 
-  async function loadLayer(query, layer, type) {
-    try {
-      const data = await fetchOverpass(query);
-      const seen = new Set();
-      let count = 0;
+  for (const element of data.elements || []) {
 
-      for (const element of data.elements || []) {
-        const key = element.type + "/" + element.id;
+    const key = element.type + "/" + element.id;
 
-        if (seen.has(key)) continue;
-        seen.add(key);
+    if (seen.has(key)) continue;
+    seen.add(key);
 
-        const tags = element.tags || {};
-        const position = elementPosition(element);
+    const tags = element.tags || {};
+    const position = elementPosition(element);
 
-        if (!position) continue;
+    if (!position) continue;
 
-        if (type === "fishing") {
-          const isFishing =
-            tags.leisure === "fishing" ||
-            tags.sport === "fishing" ||
-            tags.amenity === "boat_ramp" ||
-            /yes|permitted|permit/i.test(tags.fishing || "");
+    const isFishing =
+      tags.leisure === "fishing" ||
+      tags.sport === "fishing" ||
+      tags.amenity === "boat_ramp" ||
+      /yes|permitted|permit/i.test(tags.fishing || "");
 
-          if (!isFishing) continue;
-
-          if (!document.getElementById("fishingToggle").checked) {
-            continue;
-          }
-
-          addMarker(
-            layer,
-            position[0],
-            position[1],
-            "#36c76a",
-            elementName(element),
-            "Fishing-related location. Check local rules and public access."
-          );
-        } else {
-          const isWildlife =
-            tags.leisure === "bird_hide" ||
-            tags.wildlife === "watching" ||
-            tags.bird_hide === "yes" ||
-            /wildlife|birdwatching|birds|nature/i.test(tags.information || "") ||
-            /wildlife|animal|bird/i.test(tags.attraction || "");
-
-          if (!isWildlife) continue;
-
-          if (!document.getElementById("wildlifeToggle").checked) {
-            continue;
-          }
-
-          addMarker(
-            layer,
-            position[0],
-            position[1],
-            "#ff963d",
-            elementName(element),
-            "Wildlife viewing location. Check access and visiting rules."
-          );
-        }
-
-        count++;
-      }
-
-      return count;
-
-    } catch (error) {
-      console.error(type + " search failed:", error);
-      return 0;
+    if (!isFishing || !document.getElementById("fishingToggle").checked) {
+      continue;
     }
+
+    addMarker(
+      fishingLayer,
+      position[0],
+      position[1],
+      "#36c76a",
+      elementName(element),
+      "Fishing-related location. Check local rules and public access."
+    );
+
+    count++;
   }
 
-  const results = await Promise.all([
-    loadLayer(fishingQuery, fishingLayer, "fishing"),
-    loadLayer(wildlifeQuery, wildlifeLayer, "wildlife")
-  ]);
-
-  fishingCount = results[0];
-  wildlifeCount = results[1];
-
-  return {
-    fishingCount,
-    wildlifeCount
-  };
+  return count;
 }
 
 
-
-/* ---------------- BLM HUNTING DATA ---------------- */
+/* ---------------- BLM RECREATION DATA ---------------- */
 
 const blmService =
   "https://gis.blm.gov/arcgis/rest/services/recreation/BLM_Natl_Recs_pts/MapServer";
-
-/* Only general recreation facility layers are included. */
 
 const blmCategories = [
   { id: 1, name: "Boat Ramp" },
@@ -627,7 +549,7 @@ async function loadMapData(force = false) {
 
   if (map.getZoom() < 8) {
     setStatus(
-      "Zoom in closer to load fishing, BLM hunting, and wildlife area locations."
+      "Zoom in closer to load fishing and BLM recreation locations."
     );
     return;
   }
@@ -642,30 +564,23 @@ async function loadMapData(force = false) {
 
   fishingLayer.clearLayers();
   blmLayer.clearLayers();
-  wildlifeLayer.clearLayers();
 
-  setStatus("Loading locations in this map area...");
+  setStatus("Loading fishing and BLM recreation locations in this map area...");
 
   let fishingCount = 0;
-  let wildlifeCount = 0;
   let blmCount = 0;
-
   const errors = [];
   const jobs = [];
 
-  if (
-    document.getElementById("fishingToggle").checked ||
-    document.getElementById("wildlifeToggle").checked
-  ) {
+  if (document.getElementById("fishingToggle").checked) {
     jobs.push(
-      loadFishingAndWildlife(bounds)
-        .then(result => {
-          fishingCount = result.fishingCount;
-          wildlifeCount = result.wildlifeCount;
+      loadFishing(bounds)
+        .then(count => {
+          fishingCount = count;
         })
         .catch(error => {
-          console.error("Fishing/wildlife error:", error);
-          errors.push("Fishing/wildlife data could not load");
+          console.error("Fishing search failed:", error);
+          errors.push("Fishing data could not load: " + error.message);
         })
     );
   }
@@ -677,8 +592,8 @@ async function loadMapData(force = false) {
           blmCount = count;
         })
         .catch(error => {
-          console.error("BLM error:", error);
-          errors.push("BLM data could not load");
+          console.error("BLM recreation error:", error);
+          errors.push("BLM recreation data could not load: " + error.message);
         })
     );
   }
@@ -688,8 +603,7 @@ async function loadMapData(force = false) {
   loading = false;
 
   let message =
-    `Loaded ${fishingCount} fishing, ${blmCount} BLM hunting, ` +
-    `and ${wildlifeCount} wildlife-viewing locations.`;
+    `Loaded ${fishingCount} fishing and ${blmCount} BLM recreation locations.`;
 
   if (errors.length) {
     message += " " + errors.join("; ") + ".";
@@ -709,6 +623,7 @@ map.on("moveend", () => loadMapData());
 /* ---------------- LAYER CONTROLS ---------------- */
 
 document.getElementById("fishingToggle").onchange = event => {
+
   if (event.target.checked) {
     fishingLayer.addTo(map);
   } else {
@@ -719,20 +634,11 @@ document.getElementById("fishingToggle").onchange = event => {
 };
 
 document.getElementById("blmToggle").onchange = event => {
+
   if (event.target.checked) {
     blmLayer.addTo(map);
   } else {
     map.removeLayer(blmLayer);
-  }
-
-  loadMapData(true);
-};
-
-document.getElementById("wildlifeToggle").onchange = event => {
-  if (event.target.checked) {
-    wildlifeLayer.addTo(map);
-  } else {
-    map.removeLayer(wildlifeLayer);
   }
 
   loadMapData(true);
