@@ -423,21 +423,22 @@ async function loadFishing(bounds) {
 const blmService =
   "https://gis.blm.gov/natl/rest/services/recreation/BLM_Natl_Recs_pts/MapServer";
 
-const blmCategories = [
-  { id: 1, name: "Boat Ramp" },
-  { id: 2, name: "Campground" },
-  { id: 3, name: "Developed Campsite" },
-  { id: 4, name: "Primitive Campsite" },
-  { id: 5, name: "Group Shelter" },
-  { id: 6, name: "Interpretive Site" },
-  { id: 9, name: "Picnic Area" },
-  { id: 10, name: "Recreation Point of Interest" },
-  { id: 13, name: "Scenic Overlook" },
-  { id: 14, name: "Trailhead" },
-  { id: 15, name: "Visitor Center" }
+
+const blmRecreationTypes = [
+  "Boat Ramp",
+  "Campground",
+  "Campsite - Developed",
+  "Campsite - Primitive",
+  "Group Shelter",
+  "Interpretive Site",
+  "Picnic Area",
+  "Point of Interest",
+  "Scenic Overlook",
+  "Trail Head",
+  "Visitor Center"
 ];
 
-async function loadBlmCategory(bounds, category) {
+async function loadBlm(bounds) {
 
   const geometry = [
     bounds.getWest(),
@@ -446,21 +447,24 @@ async function loadBlmCategory(bounds, category) {
     bounds.getNorth()
   ].join(",");
 
+  const types = blmRecreationTypes
+    .map(type => "'" + type.replace(/'/g, "''") + "'")
+    .join(",");
+
   const params = new URLSearchParams({
-    where: "1=1",
+    where: `FET_SUBTYPE IN (${types})`,
     geometry: geometry,
     geometryType: "esriGeometryEnvelope",
     inSR: "4326",
     spatialRel: "esriSpatialRelIntersects",
-    outFields: "OBJECTID,FET_NAME,FET_SUBTYPE,DESCRIPTION,WEB_LINK,UNIT_NAME",
+    outFields: "OBJECTID,FET_NAME,FET_SUBTYPE,DESCRIPTION,UNIT_NAME",
     returnGeometry: "true",
     outSR: "4326",
     f: "json",
     resultRecordCount: "2000"
   });
 
-  const url =
-    `${blmService}/${category.id}/query?${params.toString()}`;
+  const url = `${blmService}/23/query?${params.toString()}`;
 
   const response = await fetch(url);
 
@@ -491,10 +495,10 @@ async function loadBlmCategory(bounds, category) {
     const name =
       attributes.FET_NAME ||
       attributes.UNIT_NAME ||
-      category.name;
+      "BLM Recreation Site";
 
     const subtype =
-      attributes.FET_SUBTYPE || category.name;
+      attributes.FET_SUBTYPE || "Recreation Site";
 
     addMarker(
       blmLayer,
@@ -502,7 +506,7 @@ async function loadBlmCategory(bounds, category) {
       lon,
       "#398bff",
       name,
-      "BLM Hunting: " + subtype +
+      "BLM Recreation: " + subtype +
       ". " + (attributes.DESCRIPTION || "Check current access information.")
     );
 
@@ -511,113 +515,6 @@ async function loadBlmCategory(bounds, category) {
 
   return count;
 }
-
-async function loadBlm(bounds) {
-
-  const results = await Promise.all(
-    blmCategories.map(category =>
-      loadBlmCategory(bounds, category)
-    )
-  );
-
-  return results.reduce((sum, count) => sum + count, 0);
-}
-
-
-/* ---------------- MAP DATA LOADING ---------------- */
-
-let loading = false;
-let pendingReload = false;
-let lastBoundsKey = "";
-
-function boundsKey(bounds) {
-  return [
-    bounds.getSouth().toFixed(2),
-    bounds.getWest().toFixed(2),
-    bounds.getNorth().toFixed(2),
-    bounds.getEast().toFixed(2),
-    map.getZoom()
-  ].join(",");
-}
-
-async function loadMapData(force = false) {
-
-  if (loading) {
-    pendingReload = true;
-    return;
-  }
-
-  if (map.getZoom() < 8) {
-    setStatus(
-      "Zoom in closer to load fishing and BLM Hunting locations."
-    );
-    return;
-  }
-
-  const bounds = map.getBounds();
-  const key = boundsKey(bounds);
-
-  if (!force && key === lastBoundsKey) return;
-
-  lastBoundsKey = key;
-  loading = true;
-
-  fishingLayer.clearLayers();
-  blmLayer.clearLayers();
-
-  setStatus("Loading fishing and BLM Hunting locations in this map area...");
-
-  let fishingCount = 0;
-  let blmCount = 0;
-  const errors = [];
-  const jobs = [];
-
-  if (document.getElementById("fishingToggle").checked) {
-    jobs.push(
-      loadFishing(bounds)
-        .then(count => {
-          fishingCount = count;
-        })
-        .catch(error => {
-          console.error("Fishing search failed:", error);
-          errors.push("Fishing data could not load: " + error.message);
-        })
-    );
-  }
-
-  if (document.getElementById("blmToggle").checked) {
-    jobs.push(
-      loadBlm(bounds)
-        .then(count => {
-          blmCount = count;
-        })
-        .catch(error => {
-          console.error("BLM Hunting error:", error);
-          errors.push("BLM Hunting data could not load: " + error.message);
-        })
-    );
-  }
-
-  await Promise.all(jobs);
-
-  loading = false;
-
-  let message =
-    `Loaded ${fishingCount} fishing and ${blmCount} BLM Hunting locations.`;
-
-  if (errors.length) {
-    message += " " + errors.join("; ") + ".";
-  }
-
-  setStatus(message);
-
-  if (pendingReload) {
-    pendingReload = false;
-    loadMapData(true);
-  }
-}
-
-map.on("moveend", () => loadMapData());
 
 
 /* ---------------- LAYER CONTROLS ---------------- */
