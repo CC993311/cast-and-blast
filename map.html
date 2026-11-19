@@ -139,7 +139,8 @@ button:disabled{opacity:.5;cursor:not-allowed}
     </label>
 
     <p class="help">
-      Zoom in to load detailed lake outlines, rivers, streams, and recreation locations.
+      BLM Recreation locations appear when zoomed in to level 10 or closer.
+      Lakes and rivers load as you zoom and move around.
     </p>
   </div>
 
@@ -209,7 +210,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
   <div class="section">
     <h3>Map Status</h3>
     <div id="status">Preparing map...</div>
-    <div id="mapStatusNote">Lake outlines and rivers load as you zoom and move around.</div>
+    <div id="mapStatusNote">Lake outlines and river data load as you zoom and move around.</div>
   </div>
 
   <p class="help">
@@ -259,7 +260,6 @@ const map = L.map("map", {
   preferCanvas:true
 });
 
-// STREET MAP
 const street = L.tileLayer(
   "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
   {
@@ -268,7 +268,6 @@ const street = L.tileLayer(
   }
 );
 
-// SATELLITE MAP
 const satellite = L.tileLayer(
   "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
   {
@@ -277,7 +276,6 @@ const satellite = L.tileLayer(
   }
 );
 
-// TERRAIN MAP
 const terrain = L.tileLayer(
   "https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
   {
@@ -286,10 +284,8 @@ const terrain = L.tileLayer(
   }
 );
 
-// START WITH SATELLITE MAP
 satellite.addTo(map);
 
-// VISIBLE MAP STYLE SELECTOR
 L.control.layers(
   {
     "Street Map":street,
@@ -305,7 +301,6 @@ L.control.layers(
 
 L.control.scale().addTo(map);
 
-// SHOW TILE ERRORS
 [street,satellite,terrain].forEach(function(layer){
   layer.on("tileerror",function(){
     console.warn("A map tile could not load:",layer);
@@ -320,7 +315,6 @@ L.control.scale().addTo(map);
 const USGS_URL =
 "https://3dhp.nationalmap.gov/arcgis/rest/services/usgs_3dhp_all/FeatureServer/60";
 
-// USGS FLOWLINE LAYER FOR RIVERS AND STREAMS
 const RIVER_URL =
 "https://3dhp.nationalmap.gov/arcgis/rest/services/usgs_3dhp_all/FeatureServer/50";
 
@@ -394,7 +388,6 @@ function boundsKey(b){
   return [b.west,b.south,b.east,b.north].join(",");
 }
 
-// Smaller request areas for rivers
 function getRiverRequestBounds(){
   const bounds=map.getBounds().pad(0.1);
   const step=0.25;
@@ -536,7 +529,7 @@ const blmLayer = L.geoJSON(null,{
       ${p.DESCRIPTION ? `<p>${escapeHTML(p.DESCRIPTION)}</p>` : ""}
     `);
   }
-}).addTo(map);
+});
 
 
 // ==========================================
@@ -766,7 +759,6 @@ async function loadRivers(){
   }finally{
     riverLoading=false;
 
-    // If the map moved during the request, load the new visible area.
     if(
       document.getElementById("riversToggle").checked &&
       map.getZoom()>=8
@@ -789,15 +781,24 @@ const loadedBlmAreas=new Set();
 const blmFeatureIds=new Set();
 
 let blmCount=0;
-let blmRequestNumber=0;
 let blmLoading=false;
 
 async function loadBlm(){
   if(!document.getElementById("blmToggle").checked)return;
 
-  if(map.getZoom()<5){
-    setStatus("Zoom in to see BLM Recreation locations.");
+  // Hide BLM markers when zoomed out.
+  if(map.getZoom()<10){
+    if(map.hasLayer(blmLayer)){
+      map.removeLayer(blmLayer);
+    }
+
+    setStatus("Zoom in to level 10 or closer to see BLM Recreation locations.");
     return;
+  }
+
+  // Show BLM markers when zoomed in.
+  if(!map.hasLayer(blmLayer)){
+    map.addLayer(blmLayer);
   }
 
   const area=getRequestBounds();
@@ -807,7 +808,6 @@ async function loadBlm(){
   if(blmLoading)return;
 
   blmLoading=true;
-  const requestNumber=++blmRequestNumber;
 
   const params=new URLSearchParams({
     where:"1=1",
@@ -883,6 +883,18 @@ async function loadBlm(){
 
   }finally{
     blmLoading=false;
+
+    // If the map moved during loading, load the newly visible area.
+    if(
+      document.getElementById("blmToggle").checked &&
+      map.getZoom()>=10
+    ){
+      const currentKey=boundsKey(getRequestBounds());
+
+      if(currentKey!==key && !loadedBlmAreas.has(currentKey)){
+        setTimeout(loadBlm,350);
+      }
+    }
   }
 }
 
@@ -939,7 +951,6 @@ document.getElementById("riversToggle").addEventListener("change",function(){
 
 document.getElementById("blmToggle").addEventListener("change",function(){
   if(this.checked){
-    map.addLayer(blmLayer);
     loadBlm();
   }else{
     map.removeLayer(blmLayer);
