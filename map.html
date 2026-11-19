@@ -182,79 +182,159 @@ function addMarker(layer,lat,lon,color,title,details){
  }).bindPopup("<strong>"+escapeHTML(title)+"</strong><br>"+escapeHTML(details)).addTo(layer);
 }
 
+
 /* FASTER LAKE LOADING WITH CACHING */
-const usgsService="https://hydro.nationalmap.gov/arcgis/rest/services/3DHP_all/FeatureServer/60";
-const loadedLakeAreas=new Set();
-const lakeFeatureIds=new Set();
-let totalLakeFeatures=0;
 
-function getLakeRequestBounds(bounds){
- const padLat=Math.max((bounds.getNorth()-bounds.getSouth())*.15,.03);
- const padLng=Math.max((bounds.getEast()-bounds.getWest())*.15,.03);
- const round=n=>Math.round(n*10)/10;
- return {
-  west:round(bounds.getWest()-padLng),
-  south:round(bounds.getSouth()-padLat),
-  east:round(bounds.getEast()+padLng),
-  north:round(bounds.getNorth()+padLat)
- };
+const usgsService =
+  "https://hydro.nationalmap.gov/arcgis/rest/services/3DHP_all/FeatureServer/60";
+
+const loadedLakeAreas = new Set();
+const lakeFeatureIds = new Set();
+
+let totalLakeFeatures = 0;
+
+function getLakeRequestBounds(bounds) {
+  const padLat = Math.max(
+    (bounds.getNorth() - bounds.getSouth()) * 0.15,
+    0.03
+  );
+
+  const padLng = Math.max(
+    (bounds.getEast() - bounds.getWest()) * 0.15,
+    0.03
+  );
+
+  const round = n => Math.round(n * 10) / 10;
+
+  return {
+    west: round(bounds.getWest() - padLng),
+    south: round(bounds.getSouth() - padLat),
+    east: round(bounds.getEast() + padLng),
+    north: round(bounds.getNorth() + padLat)
+  };
 }
 
-async function loadLakes(bounds){
- const area=getLakeRequestBounds(bounds);
- const areaKey=[area.west,area.south,area.east,area.north].join(",");
- if(loadedLakeAreas.has(areaKey))return totalLakeFeatures;
+async function loadLakes(bounds) {
+  const area = getLakeRequestBounds(bounds);
 
- const allFeatures=[];
- const pageSize=2000;
- let offset=0;
- let keepGoing=true;
+  const areaKey = [
+    area.west,
+    area.south,
+    area.east,
+    area.north
+  ].join(",");
 
- while(keepGoing){
-  const params=new URLSearchParams({
-   where:"featuretype = 3",
-   geometry:[area.west,area.south,area.east,area.north].join(","),
-   geometryType:"esriGeometryEnvelope",
-   inSR:"4326",
-   spatialRel:"esriSpatialRelIntersects",
-   outFields:"OBJECTID,id3dhp,gnisidlabel,featuretype,areasqkm",
-   returnGeometry:"true",
-   outSR:"4326",
-   f:"geojson",
-   resultOffset:String(offset),
-   resultRecordCount:String(pageSize),
-   orderByFields:"OBJECTID"
-  });
+  if (loadedLakeAreas.has(areaKey)) {
+    return totalLakeFeatures;
+  }
 
-  const response=await fetch(usgsService+"/query?"+params);
-  if(!response.ok)throw new Error("USGS returned "+response.status);
-  const data=await response.json();
-  if(data.error)throw new Error(data.error.message||"USGS query failed");
+  const pageSize = 500;
+  let offset = 0;
+  let addedThisArea = 0;
+  let keepGoing = true;
 
-  const features=data.features||[];
-  allFeatures.push(...features);
-  offset+=features.length;
-  keepGoing=features.length===pageSize && data.exceededTransferLimit!==false;
-  if(!features.length)keepGoing=false;
- }
+  while (keepGoing) {
+    const params = new URLSearchParams({
+      where: "featuretype = 3",
 
- const newFeatures=[];
- for(const feature of allFeatures){
-  const p=feature.properties||{};
-  const featureId=String(p.id3dhp||p.OBJECTID||"");
-  if(!featureId||lakeFeatureIds.has(featureId))continue;
-  lakeFeatureIds.add(featureId);
-  newFeatures.push(feature);
- }
+      geometry: [
+        area.west,
+        area.south,
+        area.east,
+        area.north
+      ].join(","),
 
- if(newFeatures.length){
-  lakeLayer.addData({type:"FeatureCollection",features:newFeatures});
-  totalLakeFeatures+=newFeatures.length;
- }
+      geometryType: "esriGeometryEnvelope",
+      inSR: "4326",
+      spatialRel: "esriSpatialRelIntersects",
 
- loadedLakeAreas.add(areaKey);
- return totalLakeFeatures;
+      outFields: "*",
+      returnGeometry: "true",
+      outSR: "4326",
+
+      // Simplify outlines to reduce download and drawing time.
+      maxAllowableOffset: "0.00015",
+      geometryPrecision: "5",
+
+      f: "geojson",
+      resultOffset: String(offset),
+      resultRecordCount: String(pageSize),
+      orderByFields: "OBJECTID"
+    });
+
+    const response = await fetch(
+      usgsService + "/query?" + params
+    );
+
+    if (!response.ok) {
+      throw new Error("USGS returned " + response.status);
+    }
+
+    const data = await response.json();
+
+    if (data.error) {
+      throw new Error(
+        data.error.message || "USGS lake query failed"
+      );
+    }
+
+    const features = data.features || [];
+    const newFeatures = [];
+
+    for (const feature of features) {
+      const properties = feature.properties || {};
+
+      const featureId = String(
+        properties.id3dhp ||
+        properties.ID3DHP ||
+        properties.OBJECTID ||
+        properties.objectid ||
+        ""
+      );
+
+      if (!featureId || lakeFeatureIds.has(featureId)) {
+        continue;
+      }
+
+      lakeFeatureIds.add(featureId);
+      newFeatures.push(feature);
+    }
+
+    // Display each batch immediately instead of waiting
+    // for every page to finish downloading.
+    if (newFeatures.length) {
+      lakeLayer.addData({
+        type: "FeatureCollection",
+        features: newFeatures
+      });
+
+      totalLakeFeatures += newFeatures.length;
+      addedThisArea += newFeatures.length;
+    }
+
+    offset += features.length;
+
+    keepGoing =
+      features.length === pageSize &&
+      data.exceededTransferLimit !== false;
+
+    if (!features.length) {
+      keepGoing = false;
+    }
+
+    // Give the browser time to draw the new lake outlines.
+    if (keepGoing) {
+      await new Promise(resolve =>
+        requestAnimationFrame(() => resolve())
+      );
+    }
+  }
+
+  loadedLakeAreas.add(areaKey);
+
+  return totalLakeFeatures;
 }
+
 
 /* FISHING LOCATIONS FROM OPENSTREETMAP */
 const overpassServers=[
