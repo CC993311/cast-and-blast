@@ -11,40 +11,96 @@
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,sans-serif;background:#101d27;color:#fff}
-header{background:#172e3e;padding:15px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-header h1{margin:0;font-size:23px}
+header{
+  background:#172e3e;
+  padding:15px 20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap
+}
+header h1{margin:0;font-size:23px;letter-spacing:.3px}
 header small{color:#a9dafa}
 #layout{display:flex;height:calc(100vh - 65px)}
-#sidebar{width:340px;min-width:300px;background:#172e3e;padding:16px;overflow-y:auto}
+#sidebar{
+  width:340px;
+  min-width:300px;
+  background:#172e3e;
+  padding:16px;
+  overflow-y:auto
+}
 #map{flex:1;min-width:0}
 .section{margin-bottom:20px}
-.section h3{color:#9bd6ff;font-size:14px;text-transform:uppercase;letter-spacing:.6px;margin:0 0 10px}
-.layer-option{display:flex;align-items:center;gap:10px;padding:10px;background:#244255;border-radius:8px;margin-bottom:7px;cursor:pointer}
-.layer-option input{width:17px;height:17px}
-input,textarea,select{width:100%;padding:10px;border:1px solid #526d7d;border-radius:7px;background:#fff;color:#172e3e;font:14px Arial;margin:5px 0 10px}
+.section h3{
+  color:#9bd6ff;
+  font-size:14px;
+  text-transform:uppercase;
+  letter-spacing:.6px;
+  margin:0 0 10px
+}
+.layer-option{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:11px;
+  background:#244255;
+  border-radius:8px;
+  margin-bottom:7px;
+  cursor:pointer
+}
+.layer-option input{width:17px;height:17px;margin:0}
+input,textarea,select{
+  width:100%;
+  padding:10px;
+  border:1px solid #526d7d;
+  border-radius:7px;
+  background:#fff;
+  color:#172e3e;
+  font:14px Arial;
+  margin:5px 0 10px
+}
 textarea{min-height:85px;resize:vertical}
-button{border:0;border-radius:7px;padding:10px 12px;background:#1688c5;color:white;font-weight:bold;cursor:pointer}
+button{
+  border:0;
+  border-radius:7px;
+  padding:10px 12px;
+  background:#1688c5;
+  color:white;
+  font-weight:bold;
+  cursor:pointer
+}
 button:hover{background:#0872aa}
 button:disabled{opacity:.5;cursor:not-allowed}
 .btn-secondary{background:#425c6c}
-.btn-danger{background:#8d4141}
 .button-row{display:flex;gap:8px}
 .button-row button{flex:1}
 .help{font-size:12px;color:#b9cbd6;line-height:1.5}
 #status{font-size:12px;color:#b9d8e9;line-height:1.5}
 #authStatus{font-size:12px;color:#b9d8e9;margin:8px 0}
 #authMessage,#reviewMessage{font-size:12px;line-height:1.5;color:#a9dafa;min-height:16px}
-#selectedLake{background:#203c4e;border-radius:9px;padding:12px;margin-bottom:12px}
+#selectedLake{
+  background:#203c4e;
+  border-radius:9px;
+  padding:12px;
+  margin-bottom:12px
+}
 #selectedLake h2{font-size:18px;margin:0 0 5px}
 .rating-summary{font-size:14px;color:#ffcf55;margin:8px 0}
-.review{border-top:1px solid #3a5668;padding:10px 0;font-size:13px}
+.review{
+  border-top:1px solid #3a5668;
+  padding:10px 0;
+  font-size:13px
+}
 .review strong{color:#b9dfff}
 .review-stars{color:#ffcf55;letter-spacing:2px}
 .review-date{font-size:11px;color:#9bb1bf;margin-top:4px}
 #reviewsList{max-height:330px;overflow-y:auto}
-.star-select{font-size:24px;letter-spacing:4px;color:#ffcf55}
-.leaflet-popup-content{color:#1b3040}
+.leaflet-popup-content{color:#1b3040;line-height:1.5}
 .leaflet-popup-content button{margin-top:6px}
+.leaflet-control-layers{font-size:13px}
+.leaflet-control-layers-expanded{padding:9px 12px}
+#mapStatusNote{font-size:11px;color:#9bb1bf;margin-top:5px}
 @media(max-width:750px){
   #layout{height:auto;min-height:calc(100vh - 65px);flex-direction:column}
   #sidebar{width:100%;min-width:0;max-height:none}
@@ -56,8 +112,8 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <body>
 
 <header>
-  <h1>🌊 Cast & Blast</h1>
-  <small>Clickable Lakes • Lake Reviews • BLM Recreation</small>
+  <h1>Cast & Blast</h1>
+  <small>Lakes & Ponds | Lake Reviews | BLM Recreation</small>
 </header>
 
 <div id="layout">
@@ -69,22 +125,24 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
     <label class="layer-option">
       <input type="checkbox" id="lakesToggle" checked>
-      💧 Lakes & Ponds
+      <span>Lakes & Ponds</span>
     </label>
 
     <label class="layer-option">
       <input type="checkbox" id="blmToggle" checked>
-      🌲 BLM Recreation
+      <span>BLM Recreation</span>
     </label>
 
-    <p class="help">Zoom in to load detailed lake outlines and recreation locations.</p>
+    <p class="help">
+      Zoom in to load detailed lake outlines and recreation locations.
+    </p>
   </div>
 
   <div class="section">
     <h3>Search Map</h3>
-    <input id="searchInput" placeholder="Search a city, lake, or place">
+    <input id="searchInput" placeholder="Search a city or place">
     <button id="searchButton" style="width:100%">Search</button>
-    <button id="locationButton" class="btn-secondary" style="width:100%;margin-top:7px">📍 My Location</button>
+    <button id="locationButton" class="btn-secondary" style="width:100%;margin-top:7px">My Location</button>
   </div>
 
   <div class="section">
@@ -92,7 +150,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
     <div id="authStatus">Checking sign-in...</div>
 
     <div id="signedOut">
-      <input id="displayName" placeholder="Your display name (for new accounts)">
+      <input id="displayName" placeholder="Display name (for new accounts)">
       <input id="email" type="email" placeholder="Email address">
       <input id="password" type="password" placeholder="Password">
 
@@ -120,16 +178,15 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
   <div class="section" id="reviewSection" style="display:none">
     <h3>Write a Review</h3>
-
     <p class="help">Share your experience with this lake. Reviews are visible to other visitors.</p>
 
     <label for="rating">Your rating</label>
     <select id="rating">
-      <option value="5">★★★★★ - 5 stars</option>
-      <option value="4">★★★★ - 4 stars</option>
-      <option value="3">★★★ - 3 stars</option>
-      <option value="2">★★ - 2 stars</option>
-      <option value="1">★ - 1 star</option>
+      <option value="5">5 stars</option>
+      <option value="4">4 stars</option>
+      <option value="3">3 stars</option>
+      <option value="2">2 stars</option>
+      <option value="1">1 star</option>
     </select>
 
     <label for="reviewText">Your review</label>
@@ -147,6 +204,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
   <div class="section">
     <h3>Map Status</h3>
     <div id="status">Preparing map...</div>
+    <div id="mapStatusNote">Lake outlines load as you zoom and move around.</div>
   </div>
 
   <p class="help">
@@ -169,9 +227,11 @@ button:disabled{opacity:.5;cursor:not-allowed}
 // SUPABASE SETTINGS
 // ==========================================
 
-const SUPABASE_URL = "https://ubnmhqxitiigsctbsmqy.supabase.co";
+const SUPABASE_URL =
+"https://ubnmhqxitiigsctbsmqy.supabase.co";
 
-const SUPABASE_KEY = "sb_publishable_g-6tScB0HFIVcVkAhCN5Ug_fpm-jFrq";
+const SUPABASE_KEY =
+"sb_publishable_g-6tScB0HFIVcVkAhCN5Ug_fpm-jFrq";
 
 const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
@@ -196,26 +256,39 @@ const map = L.map("map", {
 
 const street = L.tileLayer(
   "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-  {maxZoom:19,attribution:"© OpenStreetMap"}
+  {
+    maxZoom:19,
+    attribution:"© OpenStreetMap"
+  }
 );
 
 const satellite = L.tileLayer(
   "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-  {maxZoom:19,attribution:"Tiles © Esri"}
+  {
+    maxZoom:19,
+    attribution:"Tiles © Esri"
+  }
 );
 
 const terrain = L.tileLayer(
   "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
-  {maxZoom:17,attribution:"© OpenTopoMap"}
+  {
+    maxZoom:17,
+    attribution:"© OpenTopoMap"
+  }
 );
 
 street.addTo(map);
 
-L.control.layers({
-  "Street Map":street,
-  "Satellite":satellite,
-  "Terrain":terrain
-},null,{collapsed:true}).addTo(map);
+L.control.layers(
+  {
+    "Street Map":street,
+    "Satellite":satellite,
+    "Terrain":terrain
+  },
+  null,
+  {collapsed:false}
+).addTo(map);
 
 L.control.scale().addTo(map);
 
@@ -224,8 +297,13 @@ L.control.scale().addTo(map);
 // DATA SOURCES
 // ==========================================
 
+// Correct current USGS 3DHP service address.
+// Layer 60 is the Waterbody layer.
+
 const USGS_URL =
-"https://hydro.nationalmap.gov/arcgis/rest/services/3DHP_all/FeatureServer/60";
+"https://3dhp.nationalmap.gov/arcgis/rest/services/usgs_3dhp_all/FeatureServer/60";
+
+// BLM Recreation Locations - All, layer 23.
 
 const BLM_URL =
 "https://gis.blm.gov/natl/rest/services/recreation/BLM_Natl_Recs_pts/MapServer/23/query";
@@ -299,7 +377,7 @@ function boundsKey(b){
 
 
 // ==========================================
-// LAKE LAYER
+// LAKE MAP LAYER
 // ==========================================
 
 const lakeLayer = L.geoJSON(null,{
@@ -325,7 +403,10 @@ const lakeLayer = L.geoJSON(null,{
     });
 
     layer.on("mouseover",function(){
-      this.setStyle({fillOpacity:0.65,weight:2.5});
+      this.setStyle({
+        fillOpacity:0.65,
+        weight:2.5
+      });
     });
 
     layer.on("mouseout",function(){
@@ -336,7 +417,7 @@ const lakeLayer = L.geoJSON(null,{
 
 
 // ==========================================
-// BLM RECREATION LAYER
+// BLM RECREATION MAP LAYER
 // ==========================================
 
 const blmLayer = L.geoJSON(null,{
@@ -361,6 +442,7 @@ const blmLayer = L.geoJSON(null,{
       <strong>${escapeHTML(name)}</strong><br>
       ${escapeHTML(type)}
       ${unit ? `<br><small>BLM Unit: ${escapeHTML(unit)}</small>` : ""}
+      ${p.DESCRIPTION ? `<p>${escapeHTML(p.DESCRIPTION)}</p>` : ""}
     `);
   }
 }).addTo(map);
@@ -375,6 +457,7 @@ const lakeFeatureIds=new Set();
 
 let lakeCount=0;
 let lakeRequestNumber=0;
+let lakeLoading=false;
 
 async function loadLakes(){
   if(!document.getElementById("lakesToggle").checked)return;
@@ -388,7 +471,9 @@ async function loadLakes(){
   const key=boundsKey(area);
 
   if(loadedLakeAreas.has(key))return;
+  if(lakeLoading)return;
 
+  lakeLoading=true;
   const requestNumber=++lakeRequestNumber;
 
   setStatus("Loading lakes and ponds...");
@@ -408,15 +493,17 @@ async function loadLakes(){
     returnGeometry:"true",
     outSR:"4326",
     f:"geojson",
-    resultRecordCount:"600",
+    resultRecordCount:"1800",
     orderByFields:"OBJECTID"
   });
 
   try{
-    const response=await fetch(USGS_URL+"?"+params.toString());
+    const url=USGS_URL+"/query?"+params.toString();
+
+    const response=await fetch(url);
 
     if(!response.ok){
-      throw new Error("USGS returned "+response.status);
+      throw new Error("USGS server returned HTTP "+response.status);
     }
 
     const data=await response.json();
@@ -425,9 +512,13 @@ async function loadLakes(){
       throw new Error(data.error.message||"USGS query failed");
     }
 
+    if(!Array.isArray(data.features)){
+      throw new Error("USGS did not return a GeoJSON feature list.");
+    }
+
     const newFeatures=[];
 
-    for(const feature of (data.features||[])){
+    for(const feature of data.features){
       const p=feature.properties||{};
       const id=getLakeIdentifier(p);
 
@@ -446,17 +537,31 @@ async function loadLakes(){
       lakeCount+=newFeatures.length;
     }
 
-    loadedLakeAreas.add(key);
-
-    if(requestNumber===lakeRequestNumber){
+    // If the server says more results were available,
+    // do not mark this whole area as complete.
+    if(data.exceededTransferLimit){
       setStatus(
-        "Loaded "+lakeCount.toLocaleString()+" lakes and ponds. BLM Recreation loads separately."
+        "Loaded "+lakeCount.toLocaleString()+
+        " lakes and ponds. Zoom in further to load more in this area."
+      );
+    }else{
+      loadedLakeAreas.add(key);
+
+      setStatus(
+        "Loaded "+lakeCount.toLocaleString()+
+        " lakes and ponds."
       );
     }
 
   }catch(error){
-    console.error("Lake loading error:",error);
-    setStatus("Lake loading failed. Try moving the map or refreshing.");
+    console.error("USGS lake loading error:",error);
+
+    setStatus(
+      "Lake loading failed: "+error.message
+    );
+
+  }finally{
+    lakeLoading=false;
   }
 }
 
@@ -470,6 +575,7 @@ const blmFeatureIds=new Set();
 
 let blmCount=0;
 let blmRequestNumber=0;
+let blmLoading=false;
 
 async function loadBlm(){
   if(!document.getElementById("blmToggle").checked)return;
@@ -483,10 +589,10 @@ async function loadBlm(){
   const key=boundsKey(area);
 
   if(loadedBlmAreas.has(key))return;
+  if(blmLoading)return;
 
+  blmLoading=true;
   const requestNumber=++blmRequestNumber;
-
-  setStatus("Loading BLM Recreation locations...");
 
   const params=new URLSearchParams({
     where:"1=1",
@@ -507,10 +613,12 @@ async function loadBlm(){
   });
 
   try{
-    const response=await fetch(BLM_URL+"?"+params.toString());
+    const response=await fetch(
+      BLM_URL+"?"+params.toString()
+    );
 
     if(!response.ok){
-      throw new Error("BLM returned "+response.status);
+      throw new Error("BLM server returned HTTP "+response.status);
     }
 
     const data=await response.json();
@@ -519,9 +627,13 @@ async function loadBlm(){
       throw new Error(data.error.message||"BLM query failed");
     }
 
+    if(!Array.isArray(data.features)){
+      throw new Error("BLM did not return a feature list.");
+    }
+
     const newFeatures=[];
 
-    for(const feature of (data.features||[])){
+    for(const feature of data.features){
       const p=feature.properties||{};
       const id=String(p.OBJECTID||"");
 
@@ -540,18 +652,21 @@ async function loadBlm(){
       blmCount+=newFeatures.length;
     }
 
-    loadedBlmAreas.add(key);
-
-    if(requestNumber===blmRequestNumber){
-      setStatus(
-        "Loaded "+lakeCount.toLocaleString()+" lakes and ponds and "+
-        blmCount.toLocaleString()+" BLM Recreation locations."
-      );
+    if(!data.exceededTransferLimit){
+      loadedBlmAreas.add(key);
     }
+
+    setStatus(
+      "Lakes: "+lakeCount.toLocaleString()+
+      " | BLM Recreation: "+blmCount.toLocaleString()
+    );
 
   }catch(error){
     console.error("BLM loading error:",error);
-    setStatus("BLM Recreation loading failed. Try again later.");
+    setStatus("BLM Recreation loading failed: "+error.message);
+
+  }finally{
+    blmLoading=false;
   }
 }
 
@@ -573,7 +688,7 @@ function loadMapData(){
     if(document.getElementById("blmToggle").checked){
       loadBlm();
     }
-  },400);
+  },500);
 }
 
 map.on("moveend",loadMapData);
@@ -581,7 +696,7 @@ map.whenReady(loadMapData);
 
 
 // ==========================================
-// MAP LAYER TOGGLES
+// LAYER TOGGLES
 // ==========================================
 
 document.getElementById("lakesToggle").addEventListener("change",function(){
@@ -604,7 +719,7 @@ document.getElementById("blmToggle").addEventListener("change",function(){
 
 
 // ==========================================
-// AUTHENTICATION
+// AUTHENTICATION UI
 // ==========================================
 
 function updateAuthUI(){
@@ -635,14 +750,17 @@ function updateAuthUI(){
 function updateReviewForm(){
   const section=document.getElementById("reviewSection");
 
-  section.style.display=selectedLakeDatabaseId?"block":"none";
+  section.style.display=selectedLake?"block":"none";
 
   const submit=document.getElementById("submitReview");
 
-  submit.disabled=!currentUser || !selectedLakeDatabaseId;
+  submit.disabled=
+    !currentUser || !selectedLakeDatabaseId;
 
-  if(!currentUser){
+  if(!currentUser && selectedLake){
     setReviewMessage("Sign in to submit a lake review.");
+  }else if(currentUser && selectedLake && !selectedLakeDatabaseId){
+    setReviewMessage("Lake review information is still loading.");
   }else{
     setReviewMessage("");
   }
@@ -663,6 +781,11 @@ supabaseClient.auth.onAuthStateChange(function(event,session){
   currentUser=session?.user||null;
   updateAuthUI();
 });
+
+
+// ==========================================
+// SIGN UP
+// ==========================================
 
 document.getElementById("signUpButton").addEventListener("click",async function(){
   const email=document.getElementById("email").value.trim();
@@ -701,10 +824,21 @@ document.getElementById("signUpButton").addEventListener("click",async function(
     currentUser=data.session.user;
     updateAuthUI();
     setAuthMessage("Account created and signed in.");
+
+    if(selectedLake?.feature){
+      await selectLake(selectedLake.feature);
+    }
   }else{
-    setAuthMessage("Account created. Check your email to confirm your account.");
+    setAuthMessage(
+      "Account created. Check your email to confirm your account."
+    );
   }
 });
+
+
+// ==========================================
+// SIGN IN
+// ==========================================
 
 document.getElementById("signInButton").addEventListener("click",async function(){
   const email=document.getElementById("email").value.trim();
@@ -731,10 +865,15 @@ document.getElementById("signInButton").addEventListener("click",async function(
   updateAuthUI();
   setAuthMessage("Signed in successfully.");
 
-  if(selectedLakeDatabaseId){
-    loadReviews(selectedLakeDatabaseId);
+  if(selectedLake?.feature){
+    await selectLake(selectedLake.feature);
   }
 });
+
+
+// ==========================================
+// SIGN OUT
+// ==========================================
 
 document.getElementById("signOutButton").addEventListener("click",async function(){
   const {error}=await supabaseClient.auth.signOut();
@@ -751,7 +890,7 @@ document.getElementById("signOutButton").addEventListener("click",async function
 
 
 // ==========================================
-// SELECT A LAKE AND SAVE/GET ITS DATABASE ROW
+// SELECT A LAKE
 // ==========================================
 
 async function selectLake(feature){
@@ -774,18 +913,72 @@ async function selectLake(feature){
 
   document.getElementById("selectedLake").innerHTML=`
     <h2>${escapeHTML(selectedLake.name)}</h2>
-    <p class="help">Loading lake reviews...</p>
+    <p class="help">Finding lake reviews...</p>
   `;
 
-  document.getElementById("reviewsList").textContent="Loading reviews...";
+  document.getElementById("reviewsList").textContent=
+    "Loading reviews...";
+
   updateReviewForm();
 
-  const center=feature.geometry?.coordinates
-    ? getFeatureCenter(feature)
-    : null;
+  // First look for an existing lake record.
+  // This allows visitors to read reviews without signing in.
 
-  let latitude=center?.[0] ?? map.getCenter().lat;
-  let longitude=center?.[1] ?? map.getCenter().lng;
+  const {data:existingLake,error:lookupError}=await supabaseClient
+    .from("lakes")
+    .select("id,name,waterbody_id")
+    .eq("waterbody_id",selectedLake.waterbodyId)
+    .maybeSingle();
+
+  if(lookupError){
+    console.error("Lake lookup error:",lookupError);
+
+    document.getElementById("selectedLake").innerHTML=`
+      <h2>${escapeHTML(selectedLake.name)}</h2>
+      <p class="help">Could not look up this lake in the review database.</p>
+    `;
+
+    document.getElementById("reviewsList").textContent=
+      "Could not load reviews.";
+
+    return;
+  }
+
+  if(existingLake){
+    selectedLakeDatabaseId=existingLake.id;
+
+    document.getElementById("selectedLake").innerHTML=`
+      <h2>${escapeHTML(existingLake.name)}</h2>
+      <p class="help">Lake or pond</p>
+      <div id="lakeRatingSummary" class="rating-summary">Loading rating...</div>
+    `;
+
+    updateReviewForm();
+    await loadReviews(selectedLakeDatabaseId);
+    return;
+  }
+
+  // A new lake row requires an authenticated user.
+  // The database's existing security rules are preserved.
+
+  if(!currentUser){
+    document.getElementById("selectedLake").innerHTML=`
+      <h2>${escapeHTML(selectedLake.name)}</h2>
+      <p class="help">No reviews have been added to this lake yet.</p>
+      <p class="help">Sign in and select this lake again to start its review page.</p>
+    `;
+
+    document.getElementById("reviewsList").textContent=
+      "No reviews yet. Sign in to start the first review.";
+
+    updateReviewForm();
+    return;
+  }
+
+  const center=getFeatureCenter(feature);
+
+  const latitude=center?.[0] ?? map.getCenter().lat;
+  const longitude=center?.[1] ?? map.getCenter().lng;
 
   const {data,error}=await supabaseClient
     .from("lakes")
@@ -801,15 +994,15 @@ async function selectLake(feature){
     .single();
 
   if(error){
-    console.error("Lake database error:",error);
+    console.error("Lake database save error:",error);
 
     document.getElementById("selectedLake").innerHTML=`
       <h2>${escapeHTML(selectedLake.name)}</h2>
-      <p class="help">Could not connect to the lake review database.</p>
+      <p class="help">Could not create this lake's review page.</p>
     `;
 
     document.getElementById("reviewsList").textContent=
-      "Reviews could not be loaded.";
+      "Database error: "+error.message;
 
     return;
   }
@@ -819,13 +1012,17 @@ async function selectLake(feature){
   document.getElementById("selectedLake").innerHTML=`
     <h2>${escapeHTML(data.name)}</h2>
     <p class="help">Lake or pond</p>
-    <div id="lakeRatingSummary" class="rating-summary">Loading rating...</div>
-    <p class="help">Select this lake to read and submit reviews.</p>
+    <div id="lakeRatingSummary" class="rating-summary">No ratings yet</div>
   `;
 
   updateReviewForm();
   await loadReviews(selectedLakeDatabaseId);
 }
+
+
+// ==========================================
+// FIND A FEATURE CENTER
+// ==========================================
 
 function getFeatureCenter(feature){
   const points=[];
@@ -833,13 +1030,18 @@ function getFeatureCenter(feature){
   function walk(coords){
     if(!Array.isArray(coords))return;
 
-    if(typeof coords[0]==="number" && typeof coords[1]==="number"){
+    if(
+      typeof coords[0]==="number" &&
+      typeof coords[1]==="number"
+    ){
       points.push(coords);
       return;
     }
 
     coords.forEach(walk);
   }
+
+  if(!feature.geometry?.coordinates)return null;
 
   walk(feature.geometry.coordinates);
 
@@ -860,7 +1062,7 @@ function getFeatureCenter(feature){
 
 
 // ==========================================
-// LOAD REVIEWS AND RATINGS
+// LOAD REVIEWS
 // ==========================================
 
 async function loadReviews(lakeDatabaseId){
@@ -875,7 +1077,7 @@ async function loadReviews(lakeDatabaseId){
 
   if(error){
     console.error("Review loading error:",error);
-    list.textContent="Could not load reviews.";
+    list.textContent="Could not load reviews: "+error.message;
     return;
   }
 
@@ -883,19 +1085,29 @@ async function loadReviews(lakeDatabaseId){
 
   if(!reviews.length){
     list.innerHTML="<p>No reviews yet. Be the first to review this lake!</p>";
-    document.getElementById("lakeRatingSummary").textContent=
-      "☆☆☆☆☆ No ratings yet";
+
+    const summary=document.getElementById("lakeRatingSummary");
+    if(summary)summary.textContent="No ratings yet";
+
     return;
   }
 
-  const average=reviews.reduce((sum,r)=>sum+Number(r.rating),0)/reviews.length;
+  const average=
+    reviews.reduce((sum,r)=>sum+Number(r.rating),0)/reviews.length;
 
-  document.getElementById("lakeRatingSummary").textContent=
-    "★ "+average.toFixed(1)+" / 5 ("+reviews.length+" reviews)";
+  const summary=document.getElementById("lakeRatingSummary");
+
+  if(summary){
+    summary.textContent=
+      "★ "+average.toFixed(1)+" / 5 ("+
+      reviews.length+" recent reviews)";
+  }
 
   list.innerHTML=reviews.map(review=>{
-    const stars="★".repeat(Number(review.rating))+
-      "☆".repeat(5-Number(review.rating));
+    const rating=Math.max(1,Math.min(5,Number(review.rating)||0));
+
+    const stars="★".repeat(rating)+
+      "☆".repeat(5-rating);
 
     const date=review.created_at
       ?new Date(review.created_at).toLocaleDateString()
@@ -914,7 +1126,7 @@ async function loadReviews(lakeDatabaseId){
 
 
 // ==========================================
-// SUBMIT A LAKE REVIEW
+// SUBMIT A REVIEW
 // ==========================================
 
 document.getElementById("submitReview").addEventListener("click",async function(){
@@ -975,7 +1187,7 @@ document.getElementById("submitReview").addEventListener("click",async function(
 
 
 // ==========================================
-// SEARCH
+// PLACE SEARCH
 // ==========================================
 
 async function searchPlace(){
@@ -997,7 +1209,9 @@ async function searchPlace(){
       headers:{"Accept":"application/json"}
     });
 
-    if(!response.ok)throw new Error("Search failed");
+    if(!response.ok){
+      throw new Error("Search failed");
+    }
 
     const results=await response.json();
 
@@ -1021,7 +1235,7 @@ async function searchPlace(){
 
   }catch(error){
     console.error(error);
-    setStatus("Search could not be completed.");
+    setStatus("Search could not be completed: "+error.message);
   }
 }
 
@@ -1063,8 +1277,10 @@ document.getElementById("locationButton")
         setStatus("Showing your location.");
       },
 
-      function(){
-        setStatus("Could not get your location. Check browser permissions.");
+      function(error){
+        setStatus(
+          "Could not get your location: "+error.message
+        );
       },
 
       {
