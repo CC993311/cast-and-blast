@@ -418,28 +418,13 @@ async function loadFishing(bounds) {
 }
 
 
+
 /* ---------------- BLM HUNTING DATA ---------------- */
 
 const blmService =
   "https://gis.blm.gov/natl/rest/services/recreation/BLM_Natl_Recs_pts/MapServer";
 
-
-const blmRecreationTypes = [
-  "Boat Ramp",
-  "Campground",
-  "Campsite - Developed",
-  "Campsite - Primitive",
-  "Group Shelter",
-  "Interpretive Site",
-  "Picnic Area",
-  "Point of Interest",
-  "Scenic Overlook",
-  "Trail Head",
-  "Visitor Center"
-];
-
 async function loadBlm(bounds) {
-
   const geometry = [
     bounds.getWest(),
     bounds.getSouth(),
@@ -447,12 +432,22 @@ async function loadBlm(bounds) {
     bounds.getNorth()
   ].join(",");
 
-  const types = blmRecreationTypes
-    .map(type => "'" + type.replace(/'/g, "''") + "'")
-    .join(",");
+  const types = [
+    "FET_SUBTYPE LIKE 'Boat%'",
+    "FET_SUBTYPE = 'Campground'",
+    "FET_SUBTYPE LIKE 'Campsite - Developed%'",
+    "FET_SUBTYPE LIKE 'Campsite - Primitive%'",
+    "FET_SUBTYPE = 'Group Shelter'",
+    "FET_SUBTYPE = 'Interpretive Site'",
+    "FET_SUBTYPE = 'Picnic Area'",
+    "FET_SUBTYPE = 'Point of Interest'",
+    "FET_SUBTYPE = 'Scenic Overlook'",
+    "FET_SUBTYPE = 'Trail Head'",
+    "FET_SUBTYPE = 'Visitor Center'"
+  ];
 
   const params = new URLSearchParams({
-    where: `FET_SUBTYPE IN (${types})`,
+    where: types.join(" OR "),
     geometry: geometry,
     geometryType: "esriGeometryEnvelope",
     inSR: "4326",
@@ -464,24 +459,38 @@ async function loadBlm(bounds) {
     resultRecordCount: "2000"
   });
 
-  const url = `${blmService}/23/query?${params.toString()}`;
+  let allFeatures = [];
+  let offset = 0;
 
-  const response = await fetch(url);
+  while (true) {
+    params.set("resultOffset", String(offset));
 
-  if (!response.ok) {
-    throw new Error("BLM server returned " + response.status);
+    const url = `${blmService}/23/query?${params.toString()}`;
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error("BLM server returned " + response.status);
+    }
+
+    const data = await response.json();
+
+    if (data.error) {
+      throw new Error(data.error.message || "BLM query failed");
+    }
+
+    const features = data.features || [];
+    allFeatures.push(...features);
+
+    if (!data.exceededTransferLimit || features.length === 0) {
+      break;
+    }
+
+    offset += features.length;
   }
 
-  const data = await response.json();
+  blmLayer.clearLayers();
 
-  if (data.error) {
-    throw new Error(data.error.message || "BLM query failed");
-  }
-
-  let count = 0;
-
-  for (const feature of data.features || []) {
-
+  for (const feature of allFeatures) {
     const attributes = feature.attributes || {};
     const geometry = feature.geometry || {};
 
@@ -495,7 +504,7 @@ async function loadBlm(bounds) {
     const name =
       attributes.FET_NAME ||
       attributes.UNIT_NAME ||
-      "BLM Recreation Site";
+      "BLM Hunting Site";
 
     const subtype =
       attributes.FET_SUBTYPE || "Recreation Site";
@@ -506,14 +515,12 @@ async function loadBlm(bounds) {
       lon,
       "#398bff",
       name,
-      "BLM Recreation: " + subtype +
+      "BLM Hunting: " + subtype +
       ". " + (attributes.DESCRIPTION || "Check current access information.")
     );
-
-    count++;
   }
 
-  return count;
+  return allFeatures.length;
 }
 
 
