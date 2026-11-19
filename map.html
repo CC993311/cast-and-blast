@@ -623,6 +623,92 @@ document.getElementById("locationButton").onclick = () => {
   );
 };
 
+/* ---------------- MAP DATA LOADING ---------------- */
+
+let loading = false;
+let pendingReload = false;
+let lastBoundsKey = "";
+
+function boundsKey(bounds) {
+  return [
+    bounds.getSouth().toFixed(2),
+    bounds.getWest().toFixed(2),
+    bounds.getNorth().toFixed(2),
+    bounds.getEast().toFixed(2),
+    map.getZoom()
+  ].join(",");
+}
+
+async function loadMapData(force = false) {
+  if (loading) {
+    pendingReload = true;
+    return;
+  }
+
+  if (map.getZoom() < 8) {
+    setStatus("Zoom in closer to load nearby locations.");
+    return;
+  }
+
+  const bounds = map.getBounds();
+  const key = boundsKey(bounds);
+
+  if (!force && key === lastBoundsKey) return;
+
+  lastBoundsKey = key;
+  loading = true;
+
+  fishingLayer.clearLayers();
+  blmLayer.clearLayers();
+
+  setStatus("Loading fishing and BLM Recreation locations...");
+
+  let fishingCount = 0;
+  let blmCount = 0;
+  const errors = [];
+  const jobs = [];
+
+  if (document.getElementById("fishingToggle").checked) {
+    jobs.push(
+      loadFishing(bounds)
+        .then(count => fishingCount = count)
+        .catch(error => {
+          errors.push("Fishing: " + error.message);
+        })
+    );
+  }
+
+  if (document.getElementById("blmToggle").checked) {
+    jobs.push(
+      loadBlm(bounds)
+        .then(count => blmCount = count)
+        .catch(error => {
+          errors.push("BLM: " + error.message);
+        })
+    );
+  }
+
+  await Promise.all(jobs);
+
+  loading = false;
+
+  setStatus(
+    `Loaded ${fishingCount} fishing and ${blmCount} BLM Recreation locations.` +
+    (errors.length ? " " + errors.join("; ") : "")
+  );
+
+  if (pendingReload) {
+    pendingReload = false;
+    loadMapData(true);
+  }
+}
+
+map.on("moveend", () => loadMapData());
+
+map.whenReady(() => {
+  loadMapData(true);
+});
+
 </script>
 
 </body>
