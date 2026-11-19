@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cast & Blast | Lakes & BLM Recreation</title>
+<title>Cast & Blast | Lakes, Rivers & BLM Recreation</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
@@ -113,7 +113,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
 <header>
   <h1>Cast & Blast</h1>
-  <small>Lakes & Ponds | Lake Reviews | BLM Recreation</small>
+  <small>Lakes & Ponds | Rivers & Streams | Lake Reviews | BLM Recreation</small>
 </header>
 
 <div id="layout">
@@ -129,12 +129,17 @@ button:disabled{opacity:.5;cursor:not-allowed}
     </label>
 
     <label class="layer-option">
+      <input type="checkbox" id="riversToggle">
+      <span>Rivers & Streams</span>
+    </label>
+
+    <label class="layer-option">
       <input type="checkbox" id="blmToggle" checked>
       <span>BLM Recreation</span>
     </label>
 
     <p class="help">
-      Zoom in to load detailed lake outlines and recreation locations.
+      Zoom in to load detailed lake outlines, rivers, streams, and recreation locations.
     </p>
   </div>
 
@@ -204,11 +209,11 @@ button:disabled{opacity:.5;cursor:not-allowed}
   <div class="section">
     <h3>Map Status</h3>
     <div id="status">Preparing map...</div>
-    <div id="mapStatusNote">Lake outlines load as you zoom and move around.</div>
+    <div id="mapStatusNote">Lake outlines and rivers load as you zoom and move around.</div>
   </div>
 
   <p class="help">
-    Lake outlines: USGS 3D Hydrography Program.
+    Lake outlines and river data: USGS 3D Hydrography Program.
     Recreation locations: Bureau of Land Management.
     Reviews are submitted by community members and are not official evaluations.
   </p>
@@ -315,6 +320,10 @@ L.control.scale().addTo(map);
 const USGS_URL =
 "https://3dhp.nationalmap.gov/arcgis/rest/services/usgs_3dhp_all/FeatureServer/60";
 
+// USGS FLOWLINE LAYER FOR RIVERS AND STREAMS
+const RIVER_URL =
+"https://3dhp.nationalmap.gov/arcgis/rest/services/usgs_3dhp_all/FeatureServer/50";
+
 const BLM_URL =
 "https://gis.blm.gov/natl/rest/services/recreation/BLM_Natl_Recs_pts/MapServer/23/query";
 
@@ -385,6 +394,19 @@ function boundsKey(b){
   return [b.west,b.south,b.east,b.north].join(",");
 }
 
+// Smaller request areas for rivers
+function getRiverRequestBounds(){
+  const bounds=map.getBounds().pad(0.1);
+  const step=0.25;
+
+  return {
+    west:Math.floor(bounds.getWest()/step)*step,
+    south:Math.floor(bounds.getSouth()/step)*step,
+    east:Math.ceil(bounds.getEast()/step)*step,
+    north:Math.ceil(bounds.getNorth()/step)*step
+  };
+}
+
 
 // ==========================================
 // LAKE MAP LAYER
@@ -424,6 +446,65 @@ const lakeLayer = L.geoJSON(null,{
     });
   }
 }).addTo(map);
+
+
+// ==========================================
+// RIVERS & STREAMS MAP LAYER
+// ==========================================
+
+const riverLayer = L.geoJSON(null,{
+  style:function(feature){
+    const type=Number(feature.properties?.featuretype);
+
+    return {
+      color:type===1?"#168bff":"#55c7ff",
+      weight:type===1?3:2,
+      opacity:0.95,
+      lineCap:"round",
+      lineJoin:"round"
+    };
+  },
+
+  onEachFeature:function(feature,layer){
+    const p=feature.properties||{};
+
+    const name=
+      p.gnisidlabel ||
+      p.GNIS_NAME ||
+      p.name ||
+      "Unnamed river or stream";
+
+    let type="River or stream";
+
+    if(Number(p.featuretype)===1){
+      type="River";
+    }else if(Number(p.featuretype)===3){
+      type="Stream / drainageway";
+    }
+
+    const length=
+      Number(p.lengthkm)>0
+        ?"<br><small>Mapped segment: "+Number(p.lengthkm).toFixed(2)+" km</small>"
+        :"";
+
+    layer.bindPopup(`
+      <strong>${escapeHTML(name)}</strong><br>
+      <span>${escapeHTML(type)}</span>
+      ${length}
+    `);
+
+    layer.on("mouseover",function(){
+      this.setStyle({
+        weight:5,
+        opacity:1
+      });
+    });
+
+    layer.on("mouseout",function(){
+      riverLayer.resetStyle(this);
+    });
+  }
+});
 
 
 // ==========================================
@@ -575,6 +656,132 @@ async function loadLakes(){
 
 
 // ==========================================
+// RIVERS & STREAMS DATA LOADING
+// ==========================================
+
+const loadedRiverAreas=new Set();
+const riverFeatureIds=new Set();
+
+let riverCount=0;
+let riverLoading=false;
+
+async function loadRivers(){
+  if(!document.getElementById("riversToggle").checked)return;
+
+  if(map.getZoom()<8){
+    setStatus("Zoom in closer to see rivers and streams.");
+    return;
+  }
+
+  const area=getRiverRequestBounds();
+  const key=boundsKey(area);
+
+  if(loadedRiverAreas.has(key))return;
+  if(riverLoading)return;
+
+  riverLoading=true;
+
+  setStatus("Loading rivers and streams...");
+
+  const params=new URLSearchParams({
+    where:"featuretype IN (1,3)",
+    geometry:[
+      area.west,
+      area.south,
+      area.east,
+      area.north
+    ].join(","),
+    geometryType:"esriGeometryEnvelope",
+    inSR:"4326",
+    spatialRel:"esriSpatialRelIntersects",
+    outFields:"OBJECTID,id3dhp,gnisidlabel,featuretype,featuretypelabel,lengthkm",
+    returnGeometry:"true",
+    outSR:"4326",
+    f:"geojson",
+    resultRecordCount:"2000",
+    orderByFields:"OBJECTID"
+  });
+
+  try{
+    const response=await fetch(
+      RIVER_URL+"/query?"+params.toString()
+    );
+
+    if(!response.ok){
+      throw new Error("USGS river server returned HTTP "+response.status);
+    }
+
+    const data=await response.json();
+
+    if(data.error){
+      throw new Error(data.error.message||"USGS river query failed");
+    }
+
+    if(!Array.isArray(data.features)){
+      throw new Error("USGS did not return a river feature list.");
+    }
+
+    const newFeatures=[];
+
+    for(const feature of data.features){
+      const p=feature.properties||{};
+      const id=String(p.id3dhp||p.OBJECTID||"");
+
+      if(!id || riverFeatureIds.has(id))continue;
+
+      riverFeatureIds.add(id);
+      newFeatures.push(feature);
+    }
+
+    if(newFeatures.length){
+      riverLayer.addData({
+        type:"FeatureCollection",
+        features:newFeatures
+      });
+
+      riverCount+=newFeatures.length;
+    }
+
+    if(data.exceededTransferLimit){
+      setStatus(
+        "Loaded "+riverCount.toLocaleString()+
+        " river and stream segments. Zoom in further for more detail."
+      );
+    }else{
+      loadedRiverAreas.add(key);
+
+      setStatus(
+        "Loaded "+riverCount.toLocaleString()+
+        " river and stream segments."
+      );
+    }
+
+  }catch(error){
+    console.error("USGS river loading error:",error);
+
+    setStatus(
+      "River loading failed: "+error.message
+    );
+
+  }finally{
+    riverLoading=false;
+
+    // If the map moved during the request, load the new visible area.
+    if(
+      document.getElementById("riversToggle").checked &&
+      map.getZoom()>=8
+    ){
+      const currentKey=boundsKey(getRiverRequestBounds());
+
+      if(currentKey!==key && !loadedRiverAreas.has(currentKey)){
+        setTimeout(loadRivers,350);
+      }
+    }
+  }
+}
+
+
+// ==========================================
 // BLM RECREATION DATA LOADING
 // ==========================================
 
@@ -666,6 +873,7 @@ async function loadBlm(){
 
     setStatus(
       "Lakes: "+lakeCount.toLocaleString()+
+      " | Rivers: "+riverCount.toLocaleString()+
       " | BLM Recreation: "+blmCount.toLocaleString()
     );
 
@@ -693,6 +901,10 @@ function loadMapData(){
       loadLakes();
     }
 
+    if(document.getElementById("riversToggle").checked){
+      loadRivers();
+    }
+
     if(document.getElementById("blmToggle").checked){
       loadBlm();
     }
@@ -713,6 +925,15 @@ document.getElementById("lakesToggle").addEventListener("change",function(){
     loadLakes();
   }else{
     map.removeLayer(lakeLayer);
+  }
+});
+
+document.getElementById("riversToggle").addEventListener("change",function(){
+  if(this.checked){
+    map.addLayer(riverLayer);
+    loadRivers();
+  }else{
+    map.removeLayer(riverLayer);
   }
 });
 
