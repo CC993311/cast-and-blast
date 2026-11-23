@@ -5,1532 +5,802 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cast & Blast | Lakes, Rivers & BLM Recreation</title>
-
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,sans-serif;background:#101d27;color:#fff}
-header{
-  background:#172e3e;
-  padding:15px 20px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  flex-wrap:wrap
-}
-header h1{margin:0;font-size:23px;letter-spacing:.3px}
+header{background:#172e3e;padding:15px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+header h1{margin:0;font-size:23px}
 header small{color:#a9dafa}
 #layout{display:flex;height:calc(100vh - 65px)}
-#sidebar{
-  width:340px;
-  min-width:300px;
-  background:#172e3e;
-  padding:16px;
-  overflow-y:auto
-}
+#sidebar{width:340px;min-width:300px;background:#172e3e;padding:16px;overflow-y:auto}
 #map{flex:1;min-width:0}
 .section{margin-bottom:20px}
-.section h3{
-  color:#9bd6ff;
-  font-size:14px;
-  text-transform:uppercase;
-  letter-spacing:.6px;
-  margin:0 0 10px
-}
-.layer-option{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:11px;
-  background:#244255;
-  border-radius:8px;
-  margin-bottom:7px;
-  cursor:pointer
-}
+.section h3{color:#9bd6ff;font-size:14px;text-transform:uppercase;letter-spacing:.6px;margin:0 0 10px}
+.layer-option{display:flex;align-items:center;gap:10px;padding:11px;background:#244255;border-radius:8px;margin-bottom:7px;cursor:pointer}
 .layer-option input{width:17px;height:17px;margin:0}
-input,textarea,select{
-  width:100%;
-  padding:10px;
-  border:1px solid #526d7d;
-  border-radius:7px;
-  background:#fff;
-  color:#172e3e;
-  font:14px Arial;
-  margin:5px 0 10px
-}
-textarea{min-height:85px;resize:vertical}
-button{
-  border:0;
-  border-radius:7px;
-  padding:10px 12px;
-  background:#1688c5;
-  color:white;
-  font-weight:bold;
-  cursor:pointer
-}
+input,textarea,select{width:100%;padding:10px;border:1px solid #526d7d;border-radius:7px;background:#fff;color:#172e3e;font:14px Arial;margin:5px 0 10px}
+textarea{min-height:75px;resize:vertical}
+button{border:0;border-radius:7px;padding:10px 12px;background:#1688c5;color:white;font-weight:bold;cursor:pointer}
 button:hover{background:#0872aa}
 button:disabled{opacity:.5;cursor:not-allowed}
 .btn-secondary{background:#425c6c}
 .button-row{display:flex;gap:8px}
 .button-row button{flex:1}
 .help{font-size:12px;color:#b9cbd6;line-height:1.5}
-#status{font-size:12px;color:#b9d8e9;line-height:1.5}
-#authStatus{font-size:12px;color:#b9d8e9;margin:8px 0}
-#authMessage,#reviewMessage{font-size:12px;line-height:1.5;color:#a9dafa;min-height:16px}
-#selectedLake{
-  background:#203c4e;
-  border-radius:9px;
-  padding:12px;
-  margin-bottom:12px
-}
+#status,#authStatus{font-size:12px;color:#b9d8e9;line-height:1.5}
+#authMessage,#reviewMessage,#catchMessage{font-size:12px;line-height:1.5;color:#a9dafa;min-height:16px}
+#selectedLake{background:#203c4e;border-radius:9px;padding:12px;margin-bottom:12px}
 #selectedLake h2{font-size:18px;margin:0 0 5px}
 .rating-summary{font-size:14px;color:#ffcf55;margin:8px 0}
-.review{
-  border-top:1px solid #3a5668;
-  padding:10px 0;
-  font-size:13px
-}
-.review strong{color:#b9dfff}
+.review{border-top:1px solid #3a5668;padding:10px 0;font-size:13px}
+.review strong,.catch-card strong{color:#b9dfff}
 .review-stars{color:#ffcf55;letter-spacing:2px}
 .review-date{font-size:11px;color:#9bb1bf;margin-top:4px}
-#reviewsList{max-height:330px;overflow-y:auto}
+#reviewsList,#catchList{max-height:360px;overflow-y:auto}
+.catch-card{border-top:1px solid #3a5668;padding:11px 0;font-size:13px}
+.catch-species{font-size:15px;font-weight:bold;color:#70d3a0}
+.catch-meta{font-size:11px;color:#9bb1bf;margin:5px 0}
+.catch-photo{display:block;width:100%;max-height:190px;object-fit:cover;border-radius:7px;margin-top:8px}
+.catch-summary{background:#244255;padding:10px;border-radius:7px;margin:9px 0;font-size:13px;line-height:1.6}
+.species-tag{display:inline-block;background:#315c70;color:#d8f1ff;padding:4px 7px;border-radius:12px;margin:3px;font-size:11px}
+#mapStatusNote{font-size:11px;color:#9bb1bf;margin-top:5px}
 .leaflet-popup-content{color:#1b3040;line-height:1.5}
 .leaflet-popup-content button{margin-top:6px}
-.leaflet-control-layers{font-size:13px}
-.leaflet-control-layers-expanded{padding:9px 12px}
-#mapStatusNote{font-size:11px;color:#9bb1bf;margin-top:5px}
 @media(max-width:750px){
-  #layout{height:auto;min-height:calc(100vh - 65px);flex-direction:column}
-  #sidebar{width:100%;min-width:0;max-height:none}
-  #map{height:60vh;min-height:400px}
+ #layout{height:auto;min-height:calc(100vh - 65px);flex-direction:column}
+ #sidebar{width:100%;min-width:0}
+ #map{height:60vh;min-height:400px}
 }
 </style>
 </head>
-
 <body>
 
 <header>
-  <h1>Cast & Blast</h1>
-  <small>Lakes & Ponds | Rivers & Streams | Lake Reviews | BLM Recreation</small>
+ <h1>Cast & Blast</h1>
+ <small>Lakes & Ponds | Rivers & Streams | Fish Catches | Lake Reviews | BLM Recreation</small>
 </header>
 
 <div id="layout">
-
 <aside id="sidebar">
 
-  <div class="section">
-    <h3>Map Layers</h3>
+ <div class="section">
+  <h3>Map Layers</h3>
+  <label class="layer-option"><input type="checkbox" id="lakesToggle" checked><span>Lakes & Ponds</span></label>
+  <label class="layer-option"><input type="checkbox" id="riversToggle"><span>Rivers & Streams</span></label>
+  <label class="layer-option"><input type="checkbox" id="blmToggle" checked><span>BLM Recreation</span></label>
+  <p class="help">BLM Recreation locations appear at zoom level 10 and closer. Lakes and rivers load as you zoom and move around.</p>
+ </div>
 
-    <label class="layer-option">
-      <input type="checkbox" id="lakesToggle" checked>
-      <span>Lakes & Ponds</span>
-    </label>
+ <div class="section">
+  <h3>Search Map</h3>
+  <input id="searchInput" placeholder="Search a city or place">
+  <button id="searchButton" style="width:100%">Search</button>
+  <button id="locationButton" class="btn-secondary" style="width:100%;margin-top:7px">My Location</button>
+ </div>
 
-    <label class="layer-option">
-      <input type="checkbox" id="riversToggle">
-      <span>Rivers & Streams</span>
-    </label>
-
-    <label class="layer-option">
-      <input type="checkbox" id="blmToggle" checked>
-      <span>BLM Recreation</span>
-    </label>
-
-    <p class="help">
-      BLM Recreation locations appear when zoomed in to level 10 or closer.
-      Lakes and rivers load as you zoom and move around.
-    </p>
+ <div class="section">
+  <h3>Account</h3>
+  <div id="authStatus">Checking sign-in...</div>
+  <div id="signedOut">
+   <input id="displayName" placeholder="Display name (for new accounts)">
+   <input id="email" type="email" placeholder="Email address">
+   <input id="password" type="password" placeholder="Password">
+   <div class="button-row">
+    <button id="signInButton">Sign In</button>
+    <button id="signUpButton" class="btn-secondary">Sign Up</button>
+   </div>
+   <div id="authMessage"></div>
   </div>
-
-  <div class="section">
-    <h3>Search Map</h3>
-    <input id="searchInput" placeholder="Search a city or place">
-    <button id="searchButton" style="width:100%">Search</button>
-    <button id="locationButton" class="btn-secondary" style="width:100%;margin-top:7px">My Location</button>
+  <div id="signedIn" style="display:none">
+   <p id="signedInName" class="help"></p>
+   <button id="signOutButton" class="btn-secondary" style="width:100%">Sign Out</button>
   </div>
+ </div>
 
-  <div class="section">
-    <h3>Account</h3>
-    <div id="authStatus">Checking sign-in...</div>
-
-    <div id="signedOut">
-      <input id="displayName" placeholder="Display name (for new accounts)">
-      <input id="email" type="email" placeholder="Email address">
-      <input id="password" type="password" placeholder="Password">
-
-      <div class="button-row">
-        <button id="signInButton">Sign In</button>
-        <button id="signUpButton" class="btn-secondary">Sign Up</button>
-      </div>
-
-      <div id="authMessage"></div>
-    </div>
-
-    <div id="signedIn" style="display:none">
-      <p id="signedInName" class="help"></p>
-      <button id="signOutButton" class="btn-secondary" style="width:100%">Sign Out</button>
-    </div>
+ <div class="section">
+  <h3>Selected Waterbody</h3>
+  <div id="selectedLake">
+   <h2>Nothing selected</h2>
+   <p class="help">Click a lake, pond, river, or stream on the map.</p>
   </div>
+ </div>
 
-  <div class="section">
-    <h3>Selected Lake</h3>
-    <div id="selectedLake">
-      <h2>No lake selected</h2>
-      <p class="help">Click a blue lake or pond outline on the map to view its reviews.</p>
-    </div>
-  </div>
+ <div class="section" id="catchSection" style="display:none">
+  <h3>Post a Fish Catch</h3>
+  <p class="help">Share a fish species caught at this waterbody. You must be signed in to post.</p>
 
-  <div class="section" id="reviewSection" style="display:none">
-    <h3>Write a Review</h3>
-    <p class="help">Share your experience with this lake. Reviews are visible to other visitors.</p>
+  <label for="catchSpecies">Fish species</label>
+  <select id="catchSpecies">
+   <option value="">Choose a species</option>
+   <option>Black Bass</option>
+   <option>Largemouth Bass</option>
+   <option>Smallmouth Bass</option>
+   <option>Spotted Bass</option>
+   <option>Striped Bass</option>
+   <option>White Bass</option>
+   <option>Bluegill</option>
+   <option>Redear Sunfish</option>
+   <option>Green Sunfish</option>
+   <option>Crappie</option>
+   <option>Black Crappie</option>
+   <option>White Crappie</option>
+   <option>Rainbow Trout</option>
+   <option>Brown Trout</option>
+   <option>Brook Trout</option>
+   <option>Cutthroat Trout</option>
+   <option>Catfish</option>
+   <option>Channel Catfish</option>
+   <option>Blue Catfish</option>
+   <option>Flathead Catfish</option>
+   <option>Carp</option>
+   <option>Common Carp</option>
+   <option>Grass Carp</option>
+   <option>Walleye</option>
+   <option>Sauger</option>
+   <option>Northern Pike</option>
+   <option>Muskie</option>
+   <option>Yellow Perch</option>
+   <option>White Sturgeon</option>
+   <option>Other</option>
+  </select>
 
-    <label for="rating">Your rating</label>
-    <select id="rating">
-      <option value="5">5 stars</option>
-      <option value="4">4 stars</option>
-      <option value="3">3 stars</option>
-      <option value="2">2 stars</option>
-      <option value="1">1 star</option>
-    </select>
+  <label for="catchDate">Date caught</label>
+  <input type="date" id="catchDate">
 
-    <label for="reviewText">Your review</label>
-    <textarea id="reviewText" maxlength="1500" placeholder="Write your lake review..."></textarea>
+  <label for="otherSpecies">Other species (if selected)</label>
+  <input id="otherSpecies" maxlength="80" placeholder="Enter species name">
 
-    <button id="submitReview" style="width:100%">Submit Review</button>
-    <div id="reviewMessage"></div>
-  </div>
+  <label for="catchNotes">Notes (optional)</label>
+  <textarea id="catchNotes" maxlength="500" placeholder="Optional catch notes..."></textarea>
 
-  <div class="section">
-    <h3>Lake Reviews</h3>
-    <div id="reviewsList" class="help">Select a lake to see its reviews.</div>
-  </div>
+  <label for="catchImage">Photo URL (optional)</label>
+  <input type="url" id="catchImage" placeholder="https://example.com/photo.jpg">
+  <p class="help">Paste a link to an image hosted online. Direct photo uploads are not enabled yet.</p>
 
-  <div class="section">
-    <h3>Map Status</h3>
-    <div id="status">Preparing map...</div>
-    <div id="mapStatusNote">Lake outlines and river data load as you zoom and move around.</div>
-  </div>
+  <button id="submitCatch" style="width:100%">Post Catch</button>
+  <div id="catchMessage"></div>
+ </div>
 
-  <p class="help">
-    Lake outlines and river data: USGS 3D Hydrography Program.
-    Recreation locations: Bureau of Land Management.
-    Reviews are submitted by community members and are not official evaluations.
-  </p>
+ <div class="section">
+  <h3>Reported Fish Species</h3>
+  <div id="speciesSummary" class="help">Select a waterbody to see reported species.</div>
+ </div>
 
+ <div class="section">
+  <h3>Recent Catches</h3>
+  <div id="catchList" class="help">Select a waterbody to see catch reports.</div>
+ </div>
+
+ <div class="section" id="reviewSection" style="display:none">
+  <h3>Write a Lake Review</h3>
+  <p class="help">Share your experience with this lake. Reviews are visible to other visitors.</p>
+  <label for="rating">Your rating</label>
+  <select id="rating">
+   <option value="5">5 stars</option>
+   <option value="4">4 stars</option>
+   <option value="3">3 stars</option>
+   <option value="2">2 stars</option>
+   <option value="1">1 star</option>
+  </select>
+  <label for="reviewText">Your review</label>
+  <textarea id="reviewText" maxlength="1500" placeholder="Write your lake review..."></textarea>
+  <button id="submitReview" style="width:100%">Submit Review</button>
+  <div id="reviewMessage"></div>
+ </div>
+
+ <div class="section">
+  <h3>Lake Reviews</h3>
+  <div id="reviewsList" class="help">Select a lake to see its reviews.</div>
+ </div>
+
+ <div class="section">
+  <h3>Map Status</h3>
+  <div id="status">Preparing map...</div>
+  <div id="mapStatusNote">Lake outlines and river data load as you zoom and move around.</div>
+ </div>
+
+ <p class="help">Lake outlines and river data: USGS 3D Hydrography Program. Recreation locations: Bureau of Land Management. Catch reports and reviews are community-submitted and are not official evaluations.</p>
 </aside>
-
 <div id="map"></div>
-
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script>
-// ==========================================
-// SUPABASE SETTINGS
-// ==========================================
+const SUPABASE_URL="https://ubnmhqxitiigsctbsmqy.supabase.co";
+const SUPABASE_KEY="sb_publishable_g-6tScB0HFIVcVkAhCN5Ug_fpm-jFrq";
+const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-const SUPABASE_URL =
-"https://ubnmhqxitiigsctbsmqy.supabase.co";
+let currentUser=null;
+let selectedLake=null;
+let selectedLakeDatabaseId=null;
+let selectedWaterbody=null;
+let catchRequestNumber=0;
 
-const SUPABASE_KEY =
-"sb_publishable_g-6tScB0HFIVcVkAhCN5Ug_fpm-jFrq";
+const map=L.map("map",{center:[39.5,-98.35],zoom:5,minZoom:3,preferCanvas:true});
 
-const supabaseClient = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
-
-let currentUser = null;
-let selectedLake = null;
-let selectedLakeDatabaseId = null;
-
-
-// ==========================================
-// MAP SETUP - STREET, SATELLITE, TERRAIN
-// ==========================================
-
-const map = L.map("map", {
-  center:[39.5,-98.35],
-  zoom:5,
-  minZoom:3,
-  preferCanvas:true
-});
-
-const street = L.tileLayer(
-  "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-  {
-    maxZoom:19,
-    attribution:"© OpenStreetMap contributors"
-  }
-);
-
-const satellite = L.tileLayer(
-  "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-  {
-    maxZoom:19,
-    attribution:"Tiles © Esri"
-  }
-);
-
-const terrain = L.tileLayer(
-  "https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
-  {
-    maxZoom:18,
-    attribution:"Tiles © Esri"
-  }
-);
-
+const street=L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap contributors"});
+const satellite=L.tileLayer("https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:19,attribution:"Tiles © Esri"});
+const terrain=L.tileLayer("https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",{maxZoom:18,attribution:"Tiles © Esri"});
 satellite.addTo(map);
 
-L.control.layers(
-  {
-    "Street Map":street,
-    "Satellite":satellite,
-    "Terrain":terrain
-  },
-  null,
-  {
-    collapsed:false,
-    position:"topright"
-  }
-).addTo(map);
-
+L.control.layers({"Street Map":street,"Satellite":satellite,"Terrain":terrain},null,{collapsed:false,position:"topright"}).addTo(map);
 L.control.scale().addTo(map);
 
-[street,satellite,terrain].forEach(function(layer){
-  layer.on("tileerror",function(){
-    console.warn("A map tile could not load:",layer);
-  });
-});
-
-
-// ==========================================
-// DATA SOURCES
-// ==========================================
-
-const USGS_URL =
-"https://3dhp.nationalmap.gov/arcgis/rest/services/usgs_3dhp_all/FeatureServer/60";
-
-const RIVER_URL =
-"https://3dhp.nationalmap.gov/arcgis/rest/services/usgs_3dhp_all/FeatureServer/50";
-
-const BLM_URL =
-"https://gis.blm.gov/natl/rest/services/recreation/BLM_Natl_Recs_pts/MapServer/23/query";
-
-
-// ==========================================
-// GENERAL HELPERS
-// ==========================================
+const USGS_URL="https://3dhp.nationalmap.gov/arcgis/rest/services/usgs_3dhp_all/FeatureServer/60";
+const RIVER_URL="https://3dhp.nationalmap.gov/arcgis/rest/services/usgs_3dhp_all/FeatureServer/50";
+const BLM_URL="https://gis.blm.gov/natl/rest/services/recreation/BLM_Natl_Recs_pts/MapServer/23/query";
 
 function escapeHTML(value){
-  return String(value ?? "").replace(/[&<>"']/g,function(char){
-    return {
-      "&":"&amp;",
-      "<":"&lt;",
-      ">":"&gt;",
-      '"':"&quot;",
-      "'":"&#039;"
-    }[char];
-  });
+ return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
 }
-
-function setStatus(message){
-  document.getElementById("status").textContent=message;
-}
-
-function setAuthMessage(message){
-  document.getElementById("authMessage").textContent=message;
-}
-
-function setReviewMessage(message){
-  document.getElementById("reviewMessage").textContent=message;
-}
+function setStatus(message){document.getElementById("status").textContent=message;}
+function setAuthMessage(message){document.getElementById("authMessage").textContent=message;}
+function setReviewMessage(message){document.getElementById("reviewMessage").textContent=message;}
+function setCatchMessage(message){document.getElementById("catchMessage").textContent=message;}
 
 function getLakeName(p){
-  const candidates=[
-    p.gnisidlabel,
-    p.GNIS_NAME,
-    p.GNIS_Name,
-    p.name,
-    p.NAME
-  ];
-
-  for(const value of candidates){
-    if(value && String(value).trim()){
-      return String(value).trim();
-    }
-  }
-
-  return "Unnamed lake or pond";
+ for(const value of [p.gnisidlabel,p.GNIS_NAME,p.GNIS_Name,p.name,p.NAME]){
+  if(value&&String(value).trim())return String(value).trim();
+ }
+ return "Unnamed lake or pond";
 }
-
-function getLakeIdentifier(p){
-  return String(p.id3dhp || p.ID3DHP || p.OBJECTID || "");
-}
-
+function getLakeIdentifier(p){return String(p.id3dhp||p.ID3DHP||p.OBJECTID||"");}
 function getRequestBounds(){
-  const bounds=map.getBounds().pad(0.2);
-  const step=0.5;
-
-  return {
-    west:Math.floor(bounds.getWest()/step)*step,
-    south:Math.floor(bounds.getSouth()/step)*step,
-    east:Math.ceil(bounds.getEast()/step)*step,
-    north:Math.ceil(bounds.getNorth()/step)*step
-  };
+ const b=map.getBounds().pad(.2),s=.5;
+ return {west:Math.floor(b.getWest()/s)*s,south:Math.floor(b.getSouth()/s)*s,east:Math.ceil(b.getEast()/s)*s,north:Math.ceil(b.getNorth()/s)*s};
 }
-
-function boundsKey(b){
-  return [b.west,b.south,b.east,b.north].join(",");
-}
-
 function getRiverRequestBounds(){
-  const bounds=map.getBounds().pad(0.1);
-  const step=0.25;
-
-  return {
-    west:Math.floor(bounds.getWest()/step)*step,
-    south:Math.floor(bounds.getSouth()/step)*step,
-    east:Math.ceil(bounds.getEast()/step)*step,
-    north:Math.ceil(bounds.getNorth()/step)*step
-  };
+ const b=map.getBounds().pad(.1),s=.25;
+ return {west:Math.floor(b.getWest()/s)*s,south:Math.floor(b.getSouth()/s)*s,east:Math.ceil(b.getEast()/s)*s,north:Math.ceil(b.getNorth()/s)*s};
 }
+function boundsKey(b){return [b.west,b.south,b.east,b.north].join(",");}
 
-
-// ==========================================
-// LAKE MAP LAYER
-// ==========================================
-
-const lakeLayer = L.geoJSON(null,{
-  style:{
-    color:"#168bc4",
-    weight:1.5,
-    fillColor:"#48b9ed",
-    fillOpacity:0.35
-  },
-
-  onEachFeature:function(feature,layer){
-    const p=feature.properties||{};
-    const name=getLakeName(p);
-
-    layer.bindPopup(`
-      <strong>${escapeHTML(name)}</strong><br>
-      <span>Lake or pond</span><br>
-      <button class="select-lake-popup">View Lake & Reviews</button>
-    `);
-
-    layer.on("click",function(){
-      selectLake(feature);
-    });
-
-    layer.on("mouseover",function(){
-      this.setStyle({
-        fillOpacity:0.65,
-        weight:2.5
-      });
-    });
-
-    layer.on("mouseout",function(){
-      lakeLayer.resetStyle(this);
-    });
-  }
+const lakeLayer=L.geoJSON(null,{
+ style:{color:"#168bc4",weight:1.5,fillColor:"#48b9ed",fillOpacity:.35},
+ onEachFeature:function(feature,layer){
+  const name=getLakeName(feature.properties||{});
+  layer.bindPopup("<strong>"+escapeHTML(name)+"</strong><br>Lake or pond<br><button class='select-lake-popup'>View Lake & Catches</button>");
+  layer.on("click",()=>selectLake(feature));
+  layer.on("mouseover",function(){this.setStyle({fillOpacity:.65,weight:2.5});});
+  layer.on("mouseout",function(){lakeLayer.resetStyle(this);});
+ }
 }).addTo(map);
 
-
-// ==========================================
-// RIVERS & STREAMS MAP LAYER
-// ==========================================
-
-const riverLayer = L.geoJSON(null,{
-  style:function(feature){
-    const type=Number(feature.properties?.featuretype);
-
-    return {
-      color:type===1?"#168bff":"#55c7ff",
-      weight:type===1?3:2,
-      opacity:0.95,
-      lineCap:"round",
-      lineJoin:"round"
-    };
-  },
-
-  onEachFeature:function(feature,layer){
-    const p=feature.properties||{};
-
-    const name=
-      p.gnisidlabel ||
-      p.GNIS_NAME ||
-      p.name ||
-      "Unnamed river or stream";
-
-    let type="River or stream";
-
-    if(Number(p.featuretype)===1){
-      type="River";
-    }else if(Number(p.featuretype)===3){
-      type="Stream / drainageway";
-    }
-
-    const length=
-      Number(p.lengthkm)>0
-        ?"<br><small>Mapped segment: "+Number(p.lengthkm).toFixed(2)+" km</small>"
-        :"";
-
-    layer.bindPopup(`
-      <strong>${escapeHTML(name)}</strong><br>
-      <span>${escapeHTML(type)}</span>
-      ${length}
-    `);
-
-    layer.on("mouseover",function(){
-      this.setStyle({
-        weight:5,
-        opacity:1
-      });
-    });
-
-    layer.on("mouseout",function(){
-      riverLayer.resetStyle(this);
-    });
-  }
+const riverLayer=L.geoJSON(null,{
+ style:function(feature){
+  const type=Number(feature.properties?.featuretype);
+  return {color:type===1?"#168bff":"#55c7ff",weight:type===1?3:2,opacity:.95,lineCap:"round",lineJoin:"round"};
+ },
+ onEachFeature:function(feature,layer){
+  const p=feature.properties||{};
+  const name=p.gnisidlabel||p.GNIS_NAME||p.name||"Unnamed river or stream";
+  const type=Number(p.featuretype)===1?"River":"Stream / drainageway";
+  layer.bindPopup("<strong>"+escapeHTML(name)+"</strong><br>"+type+"<br><button class='select-river-popup'>View River Catches</button>");
+  layer.on("click",()=>selectRiver(feature));
+  layer.on("mouseover",function(){this.setStyle({weight:5,opacity:1});});
+  layer.on("mouseout",function(){riverLayer.resetStyle(this);});
+ }
 });
 
-
-// ==========================================
-// BLM RECREATION MAP LAYER
-// ==========================================
-
-const blmLayer = L.geoJSON(null,{
-  pointToLayer:function(feature,latlng){
-    return L.circleMarker(latlng,{
-      radius:6,
-      color:"#176b3a",
-      weight:1.5,
-      fillColor:"#45bd72",
-      fillOpacity:0.9
-    });
-  },
-
-  onEachFeature:function(feature,layer){
-    const p=feature.properties||{};
-
-    const name=p.FET_NAME || "BLM Recreation Location";
-    const type=p.FET_SUBTYPE || "Recreation site";
-    const unit=p.UNIT_NAME || "";
-
-    layer.bindPopup(`
-      <strong>${escapeHTML(name)}</strong><br>
-      ${escapeHTML(type)}
-      ${unit ? `<br><small>BLM Unit: ${escapeHTML(unit)}</small>` : ""}
-      ${p.DESCRIPTION ? `<p>${escapeHTML(p.DESCRIPTION)}</p>` : ""}
-    `);
-  }
+const blmLayer=L.geoJSON(null,{
+ pointToLayer:function(feature,latlng){
+  return L.circleMarker(latlng,{radius:6,color:"#176b3a",weight:1.5,fillColor:"#45bd72",fillOpacity:.9});
+ },
+ onEachFeature:function(feature,layer){
+  const p=feature.properties||{};
+  const name=p.FET_NAME||"BLM Recreation Location";
+  const type=p.FET_SUBTYPE||"Recreation site";
+  const unit=p.UNIT_NAME||"";
+  layer.bindPopup("<strong>"+escapeHTML(name)+"</strong><br>"+escapeHTML(type)+(unit?"<br><small>BLM Unit: "+escapeHTML(unit)+"</small>":"")+(p.DESCRIPTION?"<p>"+escapeHTML(p.DESCRIPTION)+"</p>":""));
+ }
 });
 
-
-// ==========================================
-// LAKE DATA LOADING
-// ==========================================
-
-const loadedLakeAreas=new Set();
-const lakeFeatureIds=new Set();
-
-let lakeCount=0;
-let lakeRequestNumber=0;
-let lakeLoading=false;
+const loadedLakeAreas=new Set(),lakeFeatureIds=new Set();
+let lakeCount=0,lakeLoading=false;
 
 async function loadLakes(){
-  if(!document.getElementById("lakesToggle").checked)return;
-
-  if(map.getZoom()<5){
-    setStatus("Zoom in to see lake and pond outlines.");
-    return;
+ if(!document.getElementById("lakesToggle").checked)return;
+ if(map.getZoom()<5){setStatus("Zoom in to see lake and pond outlines.");return;}
+ const area=getRequestBounds(),key=boundsKey(area);
+ if(loadedLakeAreas.has(key)||lakeLoading)return;
+ lakeLoading=true;setStatus("Loading lakes and ponds...");
+ const params=new URLSearchParams({
+  where:"featuretype = 3",geometry:[area.west,area.south,area.east,area.north].join(","),
+  geometryType:"esriGeometryEnvelope",inSR:"4326",spatialRel:"esriSpatialRelIntersects",
+  outFields:"OBJECTID,id3dhp,gnisidlabel,featuretype,areasqkm",returnGeometry:"true",outSR:"4326",
+  f:"geojson",resultRecordCount:"1800",orderByFields:"OBJECTID"
+ });
+ try{
+  const response=await fetch(USGS_URL+"/query?"+params);
+  if(!response.ok)throw new Error("USGS server returned HTTP "+response.status);
+  const data=await response.json();
+  if(data.error)throw new Error(data.error.message||"USGS query failed");
+  if(!Array.isArray(data.features))throw new Error("USGS did not return a feature list.");
+  const fresh=[];
+  for(const feature of data.features){
+   const id=getLakeIdentifier(feature.properties||{});
+   if(!id||lakeFeatureIds.has(id))continue;
+   lakeFeatureIds.add(id);fresh.push(feature);
   }
-
-  const area=getRequestBounds();
-  const key=boundsKey(area);
-
-  if(loadedLakeAreas.has(key))return;
-  if(lakeLoading)return;
-
-  lakeLoading=true;
-  const requestNumber=++lakeRequestNumber;
-
-  setStatus("Loading lakes and ponds...");
-
-  const params=new URLSearchParams({
-    where:"featuretype = 3",
-    geometry:[
-      area.west,
-      area.south,
-      area.east,
-      area.north
-    ].join(","),
-    geometryType:"esriGeometryEnvelope",
-    inSR:"4326",
-    spatialRel:"esriSpatialRelIntersects",
-    outFields:"OBJECTID,id3dhp,gnisidlabel,featuretype,areasqkm",
-    returnGeometry:"true",
-    outSR:"4326",
-    f:"geojson",
-    resultRecordCount:"1800",
-    orderByFields:"OBJECTID"
-  });
-
-  try{
-    const url=USGS_URL+"/query?"+params.toString();
-
-    const response=await fetch(url);
-
-    if(!response.ok){
-      throw new Error("USGS server returned HTTP "+response.status);
-    }
-
-    const data=await response.json();
-
-    if(data.error){
-      throw new Error(data.error.message||"USGS query failed");
-    }
-
-    if(!Array.isArray(data.features)){
-      throw new Error("USGS did not return a GeoJSON feature list.");
-    }
-
-    const newFeatures=[];
-
-    for(const feature of data.features){
-      const p=feature.properties||{};
-      const id=getLakeIdentifier(p);
-
-      if(!id || lakeFeatureIds.has(id))continue;
-
-      lakeFeatureIds.add(id);
-      newFeatures.push(feature);
-    }
-
-    if(newFeatures.length){
-      lakeLayer.addData({
-        type:"FeatureCollection",
-        features:newFeatures
-      });
-
-      lakeCount+=newFeatures.length;
-    }
-
-    if(data.exceededTransferLimit){
-      setStatus(
-        "Loaded "+lakeCount.toLocaleString()+
-        " lakes and ponds. Zoom in further to load more in this area."
-      );
-    }else{
-      loadedLakeAreas.add(key);
-
-      setStatus(
-        "Loaded "+lakeCount.toLocaleString()+
-        " lakes and ponds."
-      );
-    }
-
-  }catch(error){
-    console.error("USGS lake loading error:",error);
-
-    setStatus(
-      "Lake loading failed: "+error.message
-    );
-
-  }finally{
-    lakeLoading=false;
-  }
+  if(fresh.length){lakeLayer.addData({type:"FeatureCollection",features:fresh});lakeCount+=fresh.length;}
+  if(!data.exceededTransferLimit)loadedLakeAreas.add(key);
+  setStatus("Loaded "+lakeCount.toLocaleString()+" lakes and ponds.");
+ }catch(error){console.error(error);setStatus("Lake loading failed: "+error.message);}
+ finally{lakeLoading=false;}
 }
 
-
-// ==========================================
-// RIVERS & STREAMS DATA LOADING
-// ==========================================
-
-const loadedRiverAreas=new Set();
-const riverFeatureIds=new Set();
-
-let riverCount=0;
-let riverLoading=false;
+const loadedRiverAreas=new Set(),riverFeatureIds=new Set();
+let riverCount=0,riverLoading=false;
 
 async function loadRivers(){
-  if(!document.getElementById("riversToggle").checked)return;
-
-  if(map.getZoom()<8){
-    setStatus("Zoom in closer to see rivers and streams.");
-    return;
+ if(!document.getElementById("riversToggle").checked)return;
+ if(map.getZoom()<8){setStatus("Zoom in closer to see rivers and streams.");return;}
+ const area=getRiverRequestBounds(),key=boundsKey(area);
+ if(loadedRiverAreas.has(key)||riverLoading)return;
+ riverLoading=true;setStatus("Loading rivers and streams...");
+ const params=new URLSearchParams({
+  where:"featuretype IN (1,3)",geometry:[area.west,area.south,area.east,area.north].join(","),
+  geometryType:"esriGeometryEnvelope",inSR:"4326",spatialRel:"esriSpatialRelIntersects",
+  outFields:"OBJECTID,id3dhp,gnisidlabel,featuretype,featuretypelabel,lengthkm",
+  returnGeometry:"true",outSR:"4326",f:"geojson",resultRecordCount:"2000",orderByFields:"OBJECTID"
+ });
+ try{
+  const response=await fetch(RIVER_URL+"/query?"+params);
+  if(!response.ok)throw new Error("USGS river server returned HTTP "+response.status);
+  const data=await response.json();
+  if(data.error)throw new Error(data.error.message||"USGS river query failed");
+  if(!Array.isArray(data.features))throw new Error("USGS did not return a river feature list.");
+  const fresh=[];
+  for(const feature of data.features){
+   const p=feature.properties||{},id=String(p.id3dhp||p.OBJECTID||"");
+   if(!id||riverFeatureIds.has(id))continue;
+   riverFeatureIds.add(id);fresh.push(feature);
   }
-
-  const area=getRiverRequestBounds();
-  const key=boundsKey(area);
-
-  if(loadedRiverAreas.has(key))return;
-  if(riverLoading)return;
-
-  riverLoading=true;
-
-  setStatus("Loading rivers and streams...");
-
-  const params=new URLSearchParams({
-    where:"featuretype IN (1,3)",
-    geometry:[
-      area.west,
-      area.south,
-      area.east,
-      area.north
-    ].join(","),
-    geometryType:"esriGeometryEnvelope",
-    inSR:"4326",
-    spatialRel:"esriSpatialRelIntersects",
-    outFields:"OBJECTID,id3dhp,gnisidlabel,featuretype,featuretypelabel,lengthkm",
-    returnGeometry:"true",
-    outSR:"4326",
-    f:"geojson",
-    resultRecordCount:"2000",
-    orderByFields:"OBJECTID"
-  });
-
-  try{
-    const response=await fetch(
-      RIVER_URL+"/query?"+params.toString()
-    );
-
-    if(!response.ok){
-      throw new Error("USGS river server returned HTTP "+response.status);
-    }
-
-    const data=await response.json();
-
-    if(data.error){
-      throw new Error(data.error.message||"USGS river query failed");
-    }
-
-    if(!Array.isArray(data.features)){
-      throw new Error("USGS did not return a river feature list.");
-    }
-
-    const newFeatures=[];
-
-    for(const feature of data.features){
-      const p=feature.properties||{};
-      const id=String(p.id3dhp||p.OBJECTID||"");
-
-      if(!id || riverFeatureIds.has(id))continue;
-
-      riverFeatureIds.add(id);
-      newFeatures.push(feature);
-    }
-
-    if(newFeatures.length){
-      riverLayer.addData({
-        type:"FeatureCollection",
-        features:newFeatures
-      });
-
-      riverCount+=newFeatures.length;
-    }
-
-    if(data.exceededTransferLimit){
-      setStatus(
-        "Loaded "+riverCount.toLocaleString()+
-        " river and stream segments. Zoom in further for more detail."
-      );
-    }else{
-      loadedRiverAreas.add(key);
-
-      setStatus(
-        "Loaded "+riverCount.toLocaleString()+
-        " river and stream segments."
-      );
-    }
-
-  }catch(error){
-    console.error("USGS river loading error:",error);
-
-    setStatus(
-      "River loading failed: "+error.message
-    );
-
-  }finally{
-    riverLoading=false;
-
-    if(
-      document.getElementById("riversToggle").checked &&
-      map.getZoom()>=8
-    ){
-      const currentKey=boundsKey(getRiverRequestBounds());
-
-      if(currentKey!==key && !loadedRiverAreas.has(currentKey)){
-        setTimeout(loadRivers,350);
-      }
-    }
+  if(fresh.length){riverLayer.addData({type:"FeatureCollection",features:fresh});riverCount+=fresh.length;}
+  if(!data.exceededTransferLimit)loadedRiverAreas.add(key);
+  setStatus("Loaded "+riverCount.toLocaleString()+" river and stream segments.");
+ }catch(error){console.error(error);setStatus("River loading failed: "+error.message);}
+ finally{
+  riverLoading=false;
+  if(document.getElementById("riversToggle").checked&&map.getZoom()>=8){
+   const current=boundsKey(getRiverRequestBounds());
+   if(current!==key&&!loadedRiverAreas.has(current))setTimeout(loadRivers,350);
   }
+ }
 }
 
-
-// ==========================================
-// BLM RECREATION DATA LOADING
-// ==========================================
-
-const loadedBlmAreas=new Set();
-const blmFeatureIds=new Set();
-
-let blmCount=0;
-let blmLoading=false;
+const loadedBlmAreas=new Set(),blmFeatureIds=new Set();
+let blmCount=0,blmLoading=false;
 
 async function loadBlm(){
-  if(!document.getElementById("blmToggle").checked)return;
-
-  // Hide BLM markers when zoomed out.
-  if(map.getZoom()<10){
-    if(map.hasLayer(blmLayer)){
-      map.removeLayer(blmLayer);
-    }
-
-    setStatus("Zoom in to level 10 or closer to see BLM Recreation locations.");
-    return;
+ if(!document.getElementById("blmToggle").checked)return;
+ if(map.getZoom()<10){
+  if(map.hasLayer(blmLayer))map.removeLayer(blmLayer);
+  setStatus("Zoom in to level 10 or closer to see BLM Recreation locations.");
+  return;
+ }
+ if(!map.hasLayer(blmLayer))map.addLayer(blmLayer);
+ const area=getRequestBounds(),key=boundsKey(area);
+ if(loadedBlmAreas.has(key)||blmLoading)return;
+ blmLoading=true;
+ const params=new URLSearchParams({
+  where:"1=1",geometry:[area.west,area.south,area.east,area.north].join(","),
+  geometryType:"esriGeometryEnvelope",inSR:"4326",spatialRel:"esriSpatialRelIntersects",
+  outFields:"OBJECTID,FET_NAME,FET_SUBTYPE,UNIT_NAME,DESCRIPTION,WEB_LINK",
+  returnGeometry:"true",outSR:"4326",f:"geojson",resultRecordCount:"1500"
+ });
+ try{
+  const response=await fetch(BLM_URL+"?"+params);
+  if(!response.ok)throw new Error("BLM server returned HTTP "+response.status);
+  const data=await response.json();
+  if(data.error)throw new Error(data.error.message||"BLM query failed");
+  if(!Array.isArray(data.features))throw new Error("BLM did not return a feature list.");
+  const fresh=[];
+  for(const feature of data.features){
+   const id=String(feature.properties?.OBJECTID||"");
+   if(!id||blmFeatureIds.has(id))continue;
+   blmFeatureIds.add(id);fresh.push(feature);
   }
-
-  // Show BLM markers when zoomed in.
-  if(!map.hasLayer(blmLayer)){
-    map.addLayer(blmLayer);
+  if(fresh.length){blmLayer.addData({type:"FeatureCollection",features:fresh});blmCount+=fresh.length;}
+  if(!data.exceededTransferLimit)loadedBlmAreas.add(key);
+  setStatus("Lakes: "+lakeCount+" | Rivers: "+riverCount+" | BLM Recreation: "+blmCount);
+ }catch(error){console.error(error);setStatus("BLM loading failed: "+error.message);}
+ finally{
+  blmLoading=false;
+  if(document.getElementById("blmToggle").checked&&map.getZoom()>=10){
+   const current=boundsKey(getRequestBounds());
+   if(current!==key&&!loadedBlmAreas.has(current))setTimeout(loadBlm,350);
   }
-
-  const area=getRequestBounds();
-  const key=boundsKey(area);
-
-  if(loadedBlmAreas.has(key))return;
-  if(blmLoading)return;
-
-  blmLoading=true;
-
-  const params=new URLSearchParams({
-    where:"1=1",
-    geometry:[
-      area.west,
-      area.south,
-      area.east,
-      area.north
-    ].join(","),
-    geometryType:"esriGeometryEnvelope",
-    inSR:"4326",
-    spatialRel:"esriSpatialRelIntersects",
-    outFields:"OBJECTID,FET_NAME,FET_SUBTYPE,UNIT_NAME,DESCRIPTION,WEB_LINK",
-    returnGeometry:"true",
-    outSR:"4326",
-    f:"geojson",
-    resultRecordCount:"1500"
-  });
-
-  try{
-    const response=await fetch(
-      BLM_URL+"?"+params.toString()
-    );
-
-    if(!response.ok){
-      throw new Error("BLM server returned HTTP "+response.status);
-    }
-
-    const data=await response.json();
-
-    if(data.error){
-      throw new Error(data.error.message||"BLM query failed");
-    }
-
-    if(!Array.isArray(data.features)){
-      throw new Error("BLM did not return a feature list.");
-    }
-
-    const newFeatures=[];
-
-    for(const feature of data.features){
-      const p=feature.properties||{};
-      const id=String(p.OBJECTID||"");
-
-      if(!id || blmFeatureIds.has(id))continue;
-
-      blmFeatureIds.add(id);
-      newFeatures.push(feature);
-    }
-
-    if(newFeatures.length){
-      blmLayer.addData({
-        type:"FeatureCollection",
-        features:newFeatures
-      });
-
-      blmCount+=newFeatures.length;
-    }
-
-    if(!data.exceededTransferLimit){
-      loadedBlmAreas.add(key);
-    }
-
-    setStatus(
-      "Lakes: "+lakeCount.toLocaleString()+
-      " | Rivers: "+riverCount.toLocaleString()+
-      " | BLM Recreation: "+blmCount.toLocaleString()
-    );
-
-  }catch(error){
-    console.error("BLM loading error:",error);
-    setStatus("BLM Recreation loading failed: "+error.message);
-
-  }finally{
-    blmLoading=false;
-
-    // If the map moved during loading, load the newly visible area.
-    if(
-      document.getElementById("blmToggle").checked &&
-      map.getZoom()>=10
-    ){
-      const currentKey=boundsKey(getRequestBounds());
-
-      if(currentKey!==key && !loadedBlmAreas.has(currentKey)){
-        setTimeout(loadBlm,350);
-      }
-    }
-  }
+ }
 }
-
-
-// ==========================================
-// MAP LOAD CONTROL
-// ==========================================
 
 let loadTimer=null;
-
 function loadMapData(){
-  clearTimeout(loadTimer);
-
-  loadTimer=setTimeout(function(){
-    if(document.getElementById("lakesToggle").checked){
-      loadLakes();
-    }
-
-    if(document.getElementById("riversToggle").checked){
-      loadRivers();
-    }
-
-    if(document.getElementById("blmToggle").checked){
-      loadBlm();
-    }
-  },500);
+ clearTimeout(loadTimer);
+ loadTimer=setTimeout(()=>{
+  if(document.getElementById("lakesToggle").checked)loadLakes();
+  if(document.getElementById("riversToggle").checked)loadRivers();
+  if(document.getElementById("blmToggle").checked)loadBlm();
+ },500);
 }
-
 map.on("moveend",loadMapData);
 map.whenReady(loadMapData);
 
-
-// ==========================================
-// LAYER TOGGLES
-// ==========================================
-
 document.getElementById("lakesToggle").addEventListener("change",function(){
-  if(this.checked){
-    map.addLayer(lakeLayer);
-    loadLakes();
-  }else{
-    map.removeLayer(lakeLayer);
-  }
+ if(this.checked){map.addLayer(lakeLayer);loadLakes();}
+ else map.removeLayer(lakeLayer);
 });
-
 document.getElementById("riversToggle").addEventListener("change",function(){
-  if(this.checked){
-    map.addLayer(riverLayer);
-    loadRivers();
-  }else{
-    map.removeLayer(riverLayer);
-  }
+ if(this.checked){map.addLayer(riverLayer);loadRivers();}
+ else map.removeLayer(riverLayer);
 });
-
 document.getElementById("blmToggle").addEventListener("change",function(){
-  if(this.checked){
-    loadBlm();
-  }else{
-    map.removeLayer(blmLayer);
-  }
+ if(this.checked)loadBlm();
+ else map.removeLayer(blmLayer);
 });
 
-
-// ==========================================
-// AUTHENTICATION UI
-// ==========================================
-
+// AUTHENTICATION
 function updateAuthUI(){
-  const signedIn=!!currentUser;
-
-  document.getElementById("signedOut").style.display=
-    signedIn?"none":"block";
-
-  document.getElementById("signedIn").style.display=
-    signedIn?"block":"none";
-
-  document.getElementById("authStatus").textContent=
-    signedIn?"Signed in":"Not signed in";
-
-  if(signedIn){
-    const displayName=
-      currentUser.user_metadata?.display_name ||
-      currentUser.email ||
-      "Member";
-
-    document.getElementById("signedInName").textContent=
-      "Signed in as "+displayName;
-  }
-
-  updateReviewForm();
+ const signedIn=!!currentUser;
+ document.getElementById("signedOut").style.display=signedIn?"none":"block";
+ document.getElementById("signedIn").style.display=signedIn?"block":"none";
+ document.getElementById("authStatus").textContent=signedIn?"Signed in":"Not signed in";
+ if(signedIn){
+  const name=currentUser.user_metadata?.display_name||currentUser.email||"Member";
+  document.getElementById("signedInName").textContent="Signed in as "+name;
+ }
+ updateReviewForm();
+ updateCatchForm();
 }
-
 function updateReviewForm(){
-  const section=document.getElementById("reviewSection");
-
-  section.style.display=selectedLake?"block":"none";
-
-  const submit=document.getElementById("submitReview");
-
-  submit.disabled=
-    !currentUser || !selectedLakeDatabaseId;
-
-  if(!currentUser && selectedLake){
-    setReviewMessage("Sign in to submit a lake review.");
-  }else if(currentUser && selectedLake && !selectedLakeDatabaseId){
-    setReviewMessage("Lake review information is still loading.");
-  }else{
-    setReviewMessage("");
-  }
+ document.getElementById("reviewSection").style.display=selectedLake?"block":"none";
+ document.getElementById("submitReview").disabled=!currentUser||!selectedLakeDatabaseId;
+ if(!currentUser&&selectedLake)setReviewMessage("Sign in to submit a lake review.");
+ else if(currentUser&&selectedLake&&!selectedLakeDatabaseId)setReviewMessage("Lake review information is still loading.");
+ else setReviewMessage("");
 }
-
+function updateCatchForm(){
+ document.getElementById("catchSection").style.display=selectedWaterbody?"block":"none";
+ document.getElementById("submitCatch").disabled=!currentUser||!selectedWaterbody;
+ if(!selectedWaterbody)setCatchMessage("");
+ else if(!currentUser)setCatchMessage("Sign in to post a catch.");
+ else setCatchMessage("");
+}
 async function checkSession(){
-  const {data,error}=await supabaseClient.auth.getSession();
-
-  if(error){
-    console.error(error);
-  }
-
-  currentUser=data.session?.user||null;
-  updateAuthUI();
+ const {data,error}=await supabaseClient.auth.getSession();
+ if(error)console.error(error);
+ currentUser=data.session?.user||null;
+ updateAuthUI();
 }
-
-supabaseClient.auth.onAuthStateChange(function(event,session){
-  currentUser=session?.user||null;
-  updateAuthUI();
+supabaseClient.auth.onAuthStateChange((event,session)=>{
+ currentUser=session?.user||null;
+ updateAuthUI();
 });
-
-
-// ==========================================
-// SIGN UP
-// ==========================================
 
 document.getElementById("signUpButton").addEventListener("click",async function(){
-  const email=document.getElementById("email").value.trim();
-  const password=document.getElementById("password").value;
-  const displayName=document.getElementById("displayName").value.trim();
-
-  if(!email || !password){
-    setAuthMessage("Enter your email and password.");
-    return;
-  }
-
-  if(password.length<6){
-    setAuthMessage("Password must be at least 6 characters.");
-    return;
-  }
-
-  setAuthMessage("Creating your account...");
-
-  const {data,error}=await supabaseClient.auth.signUp({
-    email,
-    password,
-    options:{
-      emailRedirectTo:window.location.href,
-      data:{
-        display_name:displayName||"Lake Reviewer"
-      }
-    }
-  });
-
-  if(error){
-    setAuthMessage(error.message);
-    return;
-  }
-
-  if(data.session){
-    currentUser=data.session.user;
-    updateAuthUI();
-    setAuthMessage("Account created and signed in.");
-
-    if(selectedLake?.feature){
-      await selectLake(selectedLake.feature);
-    }
-  }else{
-    setAuthMessage(
-      "Account created. Check your email to confirm your account."
-    );
-  }
+ const email=document.getElementById("email").value.trim();
+ const password=document.getElementById("password").value;
+ const displayName=document.getElementById("displayName").value.trim();
+ if(!email||!password){setAuthMessage("Enter your email and password.");return;}
+ if(password.length<6){setAuthMessage("Password must be at least 6 characters.");return;}
+ setAuthMessage("Creating your account...");
+ const {data,error}=await supabaseClient.auth.signUp({
+  email,password,
+  options:{emailRedirectTo:window.location.href,data:{display_name:displayName||"Cast & Blast Member"}}
+ });
+ if(error){setAuthMessage(error.message);return;}
+ if(data.session){currentUser=data.session.user;updateAuthUI();setAuthMessage("Account created and signed in.");}
+ else setAuthMessage("Account created. Check your email to confirm your account.");
 });
-
-
-// ==========================================
-// SIGN IN
-// ==========================================
-
 document.getElementById("signInButton").addEventListener("click",async function(){
-  const email=document.getElementById("email").value.trim();
-  const password=document.getElementById("password").value;
-
-  if(!email || !password){
-    setAuthMessage("Enter your email and password.");
-    return;
-  }
-
-  setAuthMessage("Signing in...");
-
-  const {data,error}=await supabaseClient.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  if(error){
-    setAuthMessage(error.message);
-    return;
-  }
-
-  currentUser=data.user;
-  updateAuthUI();
-  setAuthMessage("Signed in successfully.");
-
-  if(selectedLake?.feature){
-    await selectLake(selectedLake.feature);
-  }
+ const email=document.getElementById("email").value.trim();
+ const password=document.getElementById("password").value;
+ if(!email||!password){setAuthMessage("Enter your email and password.");return;}
+ setAuthMessage("Signing in...");
+ const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});
+ if(error){setAuthMessage(error.message);return;}
+ currentUser=data.user;updateAuthUI();setAuthMessage("Signed in successfully.");
 });
-
-
-// ==========================================
-// SIGN OUT
-// ==========================================
-
 document.getElementById("signOutButton").addEventListener("click",async function(){
-  const {error}=await supabaseClient.auth.signOut();
-
-  if(error){
-    setAuthMessage(error.message);
-    return;
-  }
-
-  currentUser=null;
-  updateAuthUI();
-  setAuthMessage("You have signed out.");
+ const {error}=await supabaseClient.auth.signOut();
+ if(error){setAuthMessage(error.message);return;}
+ currentUser=null;updateAuthUI();setAuthMessage("You have signed out.");
 });
 
-
-// ==========================================
-// SELECT A LAKE
-// ==========================================
-
-async function selectLake(feature){
-  const p=feature.properties||{};
-  const lakeId=getLakeIdentifier(p);
-
-  if(!lakeId){
-    alert("This lake does not have an available map identifier.");
-    return;
-  }
-
-  selectedLake={
-    name:getLakeName(p),
-    waterbodyId:lakeId,
-    properties:p,
-    feature:feature
-  };
-
-  selectedLakeDatabaseId=null;
-
-  document.getElementById("selectedLake").innerHTML=`
-    <h2>${escapeHTML(selectedLake.name)}</h2>
-    <p class="help">Finding lake reviews...</p>
-  `;
-
-  document.getElementById("reviewsList").textContent=
-    "Loading reviews...";
-
-  updateReviewForm();
-
-  const {data:existingLake,error:lookupError}=await supabaseClient
-    .from("lakes")
-    .select("id,name,waterbody_id")
-    .eq("waterbody_id",selectedLake.waterbodyId)
-    .maybeSingle();
-
-  if(lookupError){
-    console.error("Lake lookup error:",lookupError);
-
-    document.getElementById("selectedLake").innerHTML=`
-      <h2>${escapeHTML(selectedLake.name)}</h2>
-      <p class="help">Could not look up this lake in the review database.</p>
-    `;
-
-    document.getElementById("reviewsList").textContent=
-      "Could not load reviews.";
-
-    return;
-  }
-
-  if(existingLake){
-    selectedLakeDatabaseId=existingLake.id;
-
-    document.getElementById("selectedLake").innerHTML=`
-      <h2>${escapeHTML(existingLake.name)}</h2>
-      <p class="help">Lake or pond</p>
-      <div id="lakeRatingSummary" class="rating-summary">Loading rating...</div>
-    `;
-
-    updateReviewForm();
-    await loadReviews(selectedLakeDatabaseId);
-    return;
-  }
-
-  if(!currentUser){
-    document.getElementById("selectedLake").innerHTML=`
-      <h2>${escapeHTML(selectedLake.name)}</h2>
-      <p class="help">No reviews have been added to this lake yet.</p>
-      <p class="help">Sign in and select this lake again to start its review page.</p>
-    `;
-
-    document.getElementById("reviewsList").textContent=
-      "No reviews yet. Sign in to start the first review.";
-
-    updateReviewForm();
-    return;
-  }
-
-  const center=getFeatureCenter(feature);
-
-  const latitude=center?.[0] ?? map.getCenter().lat;
-  const longitude=center?.[1] ?? map.getCenter().lng;
-
-  const {data,error}=await supabaseClient
-    .from("lakes")
-    .upsert({
-      name:selectedLake.name,
-      waterbody_id:selectedLake.waterbodyId,
-      latitude:latitude,
-      longitude:longitude
-    },{
-      onConflict:"waterbody_id"
-    })
-    .select("id,name,waterbody_id")
-    .single();
-
-  if(error){
-    console.error("Lake database save error:",error);
-
-    document.getElementById("selectedLake").innerHTML=`
-      <h2>${escapeHTML(selectedLake.name)}</h2>
-      <p class="help">Could not create this lake's review page.</p>
-    `;
-
-    document.getElementById("reviewsList").textContent=
-      "Database error: "+error.message;
-
-    return;
-  }
-
-  selectedLakeDatabaseId=data.id;
-
-  document.getElementById("selectedLake").innerHTML=`
-    <h2>${escapeHTML(data.name)}</h2>
-    <p class="help">Lake or pond</p>
-    <div id="lakeRatingSummary" class="rating-summary">No ratings yet</div>
-  `;
-
-  updateReviewForm();
-  await loadReviews(selectedLakeDatabaseId);
-}
-
-
-// ==========================================
-// FIND A FEATURE CENTER
-// ==========================================
-
+// FEATURE CENTER
 function getFeatureCenter(feature){
-  const points=[];
-
-  function walk(coords){
-    if(!Array.isArray(coords))return;
-
-    if(
-      typeof coords[0]==="number" &&
-      typeof coords[1]==="number"
-    ){
-      points.push(coords);
-      return;
-    }
-
-    coords.forEach(walk);
-  }
-
-  if(!feature.geometry?.coordinates)return null;
-
-  walk(feature.geometry.coordinates);
-
-  if(!points.length)return null;
-
-  let x=0,y=0;
-
-  points.forEach(point=>{
-    x+=point[0];
-    y+=point[1];
-  });
-
-  return [
-    y/points.length,
-    x/points.length
-  ];
+ const points=[];
+ function walk(coords){
+  if(!Array.isArray(coords))return;
+  if(typeof coords[0]==="number"&&typeof coords[1]==="number"){points.push(coords);return;}
+  coords.forEach(walk);
+ }
+ if(!feature.geometry?.coordinates)return null;
+ walk(feature.geometry.coordinates);
+ if(!points.length)return null;
+ let x=0,y=0;
+ points.forEach(p=>{x+=p[0];y+=p[1];});
+ return [y/points.length,x/points.length];
 }
 
+// SELECT A LAKE
+async function selectLake(feature){
+ const p=feature.properties||{},lakeId=getLakeIdentifier(p);
+ if(!lakeId){alert("This lake does not have an available map identifier.");return;}
+ selectedLake={name:getLakeName(p),waterbodyId:lakeId,properties:p,feature};
+ selectedLakeDatabaseId=null;
+ await selectWaterbody("lake",feature);
+ document.getElementById("selectedLake").innerHTML="<h2>"+escapeHTML(selectedLake.name)+"</h2><p class='help'>Finding lake reviews...</p>";
+ document.getElementById("reviewsList").textContent="Loading reviews...";
+ updateReviewForm();
 
-// ==========================================
-// LOAD REVIEWS
-// ==========================================
+ const {data:existingLake,error:lookupError}=await supabaseClient.from("lakes")
+  .select("id,name,waterbody_id").eq("waterbody_id",lakeId).maybeSingle();
 
-async function loadReviews(lakeDatabaseId){
-  const list=document.getElementById("reviewsList");
-
-  const {data,error}=await supabaseClient
-    .from("reviews")
-    .select("rating,review_text,display_name,created_at")
-    .eq("lake_id",lakeDatabaseId)
-    .order("created_at",{ascending:false})
-    .limit(50);
-
-  if(error){
-    console.error("Review loading error:",error);
-    list.textContent="Could not load reviews: "+error.message;
-    return;
-  }
-
-  const reviews=data||[];
-
-  if(!reviews.length){
-    list.innerHTML="<p>No reviews yet. Be the first to review this lake!</p>";
-
-    const summary=document.getElementById("lakeRatingSummary");
-    if(summary)summary.textContent="No ratings yet";
-
-    return;
-  }
-
-  const average=
-    reviews.reduce((sum,r)=>sum+Number(r.rating),0)/reviews.length;
-
-  const summary=document.getElementById("lakeRatingSummary");
-
-  if(summary){
-    summary.textContent=
-      "★ "+average.toFixed(1)+" / 5 ("+
-      reviews.length+" recent reviews)";
-  }
-
-  list.innerHTML=reviews.map(review=>{
-    const rating=Math.max(1,Math.min(5,Number(review.rating)||0));
-
-    const stars="★".repeat(rating)+
-      "☆".repeat(5-rating);
-
-    const date=review.created_at
-      ?new Date(review.created_at).toLocaleDateString()
-      :"";
-
-    return `
-      <div class="review">
-        <strong>${escapeHTML(review.display_name||"Lake Reviewer")}</strong>
-        <div class="review-stars">${stars}</div>
-        <p>${escapeHTML(review.review_text||"")}</p>
-        <div class="review-date">${escapeHTML(date)}</div>
-      </div>
-    `;
-  }).join("");
-}
-
-
-// ==========================================
-// SUBMIT A REVIEW
-// ==========================================
-
-document.getElementById("submitReview").addEventListener("click",async function(){
-  if(!currentUser){
-    setReviewMessage("Please sign in before submitting a review.");
-    return;
-  }
-
-  if(!selectedLakeDatabaseId){
-    setReviewMessage("Select a lake first.");
-    return;
-  }
-
-  const rating=Number(document.getElementById("rating").value);
-  const reviewText=document.getElementById("reviewText").value.trim();
-
-  if(!reviewText){
-    setReviewMessage("Please write a review first.");
-    return;
-  }
-
-  if(reviewText.length>1500){
-    setReviewMessage("Your review is too long.");
-    return;
-  }
-
-  this.disabled=true;
-  setReviewMessage("Submitting your review...");
-
-  const displayName=
-    currentUser.user_metadata?.display_name ||
-    currentUser.email?.split("@")[0] ||
-    "Lake Reviewer";
-
-  const {error}=await supabaseClient
-    .from("reviews")
-    .insert({
-      lake_id:selectedLakeDatabaseId,
-      rating:rating,
-      review_text:reviewText,
-      user_id:currentUser.id,
-      display_name:displayName
-    });
-
-  this.disabled=false;
-
-  if(error){
-    console.error("Review submission error:",error);
-    setReviewMessage("Could not submit review: "+error.message);
-    return;
-  }
-
-  document.getElementById("reviewText").value="";
-  setReviewMessage("Your review was submitted!");
-
+ if(lookupError){
+  console.error(lookupError);
+  document.getElementById("selectedLake").innerHTML="<h2>"+escapeHTML(selectedLake.name)+"</h2><p class='help'>Could not look up this lake in the review database.</p>";
+  document.getElementById("reviewsList").textContent="Could not load reviews.";
+  return;
+ }
+ if(existingLake){
+  selectedLakeDatabaseId=existingLake.id;
+  document.getElementById("selectedLake").innerHTML="<h2>"+escapeHTML(existingLake.name)+"</h2><p class='help'>Lake or pond</p><div id='lakeRatingSummary' class='rating-summary'>Loading rating...</div>";
+  updateReviewForm();
   await loadReviews(selectedLakeDatabaseId);
+  return;
+ }
+ if(!currentUser){
+  document.getElementById("selectedLake").innerHTML="<h2>"+escapeHTML(selectedLake.name)+"</h2><p class='help'>No reviews have been added to this lake yet. Sign in and select it again to start its review page.</p>";
+  document.getElementById("reviewsList").textContent="No reviews yet. Sign in to start the first review.";
+  updateReviewForm();
+  return;
+ }
+ const center=getFeatureCenter(feature);
+ const {data,error}=await supabaseClient.from("lakes").upsert({
+  name:selectedLake.name,waterbody_id:lakeId,
+  latitude:center?.[0]??map.getCenter().lat,
+  longitude:center?.[1]??map.getCenter().lng
+ },{onConflict:"waterbody_id"}).select("id,name,waterbody_id").single();
+
+ if(error){
+  console.error(error);
+  document.getElementById("selectedLake").innerHTML="<h2>"+escapeHTML(selectedLake.name)+"</h2><p class='help'>Could not create this lake's review page.</p>";
+  document.getElementById("reviewsList").textContent="Database error: "+error.message;
+  return;
+ }
+ selectedLakeDatabaseId=data.id;
+ document.getElementById("selectedLake").innerHTML="<h2>"+escapeHTML(data.name)+"</h2><p class='help'>Lake or pond</p><div id='lakeRatingSummary' class='rating-summary'>No ratings yet</div>";
+ updateReviewForm();
+ await loadReviews(selectedLakeDatabaseId);
+}
+
+// SELECT A RIVER OR STREAM
+async function selectRiver(feature){
+ selectedLake=null;
+ selectedLakeDatabaseId=null;
+ updateReviewForm();
+ document.getElementById("selectedLake").innerHTML="<h2>River or stream selected</h2><p class='help'>Lake reviews are only available for lakes and ponds.</p>";
+ document.getElementById("reviewsList").textContent="Select a lake or pond to see its reviews.";
+ await selectWaterbody("river",feature);
+}
+
+// SHARED WATERBODY SELECTION AND CATCH LOADING
+async function selectWaterbody(type,feature){
+ const p=feature.properties||{};
+ const id=String(p.id3dhp||p.ID3DHP||p.OBJECTID||"");
+ const name=type==="lake"?getLakeName(p):(p.gnisidlabel||p.GNIS_NAME||p.name||"Unnamed river or stream");
+ if(!id){setCatchMessage("This map feature does not have an available identifier.");return;}
+ selectedWaterbody={type,id,name,feature};
+ catchRequestNumber++;
+ document.getElementById("selectedLake").innerHTML="<h2>"+escapeHTML(name)+"</h2><p class='help'>"+(type==="lake"?"Lake or pond":"River or stream")+"</p><p class='help'>Loading catch information...</p>";
+ document.getElementById("speciesSummary").textContent="Loading reported species...";
+ document.getElementById("catchList").textContent="Loading catch reports...";
+ updateCatchForm();
+ await loadCatchReports();
+}
+
+// LOAD CATCH REPORTS
+async function loadCatchReports(){
+ if(!selectedWaterbody)return;
+ const request=++catchRequestNumber;
+ const waterbody={...selectedWaterbody};
+ const {data,error}=await supabaseClient.from("catch_reports")
+  .select("id,species,caught_at,notes,image_url,display_name,created_at,user_id")
+  .eq("waterbody_type",waterbody.type)
+  .eq("waterbody_id",waterbody.id)
+  .order("created_at",{ascending:false})
+  .limit(100);
+
+ if(request!==catchRequestNumber)return;
+ const list=document.getElementById("catchList");
+ const summary=document.getElementById("speciesSummary");
+ if(error){
+  console.error("Catch loading error:",error);
+  list.textContent="Could not load catch reports: "+error.message;
+  summary.textContent="Could not load species.";
+  return;
+ }
+ const catches=data||[];
+ document.getElementById("selectedLake").innerHTML=
+  "<h2>"+escapeHTML(waterbody.name)+"</h2><p class='help'>"+(waterbody.type==="lake"?"Lake or pond":"River or stream")+"</p><p class='help'>"+catches.length+" reported catches</p>";
+
+ if(!catches.length){
+  summary.textContent="No fish species have been reported here yet.";
+  list.textContent="No catches posted yet. Be the first to share a catch!";
+  return;
+ }
+ const counts={};
+ catches.forEach(c=>{counts[c.species]=(counts[c.species]||0)+1;});
+ summary.innerHTML=Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([species,count])=>
+  "<span class='species-tag'>"+escapeHTML(species)+" ("+count+")</span>"
+ ).join("");
+
+ list.innerHTML=catches.map(c=>{
+  const date=c.caught_at?new Date(c.caught_at+"T12:00:00").toLocaleDateString():"Date not provided";
+  const photo=validPhotoURL(c.image_url);
+  return "<div class='catch-card'><div class='catch-species'>"+escapeHTML(c.species)+"</div>"+
+   "<div class='catch-meta'>Posted by "+escapeHTML(c.display_name||"Member")+" · "+escapeHTML(date)+"</div>"+
+   (c.notes?"<p>"+escapeHTML(c.notes)+"</p>":"")+
+   (photo?"<img class='catch-photo' src='"+escapeHTML(photo)+"' alt='Community catch photo' loading='lazy' referrerpolicy='no-referrer'>":"")+
+   (currentUser&&currentUser.id===c.user_id?"<button class='delete-catch' data-id='"+Number(c.id)+"' style='margin-top:8px;background:#8b4242'>Delete my post</button>":"")+
+   "</div>";
+ }).join("");
+}
+
+function validPhotoURL(value){
+ if(!value)return "";
+ try{
+  const url=new URL(value);
+  return url.protocol==="https:"||url.protocol==="http:"?url.href:"";
+ }catch(e){return "";}
+}
+
+document.getElementById("catchList").addEventListener("click",async function(event){
+ const button=event.target.closest(".delete-catch");
+ if(!button||!currentUser)return;
+ const id=Number(button.dataset.id);
+ if(!Number.isSafeInteger(id)||id<=0)return;
+ if(!confirm("Delete your catch post?"))return;
+ button.disabled=true;
+ const {error}=await supabaseClient.from("catch_reports").delete().eq("id",id).eq("user_id",currentUser.id);
+ if(error){setCatchMessage("Could not delete post: "+error.message);button.disabled=false;return;}
+ setCatchMessage("Your catch post was deleted.");
+ await loadCatchReports();
 });
 
+// SUBMIT A CATCH
+document.getElementById("submitCatch").addEventListener("click",async function(){
+ if(!currentUser){setCatchMessage("Please sign in before posting a catch.");return;}
+ if(!selectedWaterbody){setCatchMessage("Select a lake, pond, river, or stream first.");return;}
 
-// ==========================================
-// PLACE SEARCH
-// ==========================================
+ let species=document.getElementById("catchSpecies").value;
+ const other=document.getElementById("otherSpecies").value.trim();
+ if(species==="Other")species=other;
+ if(!species){setCatchMessage("Choose a fish species.");return;}
+ if(species.length>80){setCatchMessage("Species name is too long.");return;}
 
-async function searchPlace(){
-  const query=document.getElementById("searchInput").value.trim();
+ const date=document.getElementById("catchDate").value;
+ if(!date){setCatchMessage("Choose the date of your catch.");return;}
+ const notes=document.getElementById("catchNotes").value.trim();
+ const rawPhoto=document.getElementById("catchImage").value.trim();
+ const imageURL=rawPhoto?validPhotoURL(rawPhoto):"";
+ if(rawPhoto&&!imageURL){setCatchMessage("Enter a valid photo URL beginning with http:// or https://.");return;}
 
-  if(!query){
-    setStatus("Enter a place to search.");
-    return;
-  }
+ const displayName=currentUser.user_metadata?.display_name||currentUser.email?.split("@")[0]||"Member";
+ this.disabled=true;
+ setCatchMessage("Posting your catch...");
 
-  setStatus("Searching...");
+ const waterbody={...selectedWaterbody};
+ const {error}=await supabaseClient.from("catch_reports").insert({
+  waterbody_type:waterbody.type,
+  waterbody_id:waterbody.id,
+  waterbody_name:waterbody.name,
+  species:species,
+  caught_at:date,
+  notes:notes||null,
+  image_url:imageURL||null,
+  user_id:currentUser.id,
+  display_name:displayName
+ });
+ this.disabled=false;
+ if(error){
+  console.error("Catch submission error:",error);
+  setCatchMessage("Could not post catch: "+error.message);
+  return;
+ }
+ document.getElementById("catchSpecies").value="";
+ document.getElementById("otherSpecies").value="";
+ document.getElementById("catchNotes").value="";
+ document.getElementById("catchImage").value="";
+ document.getElementById("catchDate").value=new Date().toISOString().slice(0,10);
+ setCatchMessage("Your catch was posted!");
+ await loadCatchReports();
+});
 
-  try{
-    const url=
-      "https://nominatim.openstreetmap.org/search?format=json&limit=1&q="+
-      encodeURIComponent(query);
-
-    const response=await fetch(url,{
-      headers:{"Accept":"application/json"}
-    });
-
-    if(!response.ok){
-      throw new Error("Search failed");
-    }
-
-    const results=await response.json();
-
-    if(!results.length){
-      setStatus("No matching place found.");
-      return;
-    }
-
-    const place=results[0];
-    const lat=Number(place.lat);
-    const lon=Number(place.lon);
-
-    map.setView([lat,lon],11);
-
-    L.marker([lat,lon])
-      .addTo(map)
-      .bindPopup(escapeHTML(place.display_name))
-      .openPopup();
-
-    setStatus("Showing "+place.display_name);
-
-  }catch(error){
-    console.error(error);
-    setStatus("Search could not be completed: "+error.message);
-  }
+// LOAD LAKE REVIEWS
+async function loadReviews(lakeDatabaseId){
+ const list=document.getElementById("reviewsList");
+ const {data,error}=await supabaseClient.from("reviews")
+  .select("rating,review_text,display_name,created_at")
+  .eq("lake_id",lakeDatabaseId)
+  .order("created_at",{ascending:false}).limit(50);
+ if(error){console.error(error);list.textContent="Could not load reviews: "+error.message;return;}
+ const reviews=data||[];
+ if(!reviews.length){
+  list.innerHTML="<p>No reviews yet. Be the first to review this lake!</p>";
+  const summary=document.getElementById("lakeRatingSummary");
+  if(summary)summary.textContent="No ratings yet";
+  return;
+ }
+ const average=reviews.reduce((sum,r)=>sum+Number(r.rating),0)/reviews.length;
+ const summary=document.getElementById("lakeRatingSummary");
+ if(summary)summary.textContent="★ "+average.toFixed(1)+" / 5 ("+reviews.length+" recent reviews)";
+ list.innerHTML=reviews.map(r=>{
+  const rating=Math.max(1,Math.min(5,Number(r.rating)||0));
+  const stars="★".repeat(rating)+"☆".repeat(5-rating);
+  const date=r.created_at?new Date(r.created_at).toLocaleDateString():"";
+  return "<div class='review'><strong>"+escapeHTML(r.display_name||"Lake Reviewer")+"</strong><div class='review-stars'>"+stars+"</div><p>"+escapeHTML(r.review_text||"")+"</p><div class='review-date'>"+escapeHTML(date)+"</div></div>";
+ }).join("");
 }
 
-document.getElementById("searchButton")
-  .addEventListener("click",searchPlace);
+// SUBMIT A LAKE REVIEW
+document.getElementById("submitReview").addEventListener("click",async function(){
+ if(!currentUser){setReviewMessage("Please sign in before submitting a review.");return;}
+ if(!selectedLakeDatabaseId){setReviewMessage("Select a lake first.");return;}
+ const rating=Number(document.getElementById("rating").value);
+ const reviewText=document.getElementById("reviewText").value.trim();
+ if(!reviewText){setReviewMessage("Please write a review first.");return;}
+ if(reviewText.length>1500){setReviewMessage("Your review is too long.");return;}
+ this.disabled=true;setReviewMessage("Submitting your review...");
+ const displayName=currentUser.user_metadata?.display_name||currentUser.email?.split("@")[0]||"Lake Reviewer";
+ const {error}=await supabaseClient.from("reviews").insert({
+  lake_id:selectedLakeDatabaseId,rating,review_text:reviewText,user_id:currentUser.id,display_name:displayName
+ });
+ this.disabled=false;
+ if(error){console.error(error);setReviewMessage("Could not submit review: "+error.message);return;}
+ document.getElementById("reviewText").value="";
+ setReviewMessage("Your review was submitted!");
+ await loadReviews(selectedLakeDatabaseId);
+});
 
-document.getElementById("searchInput")
-  .addEventListener("keydown",function(event){
-    if(event.key==="Enter")searchPlace();
-  });
+// MAP SEARCH
+async function searchPlace(){
+ const query=document.getElementById("searchInput").value.trim();
+ if(!query){setStatus("Enter a place to search.");return;}
+ setStatus("Searching...");
+ try{
+  const url="https://nominatim.openstreetmap.org/search?format=json&limit=1&q="+encodeURIComponent(query);
+  const response=await fetch(url,{headers:{"Accept":"application/json"}});
+  if(!response.ok)throw new Error("Search failed");
+  const results=await response.json();
+  if(!results.length){setStatus("No matching place found.");return;}
+  const place=results[0],lat=Number(place.lat),lon=Number(place.lon);
+  map.setView([lat,lon],11);
+  L.marker([lat,lon]).addTo(map).bindPopup(escapeHTML(place.display_name)).openPopup();
+  setStatus("Showing "+place.display_name);
+ }catch(error){console.error(error);setStatus("Search could not be completed: "+error.message);}
+}
+document.getElementById("searchButton").addEventListener("click",searchPlace);
+document.getElementById("searchInput").addEventListener("keydown",e=>{if(e.key==="Enter")searchPlace();});
 
-
-// ==========================================
 // MY LOCATION
-// ==========================================
+document.getElementById("locationButton").addEventListener("click",function(){
+ if(!navigator.geolocation){setStatus("Location is not supported by this browser.");return;}
+ setStatus("Finding your location...");
+ navigator.geolocation.getCurrentPosition(position=>{
+  const lat=position.coords.latitude,lon=position.coords.longitude;
+  map.setView([lat,lon],11);
+  L.marker([lat,lon]).addTo(map).bindPopup("Your location").openPopup();
+  setStatus("Showing your location.");
+ },error=>setStatus("Could not get your location: "+error.message),{enableHighAccuracy:true,timeout:12000});
+});
 
-document.getElementById("locationButton")
-  .addEventListener("click",function(){
-
-    if(!navigator.geolocation){
-      setStatus("Location is not supported by this browser.");
-      return;
-    }
-
-    setStatus("Finding your location...");
-
-    navigator.geolocation.getCurrentPosition(
-      function(position){
-        const lat=position.coords.latitude;
-        const lon=position.coords.longitude;
-
-        map.setView([lat,lon],11);
-
-        L.marker([lat,lon])
-          .addTo(map)
-          .bindPopup("Your location")
-          .openPopup();
-
-        setStatus("Showing your location.");
-      },
-
-      function(error){
-        setStatus(
-          "Could not get your location: "+error.message
-        );
-      },
-
-      {
-        enableHighAccuracy:true,
-        timeout:12000
-      }
-    );
-  });
-
-
-// ==========================================
-// STARTUP
-// ==========================================
-
+// INITIAL DATE AND STARTUP
+document.getElementById("catchDate").value=new Date().toISOString().slice(0,10);
 checkSession();
-
 </script>
 </body>
 </html>
