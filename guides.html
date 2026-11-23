@@ -4,242 +4,307 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fishing Encyclopedia | Cast & Blast</title>
+<title>Fishing Guides | Cast & Blast</title>
 
 <style>
 :root {
   --bg:#101710;
-  --panel:#19251a;
-  --panel2:#202e21;
-  --green:#75a96a;
-  --green2:#9bc58c;
-  --text:#edf2e9;
-  --muted:#aab7a5;
-  --border:#344635;
-  --gold:#d6b56c;
+  --panel:#1b281e;
+  --panel2:#243529;
+  --green:#a9c77b;
+  --white:#f1f4ec;
+  --muted:#aab6a7;
+  --border:#354735;
 }
-*{box-sizing:border-box}
-body{
-  margin:0;
+
+* { box-sizing:border-box; margin:0; padding:0; }
+
+body {
   background:var(--bg);
-  color:var(--text);
+  color:var(--white);
   font-family:Arial,sans-serif;
   line-height:1.6;
 }
-header{
-  background:#172419;
+
+header {
+  background:#172319;
   border-bottom:1px solid var(--border);
-  padding:20px 6%;
+  padding:18px 7%;
   display:flex;
   justify-content:space-between;
   align-items:center;
   flex-wrap:wrap;
   gap:15px;
 }
-.logo{
-  font-size:24px;
-  font-weight:bold;
-  color:var(--green2);
+
+.logo {
+  font-size:22px;
+  font-weight:800;
   letter-spacing:1px;
 }
-nav{display:flex;gap:20px;flex-wrap:wrap}
-nav a{
-  color:var(--text);
-  text-decoration:none;
-  font-size:14px;
-}
-nav a:hover{color:var(--green2)}
-.hero{
-  padding:65px 20px 45px;
-  text-align:center;
-  background:linear-gradient(135deg,#203724,#101710);
-}
-.hero h1{
-  font-size:clamp(32px,5vw,48px);
-  margin:0 0 12px;
-}
-.hero p{
-  max-width:720px;
-  margin:auto;
-  color:#c2cdbd;
-}
-.hero-tag{
-  display:inline-block;
-  color:var(--green2);
-  border:1px solid #506d4d;
-  padding:5px 13px;
-  border-radius:20px;
-  font-size:12px;
-  margin-bottom:15px;
-  letter-spacing:1px;
-}
-.container{
-  width:min(1200px,92%);
-  margin:35px auto 70px;
-}
-.section-heading{margin-bottom:20px}
-.section-heading h2{margin-bottom:5px}
-.section-heading p{color:var(--muted);margin-top:0}
-.search-area{
+
+.logo span { color:var(--green); }
+
+nav {
   display:flex;
-  gap:12px;
   flex-wrap:wrap;
-  margin-bottom:18px;
-}
-.search-area input{
-  flex:1;
-  min-width:220px;
-  padding:14px;
-  border-radius:9px;
-  border:1px solid var(--border);
-  background:#19251a;
-  color:white;
-  font-size:15px;
-}
-.filters{
-  display:flex;
-  gap:9px;
-  flex-wrap:wrap;
-  margin-bottom:28px;
-}
-.filter{
-  background:#1d2b1e;
-  color:#dce8d8;
-  border:1px solid var(--border);
-  padding:9px 15px;
-  border-radius:22px;
-  cursor:pointer;
-}
-.filter.active,.filter:hover{
-  background:#496b43;
-  border-color:#719968;
-  color:white;
-}
-.species-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(245px,1fr));
   gap:20px;
 }
-.fish-card{
+
+nav a {
+  color:var(--muted);
+  text-decoration:none;
+  font-size:14px;
+  font-weight:bold;
+}
+
+nav a:hover { color:var(--green); }
+
+.hero {
+  text-align:center;
+  padding:75px 7%;
+  background:radial-gradient(ellipse at center,#2c4930,#17271b 55%,#101710);
+}
+
+.eyebrow {
+  color:var(--green);
+  letter-spacing:3px;
+  font-size:12px;
+  font-weight:bold;
+  margin-bottom:15px;
+}
+
+.hero h1 {
+  font-size:clamp(36px,6vw,62px);
+  line-height:1.1;
+  margin-bottom:18px;
+}
+
+.hero h1 span { color:var(--green); }
+
+.hero p {
+  max-width:680px;
+  margin:auto;
+  color:#c2cdbf;
+  font-size:16px;
+}
+
+.search-wrap {
+  max-width:560px;
+  margin:28px auto 0;
+}
+
+.search-wrap input {
+  width:100%;
+  padding:15px 18px;
+  border-radius:7px;
+  border:1px solid var(--border);
+  background:#101710;
+  color:var(--white);
+  font-size:15px;
+  outline:none;
+}
+
+.search-wrap input:focus { border-color:var(--green); }
+
+section { padding:55px 7%; }
+
+.section-heading { margin-bottom:25px; }
+
+.section-heading small {
+  color:var(--green);
+  font-size:11px;
+  font-weight:bold;
+  letter-spacing:2px;
+}
+
+.section-heading h2 {
+  font-size:29px;
+  margin-top:5px;
+}
+
+.section-heading p {
+  color:var(--muted);
+  margin-top:8px;
+  max-width:700px;
+}
+
+.cards {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:18px;
+}
+
+.card {
   background:var(--panel);
   border:1px solid var(--border);
-  border-radius:13px;
-  overflow:hidden;
-  transition:.2s;
+  border-radius:10px;
+  padding:24px;
 }
-.fish-card:hover{
-  transform:translateY(-3px);
-  border-color:#66845e;
+
+.card h3 {
+  color:var(--white);
+  font-size:18px;
+  margin-bottom:10px;
 }
-.fish-picture{
-  width:100%;
-  aspect-ratio:1.125;
-  background-image:url("fish-illustrations.png");
-  background-repeat:no-repeat;
-  background-size:400% 300%;
-  background-color:#f7f1df;
+
+.card p {
+  color:var(--muted);
+  font-size:14px;
 }
-.fish-info{padding:17px}
-.fish-info h3{margin:0 0 3px;font-size:19px}
-.scientific{
-  color:#9eae99;
-  font-size:12px;
-  font-style:italic;
+
+.card-icon {
+  width:43px;
+  height:43px;
+  border-radius:9px;
+  display:grid;
+  place-items:center;
+  background:var(--panel2);
+  color:var(--green);
+  font-size:22px;
+  margin-bottom:15px;
 }
-.type{
-  display:inline-block;
-  font-size:11px;
-  color:var(--green2);
-  background:#263b28;
-  border-radius:20px;
-  padding:4px 9px;
-  margin:10px 0;
-}
-.fish-info p{
-  color:#c0cbbb;
-  font-size:13px;
-  margin:5px 0 13px;
-}
-details{
+
+.guide-section {
   border-top:1px solid var(--border);
-  margin-top:12px;
-  padding-top:11px;
 }
-summary{
+
+.info-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:16px;
+}
+
+.info-card {
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:9px;
+  padding:22px;
+}
+
+.info-card h3 {
+  color:var(--green);
+  margin-bottom:9px;
+  font-size:17px;
+}
+
+.info-card p, .info-card li {
+  color:var(--muted);
+  font-size:14px;
+}
+
+.info-card ul {
+  padding-left:19px;
+  margin-top:8px;
+}
+
+.info-card li { margin:5px 0; }
+
+.tip {
+  border-left:3px solid var(--green);
+  padding:13px 16px;
+  background:#1b281e;
+  color:#d6dfd1;
+  margin-top:18px;
+  font-size:14px;
+  border-radius:0 7px 7px 0;
+}
+
+.species-section { background:#131d15; }
+
+.species-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(225px,1fr));
+  gap:20px;
+}
+
+.species-card {
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:10px;
+  overflow:hidden;
+}
+
+.fish-picture {
+  height:165px;
+  background-image:url("fish-illustrations.png");
+  background-size:400% 300%;
+  background-repeat:no-repeat;
+  background-color:#e8e6d9;
+}
+
+.species-content { padding:18px; }
+
+.species-content h3 {
+  font-size:18px;
+  margin-bottom:4px;
+}
+
+.species-category {
+  color:var(--green);
+  font-size:11px;
+  font-weight:bold;
+  letter-spacing:1px;
+  margin-bottom:12px;
+}
+
+.species-content p {
+  color:var(--muted);
+  font-size:13px;
+  margin-bottom:12px;
+}
+
+details {
+  border-top:1px solid var(--border);
+  padding-top:10px;
+  margin-top:10px;
+}
+
+summary {
   cursor:pointer;
-  color:var(--green2);
+  color:var(--green);
   font-weight:bold;
   font-size:13px;
 }
-details h4{
-  color:#d6e6ce;
-  margin:15px 0 3px;
-  font-size:14px;
-}
-details p{
-  color:#c0cbbb;
+
+details p {
+  margin-top:9px;
+  color:var(--muted);
   font-size:13px;
-  margin:0;
 }
-.empty{
+
+details strong { color:var(--white); }
+
+.species-card[hidden] { display:none; }
+
+.empty-message {
   display:none;
-  padding:30px;
-  text-align:center;
   color:var(--muted);
-  background:var(--panel);
-  border-radius:12px;
+  padding:20px 0;
 }
-.info-section{
-  margin-top:55px;
-}
-.info-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
-  gap:17px;
-}
-.info-card{
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:20px;
-}
-.info-card h3{
-  color:var(--green2);
-  margin-top:0;
-}
-.info-card p,.info-card li{
-  color:#c0cbbb;
-  font-size:14px;
-}
-.info-card ul{padding-left:20px}
-.notice{
-  background:#263522;
-  border-left:4px solid var(--gold);
-  padding:18px;
-  border-radius:7px;
-  color:#dce5d6;
-  margin-top:30px;
-  font-size:14px;
-}
-.resources a{
-  color:var(--green2);
+
+.resource-link {
+  color:var(--green);
   text-decoration:none;
+  font-weight:bold;
 }
-.resources a:hover{text-decoration:underline}
-footer{
+
+.resource-link:hover { text-decoration:underline; }
+
+footer {
+  background:#172319;
   border-top:1px solid var(--border);
-  background:#172419;
-  padding:28px 15px;
   text-align:center;
-  color:var(--muted);
-  font-size:13px;
+  padding:30px 15px;
+  color:#899687;
+  font-size:12px;
 }
-footer a{color:var(--green2);text-decoration:none}
-@media(max-width:600px){
-  header{justify-content:center}
-  nav{justify-content:center}
-  .hero{padding:45px 18px}
-  .container{width:94%}
+
+@media(max-width:600px) {
+  header { justify-content:center; }
+  nav { justify-content:center; }
+  section { padding:42px 6%; }
+  .hero { padding:60px 6%; }
 }
 </style>
 </head>
@@ -247,599 +312,932 @@ footer a{color:var(--green2);text-decoration:none}
 <body>
 
 <header>
-  <div class="logo">CAST & BLAST</div>
+  <div class="logo">CAST <span>&</span> BLAST</div>
   <nav>
     <a href="index.html">Home</a>
     <a href="map.html">Fishing Map</a>
-    <a href="guides.html">Fishing Guides</a>
+    <a href="#beginner">Beginner Guide</a>
+    <a href="#equipment">Equipment</a>
+    <a href="#species">Fish Species</a>
   </nav>
 </header>
 
-<section class="hero">
-  <div class="hero-tag">FISHING KNOWLEDGE CENTER</div>
-  <h1>The Fishing Encyclopedia</h1>
+<div class="hero">
+  <div class="eyebrow">THE CAST & BLAST FISHING LIBRARY</div>
+  <h1>THE COMPLETE<br><span>FISHING GUIDE</span></h1>
   <p>
-    Learn to identify fish, understand their habitats, explore their
-    behavior, and discover general fishing techniques for freshwater
-    and saltwater species.
+    Learn about fishing techniques, equipment, fish species,
+    freshwater and saltwater fishing, knots, and responsible
+    fishing practices.
   </p>
-</section>
 
-<main class="container">
+  <div class="search-wrap">
+    <input id="guideSearch" type="text"
+      placeholder="Search fish species, equipment, or techniques...">
+  </div>
+</div>
 
+<!-- GUIDE CATEGORIES -->
 <section>
   <div class="section-heading">
-    <h2>Fish Species Library</h2>
-    <p>Explore illustrated fish profiles and learn what makes each species unique.</p>
+    <small>EXPLORE THE LIBRARY</small>
+    <h2>Fishing Topics</h2>
+    <p>Explore different parts of fishing and learn something new.</p>
   </div>
 
-  <div class="search-area">
-    <input id="fishSearch" type="search"
-      placeholder="Search fish species..."
-      oninput="filterFish()">
+  <div class="cards">
+    <a class="card" href="#beginner" style="text-decoration:none">
+      <div class="card-icon">🎣</div>
+      <h3>Getting Started</h3>
+      <p>Learn the basics of fishing and how to prepare for your first trip.</p>
+    </a>
+
+    <a class="card" href="#equipment" style="text-decoration:none">
+      <div class="card-icon">🧰</div>
+      <h3>Fishing Equipment</h3>
+      <p>Understand rods, reels, lines, hooks, and tackle.</p>
+    </a>
+
+    <a class="card" href="#techniques" style="text-decoration:none">
+      <div class="card-icon">🌊</div>
+      <h3>Fishing Techniques</h3>
+      <p>Explore different ways anglers fish in different environments.</p>
+    </a>
+
+    <a class="card" href="#freshwater" style="text-decoration:none">
+      <div class="card-icon">🏞️</div>
+      <h3>Freshwater Fishing</h3>
+      <p>Learn about lakes, ponds, rivers, and reservoirs.</p>
+    </a>
+
+    <a class="card" href="#saltwater" style="text-decoration:none">
+      <div class="card-icon">🌅</div>
+      <h3>Saltwater Fishing</h3>
+      <p>Explore bays, beaches, estuaries, and ocean environments.</p>
+    </a>
+
+    <a class="card" href="#species" style="text-decoration:none">
+      <div class="card-icon">🐟</div>
+      <h3>Fish Species</h3>
+      <p>Explore fish identification, habitat, diet, and behavior.</p>
+    </a>
+
+    <a class="card" href="#knots" style="text-decoration:none">
+      <div class="card-icon">🪢</div>
+      <h3>Fishing Knots</h3>
+      <p>Learn about common knots and their uses.</p>
+    </a>
+
+    <a class="card" href="#responsible" style="text-decoration:none">
+      <div class="card-icon">🌱</div>
+      <h3>Responsible Fishing</h3>
+      <p>Learn how anglers can help protect fish and waterways.</p>
+    </a>
+  </div>
+</section>
+
+<!-- BEGINNER GUIDE -->
+<section class="guide-section" id="beginner">
+  <div class="section-heading">
+    <small>START HERE</small>
+    <h2>Fishing for Beginners</h2>
+    <p>A basic introduction to understanding fishing and preparing for a trip.</p>
   </div>
 
-  <div class="filters">
-    <button class="filter active" onclick="setCategory('all',this)">All Species</button>
-    <button class="filter" onclick="setCategory('freshwater',this)">Freshwater</button>
-    <button class="filter" onclick="setCategory('saltwater',this)">Saltwater</button>
-    <button class="filter" onclick="setCategory('bass',this)">Bass</button>
-    <button class="filter" onclick="setCategory('trout',this)">Trout</button>
-    <button class="filter" onclick="setCategory('catfish',this)">Catfish</button>
-    <button class="filter" onclick="setCategory('panfish',this)">Panfish</button>
+  <div class="info-grid">
+    <div class="info-card">
+      <h3>1. Understand Your Location</h3>
+      <p>
+        Start by learning about the water you plan to visit.
+        Lakes, rivers, ponds, and ocean areas all have different
+        conditions and fish species.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <h3>2. Choose Suitable Equipment</h3>
+      <p>
+        Select a rod, reel, line, and tackle that are appropriate
+        for the type of fishing and fish you are learning about.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <h3>3. Learn Basic Fishing Terms</h3>
+      <p>
+        Learn what terms such as casting, retrieve, drag, tackle,
+        lure, bait, and catch-and-release mean.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <h3>4. Check Local Rules</h3>
+      <p>
+        Before fishing, check license requirements, fishing seasons,
+        size limits, bag limits, and area-specific restrictions.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <h3>5. Prepare for the Day</h3>
+      <p>
+        Check the weather, bring drinking water, sun protection,
+        suitable clothing, and a way to keep your equipment organized.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <h3>6. Keep Learning</h3>
+      <p>
+        Pay attention to water conditions, fish behavior, and
+        what you learn from each fishing trip.
+      </p>
+    </div>
+  </div>
+
+  <div class="tip">
+    Beginner tip: Learning to identify the fish in your local waters
+    is a great starting point for understanding fishing.
+  </div>
+</section>
+
+<!-- EQUIPMENT -->
+<section class="guide-section" id="equipment">
+  <div class="section-heading">
+    <small>KNOW YOUR GEAR</small>
+    <h2>Fishing Equipment</h2>
+    <p>Understand the main pieces of equipment used by anglers.</p>
+  </div>
+
+  <div class="info-grid">
+    <div class="info-card">
+      <h3>Fishing Rods</h3>
+      <p>
+        A fishing rod is used to cast line and help control the
+        fishing presentation. Rods vary in length, power, and action.
+      </p>
+      <ul>
+        <li>Spinning rods</li>
+        <li>Casting rods</li>
+        <li>Fly rods</li>
+        <li>Telescopic rods</li>
+      </ul>
+    </div>
+
+    <div class="info-card">
+      <h3>Fishing Reels</h3>
+      <p>
+        A reel stores fishing line and helps an angler retrieve
+        line and manage tension.
+      </p>
+      <ul>
+        <li>Spinning reels</li>
+        <li>Baitcasting reels</li>
+        <li>Fly reels</li>
+        <li>Conventional reels</li>
+      </ul>
+    </div>
+
+    <div class="info-card">
+      <h3>Fishing Line</h3>
+      <p>
+        Fishing line connects the angler's equipment to the hook
+        or lure. Different materials have different properties.
+      </p>
+      <ul>
+        <li>Monofilament</li>
+        <li>Fluorocarbon</li>
+        <li>Braided line</li>
+      </ul>
+    </div>
+
+    <div class="info-card">
+      <h3>Hooks</h3>
+      <p>
+        Hooks come in many shapes and sizes. The appropriate hook
+        depends on the fishing method, bait, and target species.
+      </p>
+      <ul>
+        <li>J-hooks</li>
+        <li>Circle hooks</li>
+        <li>Treble hooks</li>
+        <li>Single hooks</li>
+      </ul>
+    </div>
+
+    <div class="info-card">
+      <h3>Bait and Lures</h3>
+      <p>
+        Bait and artificial lures are used to attract fish.
+        Different fish species respond to different presentations.
+      </p>
+      <ul>
+        <li>Natural bait</li>
+        <li>Soft plastic lures</li>
+        <li>Crankbaits</li>
+        <li>Spinnerbaits</li>
+        <li>Jigs</li>
+      </ul>
+    </div>
+
+    <div class="info-card">
+      <h3>Other Useful Equipment</h3>
+      <p>
+        Other equipment can help organize a fishing trip and
+        support safe, responsible fish handling.
+      </p>
+      <ul>
+        <li>Tackle box</li>
+        <li>Measuring ruler</li>
+        <li>Landing net</li>
+        <li>Needle-nose pliers</li>
+        <li>Personal flotation device when appropriate</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- TECHNIQUES -->
+<section class="guide-section" id="techniques">
+  <div class="section-heading">
+    <small>DIFFERENT WAYS TO FISH</small>
+    <h2>Fishing Techniques</h2>
+    <p>Different methods are used depending on the water, species, and equipment.</p>
+  </div>
+
+  <div class="info-grid">
+    <div class="info-card">
+      <h3>Spinning</h3>
+      <p>
+        Spinning is a popular fishing style that uses a spinning
+        reel and rod. It can be used in many freshwater and
+        saltwater environments.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <h3>Bait Fishing</h3>
+      <p>
+        Bait fishing uses natural or prepared bait to attract fish.
+        It is used for many species, including catfish and panfish.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <h3>Fly Fishing</h3>
+      <p>
+        Fly fishing uses specialized equipment and lightweight
+        artificial flies. It is often associated with trout
+        streams and rivers.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <h3>Trolling</h3>
+      <p>
+        Trolling involves presenting fishing lines from a moving
+        boat. It is used in some lakes and saltwater environments.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <h3>Jigging</h3>
+      <p>
+        Jigging uses a weighted lure, often moved through the
+        water with a repeated lifting and lowering motion.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <h3>Surf Fishing</h3>
+      <p>
+        Surf fishing takes place along ocean beaches. Anglers
+        must understand changing tides, waves, and local beach rules.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- FRESHWATER -->
+<section class="guide-section" id="freshwater">
+  <div class="section-heading">
+    <small>INLAND WATERS</small>
+    <h2>Freshwater Fishing</h2>
+    <p>Learn about the different environments found in freshwater systems.</p>
+  </div>
+
+  <div class="info-grid">
+    <div class="info-card">
+      <h3>Lakes</h3>
+      <p>
+        Lakes contain different habitats, including shallow shorelines,
+        deeper water, vegetation, rocky areas, and submerged structures.
+      </p>
+      <p>
+        Common species include bass, trout, crappie, catfish,
+        bluegill, and other regional fish.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <h3>Ponds</h3>
+      <p>
+        Ponds are smaller bodies of freshwater that may contain
+        vegetation, shallow edges, and areas of deeper water.
+      </p>
+      <p>
+        Depending on the location, common fish include bluegill,
+        bass, catfish, and stocked trout.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <h3>Rivers</h3>
+      <p>
+        Rivers have flowing water. Current, depth, temperature,
+        and underwater structure all influence fish habitat.
+      </p>
+      <p>
+        Fish species vary widely depending on the river and region.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <h3>Reservoirs</h3>
+      <p>
+        Reservoirs are human-made lakes created by dams.
+        They can contain a variety of habitats and fish species.
+      </p>
+      <p>
+        Some reservoirs support bass, trout, catfish, crappie,
+        and other game fish.
+      </p>
+    </div>
+  </div>
+
+  <div class="tip">
+    Water conditions change throughout the year. Temperature,
+    rainfall, water levels, and seasonal conditions can all
+    influence fish behavior.
+  </div>
+</section>
+
+<!-- SALTWATER -->
+<section class="guide-section" id="saltwater">
+  <div class="section-heading">
+    <small>COASTAL WATERS</small>
+    <h2>Saltwater Fishing</h2>
+    <p>Explore the different environments found along coastlines and in the ocean.</p>
+  </div>
+
+  <div class="info-grid">
+    <div class="info-card">
+      <h3>Ocean Fishing</h3>
+      <p>
+        Ocean environments contain a wide variety of fish.
+        Conditions can change with depth, currents, water temperature,
+        and location.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <h3>Bay Fishing</h3>
+      <p>
+        Bays are coastal areas that are partly enclosed by land.
+        They can provide important habitat for many fish species.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <h3>Estuaries</h3>
+      <p>
+        Estuaries are places where freshwater and saltwater mix.
+        They are productive ecosystems and important nursery
+        habitats for many fish.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <h3>Beach Fishing</h3>
+      <p>
+        Beach fishing takes place along the shoreline.
+        Conditions can change with tides, waves, and weather.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- SPECIES -->
+<section class="guide-section species-section" id="species">
+  <div class="section-heading">
+    <small>FISH IDENTIFICATION</small>
+    <h2>Fish Species Encyclopedia</h2>
+    <p>
+      Explore freshwater and saltwater species. Open each profile
+      to learn about identification, habitat, diet, behavior,
+      and general fishing information.
+    </p>
   </div>
 
   <div class="species-grid" id="speciesGrid">
 
-    <!-- 1 LARGEMOUTH BASS -->
-    <article class="fish-card" data-name="largemouth bass" data-type="freshwater bass">
+    <article class="species-card" data-search="largemouth bass freshwater bass">
       <div class="fish-picture" style="background-position:0% 0%"></div>
-      <div class="fish-info">
+      <div class="species-content">
         <h3>Largemouth Bass</h3>
-        <div class="scientific">Micropterus salmoides</div>
-        <span class="type">Freshwater · Bass</span>
-        <p>A popular freshwater fish recognized by its large mouth and dark side stripe.</p>
+        <div class="species-category">FRESHWATER · BASS</div>
+        <p>A popular freshwater predator recognized by its large mouth and dark side stripe.</p>
         <details>
-          <summary>Explore full species guide</summary>
-          <h4>Identification</h4>
-          <p>Usually greenish with a dark horizontal stripe running along the side. Its upper jaw extends beyond the rear edge of the eye. Body shape is elongated and sturdy.</p>
-          <h4>Habitat</h4>
-          <p>Common in warm lakes, reservoirs, ponds, and slow-moving rivers. Often associated with vegetation, submerged wood, and shaded shoreline areas.</p>
-          <h4>Diet</h4>
-          <p>Feeds on smaller fish, crayfish, insects, frogs, and other aquatic animals.</p>
-          <h4>Behavior</h4>
-          <p>Often stays near cover and may move into shallower water when conditions are favorable. Water temperature and seasonal changes influence activity.</p>
-          <h4>General fishing information</h4>
-          <p>Anglers commonly use soft plastic lures, spinnerbaits, crankbaits, and other artificial presentations. Fishing activity varies with weather and water conditions.</p>
-          <h4>Identification tip</h4>
-          <p>Compare the jaw length with a smallmouth bass. The largemouth's upper jaw extends noticeably farther behind the eye.</p>
-          <h4>Interesting fact</h4>
-          <p>Largemouth bass can grow to impressive sizes and are an important sport fish in many California reservoirs.</p>
+          <summary>View full species guide</summary>
+          <p><strong>Identification:</strong> Greenish body, dark horizontal stripe, and a large mouth that extends past the eye.</p>
+          <p><strong>Habitat:</strong> Lakes, ponds, reservoirs, and slow-moving rivers with vegetation or structure.</p>
+          <p><strong>Diet:</strong> Small fish, insects, crayfish, and other aquatic animals.</p>
+          <p><strong>Behavior:</strong> Often associated with cover such as vegetation, submerged branches, and docks.</p>
+          <p><strong>Fishing information:</strong> Anglers use a variety of artificial lures and natural baits. Local conditions and regulations vary.</p>
+          <p><strong>Interesting fact:</strong> Largemouth bass are members of the sunfish family.</p>
         </details>
       </div>
     </article>
 
-    <!-- 2 SMALLMOUTH BASS -->
-    <article class="fish-card" data-name="smallmouth bass" data-type="freshwater bass">
+    <article class="species-card" data-search="smallmouth bass freshwater bass">
       <div class="fish-picture" style="background-position:33.333% 0%"></div>
-      <div class="fish-info">
+      <div class="species-content">
         <h3>Smallmouth Bass</h3>
-        <div class="scientific">Micropterus dolomieu</div>
-        <span class="type">Freshwater · Bass</span>
-        <p>A bronze-colored bass often associated with rocky and clearer water.</p>
+        <div class="species-category">FRESHWATER · BASS</div>
+        <p>A bronze-colored bass often found around rocky areas and clear water.</p>
         <details>
-          <summary>Explore full species guide</summary>
-          <h4>Identification</h4>
-          <p>Usually bronze, brown, or olive with dark vertical bars or mottled markings. Its upper jaw generally does not extend beyond the middle of the eye.</p>
-          <h4>Habitat</h4>
-          <p>Found in lakes and rivers, especially around rocky shorelines, gravel, boulders, and current breaks.</p>
-          <h4>Diet</h4>
-          <p>Eats crayfish, insects, aquatic invertebrates, and smaller fish.</p>
-          <h4>Behavior</h4>
-          <p>Often uses rocky structure and moving water. It may move between deeper water and shallower feeding areas as conditions change.</p>
-          <h4>General fishing information</h4>
-          <p>Common presentations include jigs, soft plastics, small crankbaits, and other lures that imitate crayfish or baitfish.</p>
-          <h4>Identification tip</h4>
-          <p>Look for the bronze color, vertical markings, and shorter jaw compared with a largemouth bass.</p>
-          <h4>Interesting fact</h4>
-          <p>Smallmouth bass are known for their strong fighting behavior relative to their size.</p>
+          <summary>View full species guide</summary>
+          <p><strong>Identification:</strong> Bronze or brown body, vertical bars, and a mouth that usually does not extend past the eye.</p>
+          <p><strong>Habitat:</strong> Clear lakes, rocky shorelines, and rivers with moderate current.</p>
+          <p><strong>Diet:</strong> Crayfish, insects, and smaller fish.</p>
+          <p><strong>Behavior:</strong> Often associated with rocky structure and current breaks.</p>
+          <p><strong>Fishing information:</strong> Commonly associated with spinning and baitcasting equipment.</p>
+          <p><strong>Interesting fact:</strong> Smallmouth bass are often found in cooler water than largemouth bass.</p>
         </details>
       </div>
     </article>
 
-    <!-- 3 RAINBOW TROUT -->
-    <article class="fish-card" data-name="rainbow trout" data-type="freshwater trout">
+    <article class="species-card" data-search="rainbow trout freshwater trout">
       <div class="fish-picture" style="background-position:66.666% 0%"></div>
-      <div class="fish-info">
+      <div class="species-content">
         <h3>Rainbow Trout</h3>
-        <div class="scientific">Oncorhynchus mykiss</div>
-        <span class="type">Freshwater · Trout</span>
-        <p>Recognized by its colorful pink stripe and dark spots.</p>
+        <div class="species-category">FRESHWATER · TROUT</div>
+        <p>Recognized by its colorful pink or reddish stripe along the side.</p>
         <details>
-          <summary>Explore full species guide</summary>
-          <h4>Identification</h4>
-          <p>Typically has a silvery body, pink or reddish stripe along the sides, and small dark spots across the back and tail.</p>
-          <h4>Habitat</h4>
-          <p>Prefers cool, oxygen-rich water. Found in streams, rivers, lakes, and reservoirs.</p>
-          <h4>Diet</h4>
-          <p>Feeds on aquatic insects, larvae, crustaceans, and smaller fish.</p>
-          <h4>Behavior</h4>
-          <p>Often feeds in current seams and areas where food drifts naturally. In lakes, it may move deeper when surface water becomes warm.</p>
-          <h4>General fishing information</h4>
-          <p>Common fishing presentations include small spinners, spoons, flies, and bait where permitted by local regulations.</p>
-          <h4>Identification tip</h4>
-          <p>The pink lateral stripe and spotted tail are useful clues. Some trout colors vary with habitat and season.</p>
-          <h4>Interesting fact</h4>
-          <p>Steelhead are rainbow trout that migrate to the ocean and return to freshwater to reproduce.</p>
+          <summary>View full species guide</summary>
+          <p><strong>Identification:</strong> Silvery body, dark spots, and a pink or red lateral stripe.</p>
+          <p><strong>Habitat:</strong> Cold lakes, streams, rivers, and stocked waters.</p>
+          <p><strong>Diet:</strong> Aquatic insects, crustaceans, and small fish.</p>
+          <p><strong>Behavior:</strong> Often associated with cool, oxygen-rich water.</p>
+          <p><strong>Fishing information:</strong> Fly fishing, spinning, and other methods are used depending on local rules.</p>
+          <p><strong>Interesting fact:</strong> Rainbow trout are native to the Pacific coast region of North America.</p>
         </details>
       </div>
     </article>
 
-    <!-- 4 BROWN TROUT -->
-    <article class="fish-card" data-name="brown trout" data-type="freshwater trout">
+    <article class="species-card" data-search="brown trout freshwater trout">
       <div class="fish-picture" style="background-position:100% 0%"></div>
-      <div class="fish-info">
+      <div class="species-content">
         <h3>Brown Trout</h3>
-        <div class="scientific">Salmo trutta</div>
-        <span class="type">Freshwater · Trout</span>
-        <p>A trout with golden-brown coloring and distinctive dark and reddish spots.</p>
+        <div class="species-category">FRESHWATER · TROUT</div>
+        <p>A trout with brown or golden coloring and distinctive spots.</p>
         <details>
-          <summary>Explore full species guide</summary>
-          <h4>Identification</h4>
-          <p>Usually golden, olive, or brown with dark spots and often red or orange spots surrounded by lighter halos.</p>
-          <h4>Habitat</h4>
-          <p>Lives in cool streams, rivers, lakes, and reservoirs. Often uses pools, undercut banks, and submerged structure.</p>
-          <h4>Diet</h4>
-          <p>Feeds on insects, aquatic larvae, crustaceans, and smaller fish.</p>
-          <h4>Behavior</h4>
-          <p>Can be cautious and may spend time near cover. Feeding activity changes with light, water temperature, and food availability.</p>
-          <h4>General fishing information</h4>
-          <p>Common presentations include flies, small spinners, spoons, and other trout lures.</p>
-          <h4>Identification tip</h4>
-          <p>Look for the golden-brown body and reddish spots. Rainbow trout generally have a more noticeable pink lateral stripe.</p>
-          <h4>Interesting fact</h4>
-          <p>Brown trout were originally native to Europe and have been introduced to waters around the world.</p>
+          <summary>View full species guide</summary>
+          <p><strong>Identification:</strong> Brown or golden body with dark spots and sometimes reddish spots surrounded by lighter rings.</p>
+          <p><strong>Habitat:</strong> Cold rivers, streams, and lakes.</p>
+          <p><strong>Diet:</strong> Insects, aquatic invertebrates, and smaller fish.</p>
+          <p><strong>Behavior:</strong> Often uses deeper pools, cover, and shaded areas.</p>
+          <p><strong>Fishing information:</strong> Fly fishing and spinning are both used in suitable waters.</p>
+          <p><strong>Interesting fact:</strong> Brown trout are native to Europe and were introduced to many other parts of the world.</p>
         </details>
       </div>
     </article>
 
-    <!-- 5 CHANNEL CATFISH -->
-    <article class="fish-card" data-name="channel catfish" data-type="freshwater catfish">
+    <article class="species-card" data-search="channel catfish freshwater catfish">
       <div class="fish-picture" style="background-position:0% 50%"></div>
-      <div class="fish-info">
+      <div class="species-content">
         <h3>Channel Catfish</h3>
-        <div class="scientific">Ictalurus punctatus</div>
-        <span class="type">Freshwater · Catfish</span>
-        <p>A whiskered fish with a forked tail and often spotted sides.</p>
+        <div class="species-category">FRESHWATER · CATFISH</div>
+        <p>Recognized by its whisker-like barbels and deeply forked tail.</p>
         <details>
-          <summary>Explore full species guide</summary>
-          <h4>Identification</h4>
-          <p>Usually olive, gray, or blue-gray with a pale belly, whisker-like barbels, and a deeply forked tail. Smaller individuals often have dark spots.</p>
-          <h4>Habitat</h4>
-          <p>Found in lakes, reservoirs, ponds, and rivers. Uses deeper pools, channels, and areas with suitable cover.</p>
-          <h4>Diet</h4>
-          <p>An opportunistic feeder that eats insects, crayfish, small fish, and other available food.</p>
-          <h4>Behavior</h4>
-          <p>Uses its barbels and other sensory systems to locate food. Activity can increase during low-light periods.</p>
-          <h4>General fishing information</h4>
-          <p>Common bait choices include worms and prepared catfish baits where allowed. Fishing conditions and water temperature affect activity.</p>
-          <h4>Identification tip</h4>
-          <p>Look for the forked tail and curved anal fin. Compare these features with blue catfish.</p>
-          <h4>Interesting fact</h4>
-          <p>Catfish have excellent sensory abilities that help them find food in cloudy water.</p>
+          <summary>View full species guide</summary>
+          <p><strong>Identification:</strong> Gray or olive body, barbels around the mouth, and a forked tail.</p>
+          <p><strong>Habitat:</strong> Rivers, reservoirs, lakes, and ponds.</p>
+          <p><strong>Diet:</strong> Insects, crustaceans, fish, and other available food.</p>
+          <p><strong>Behavior:</strong> Uses its barbels to locate food and can be active in different water conditions.</p>
+          <p><strong>Fishing information:</strong> Commonly pursued using bait fishing methods.</p>
+          <p><strong>Interesting fact:</strong> Catfish have taste receptors across much of their bodies.</p>
         </details>
       </div>
     </article>
 
-    <!-- 6 BLUE CATFISH -->
-    <article class="fish-card" data-name="blue catfish" data-type="freshwater catfish">
+    <article class="species-card" data-search="blue catfish freshwater catfish">
       <div class="fish-picture" style="background-position:33.333% 50%"></div>
-      <div class="fish-info">
+      <div class="species-content">
         <h3>Blue Catfish</h3>
-        <div class="scientific">Ictalurus furcatus</div>
-        <span class="type">Freshwater · Catfish</span>
-        <p>A large catfish with blue-gray coloring and a forked tail.</p>
+        <div class="species-category">FRESHWATER · CATFISH</div>
+        <p>A large catfish with a blue-gray body and deeply forked tail.</p>
         <details>
-          <summary>Explore full species guide</summary>
-          <h4>Identification</h4>
-          <p>Usually slate-blue or blue-gray with a pale underside, smooth scaleless skin, barbels, and a deeply forked tail.</p>
-          <h4>Habitat</h4>
-          <p>Often associated with large rivers, reservoirs, and deep channels. Also uses areas with current and submerged structure.</p>
-          <h4>Diet</h4>
-          <p>Eats fish, crustaceans, insects, and other available aquatic animals.</p>
-          <h4>Behavior</h4>
-          <p>Can travel through large water systems and may use deeper areas during certain conditions.</p>
-          <h4>General fishing information</h4>
-          <p>Anglers commonly use natural baits and catfish rigs. Local conditions and regulations determine what is appropriate.</p>
-          <h4>Identification tip</h4>
-          <p>Blue catfish generally have a straighter anal fin edge, while channel catfish have a more curved anal fin.</p>
-          <h4>Interesting fact</h4>
-          <p>Blue catfish can reach very large sizes and are among the largest freshwater catfish in North America.</p>
+          <summary>View full species guide</summary>
+          <p><strong>Identification:</strong> Blue-gray coloring, smooth skin, barbels, and a deeply forked tail.</p>
+          <p><strong>Habitat:</strong> Large rivers, reservoirs, and connected waterways.</p>
+          <p><strong>Diet:</strong> Fish, crustaceans, and other aquatic animals.</p>
+          <p><strong>Behavior:</strong> Can move through large river systems and use a variety of depths.</p>
+          <p><strong>Fishing information:</strong> Anglers use different bait fishing setups depending on local conditions.</p>
+          <p><strong>Interesting fact:</strong> Blue catfish can grow to very large sizes.</p>
         </details>
       </div>
     </article>
 
-    <!-- 7 BLACK CRAPPIE -->
-    <article class="fish-card" data-name="black crappie" data-type="freshwater panfish">
+    <article class="species-card" data-search="black crappie freshwater panfish">
       <div class="fish-picture" style="background-position:66.666% 50%"></div>
-      <div class="fish-info">
+      <div class="species-content">
         <h3>Black Crappie</h3>
-        <div class="scientific">Pomoxis nigromaculatus</div>
-        <span class="type">Freshwater · Panfish</span>
-        <p>A deep-bodied fish covered with irregular dark spots.</p>
+        <div class="species-category">FRESHWATER · PANFISH</div>
+        <p>A popular panfish with dark speckles across its sides.</p>
         <details>
-          <summary>Explore full species guide</summary>
-          <h4>Identification</h4>
-          <p>Usually silvery with dark irregular markings. Has a deep, compressed body and a spiny dorsal fin.</p>
-          <h4>Habitat</h4>
-          <p>Found in lakes, ponds, reservoirs, and slow-moving rivers. Often associated with submerged brush and aquatic vegetation.</p>
-          <h4>Diet</h4>
-          <p>Feeds on small fish, insects, and tiny aquatic organisms.</p>
-          <h4>Behavior</h4>
-          <p>Often forms groups and may gather around submerged structure. Seasonal movement can bring fish into shallower water.</p>
-          <h4>General fishing information</h4>
-          <p>Small jigs, soft plastics, and other small presentations are commonly used.</p>
-          <h4>Identification tip</h4>
-          <p>Black crappie usually have irregular dark spotting rather than the more organized vertical bars seen on white crappie.</p>
-          <h4>Interesting fact</h4>
-          <p>Crappie are popular panfish and are known for their schooling behavior.</p>
+          <summary>View full species guide</summary>
+          <p><strong>Identification:</strong> Silvery body with irregular dark spots and a deep, compressed shape.</p>
+          <p><strong>Habitat:</strong> Lakes, reservoirs, ponds, and slower river sections.</p>
+          <p><strong>Diet:</strong> Small fish, insects, and zooplankton.</p>
+          <p><strong>Behavior:</strong> Often forms groups and may associate with submerged structure.</p>
+          <p><strong>Fishing information:</strong> Commonly caught using small jigs and other light tackle.</p>
+          <p><strong>Interesting fact:</strong> Crappie are part of the sunfish family.</p>
         </details>
       </div>
     </article>
 
-    <!-- 8 BLUEGILL -->
-    <article class="fish-card" data-name="bluegill" data-type="freshwater panfish">
+    <article class="species-card" data-search="bluegill freshwater sunfish panfish">
       <div class="fish-picture" style="background-position:100% 50%"></div>
-      <div class="fish-info">
+      <div class="species-content">
         <h3>Bluegill</h3>
-        <div class="scientific">Lepomis macrochirus</div>
-        <span class="type">Freshwater · Panfish</span>
-        <p>A colorful sunfish with a dark spot near the rear of its dorsal fin.</p>
+        <div class="species-category">FRESHWATER · SUNFISH</div>
+        <p>A small sunfish with a blue-colored area near its gill cover.</p>
         <details>
-          <summary>Explore full species guide</summary>
-          <h4>Identification</h4>
-          <p>Has a deep, flattened body with blue-green coloring, yellow or orange lower areas, and a dark ear flap behind the eye.</p>
-          <h4>Habitat</h4>
-          <p>Common in warm ponds, lakes, reservoirs, and slow-moving streams. Often lives near vegetation and shallow structure.</p>
-          <h4>Diet</h4>
-          <p>Feeds on insects, larvae, small crustaceans, and other tiny aquatic organisms.</p>
-          <h4>Behavior</h4>
-          <p>Often gathers in groups. During spawning periods, it may create visible nesting areas in shallow water.</p>
-          <h4>General fishing information</h4>
-          <p>Small hooks, bobbers, worms, and tiny artificial lures are commonly used for bluegill.</p>
-          <h4>Identification tip</h4>
-          <p>The dark ear flap and dark spot near the back of the dorsal fin are helpful identifying features.</p>
-          <h4>Interesting fact</h4>
-          <p>Bluegill are members of the sunfish family and are an important food source for larger fish.</p>
+          <summary>View full species guide</summary>
+          <p><strong>Identification:</strong> Deep, rounded body, blue coloring near the gill cover, and dark vertical bars.</p>
+          <p><strong>Habitat:</strong> Ponds, lakes, reservoirs, and slow-moving rivers.</p>
+          <p><strong>Diet:</strong> Insects, larvae, small crustaceans, and other tiny organisms.</p>
+          <p><strong>Behavior:</strong> Often found in groups around vegetation and shallow habitat.</p>
+          <p><strong>Fishing information:</strong> Commonly associated with light tackle and small hooks.</p>
+          <p><strong>Interesting fact:</strong> Bluegill are one of the most widely recognized North American sunfish.</p>
         </details>
       </div>
     </article>
 
-    <!-- 9 STRIPED BASS -->
-    <article class="fish-card" data-name="striped bass" data-type="freshwater saltwater">
+    <article class="species-card" data-search="striped bass freshwater saltwater bass">
       <div class="fish-picture" style="background-position:0% 100%"></div>
-      <div class="fish-info">
+      <div class="species-content">
         <h3>Striped Bass</h3>
-        <div class="scientific">Morone saxatilis</div>
-        <span class="type">Freshwater & Saltwater</span>
-        <p>A silver fish with several dark horizontal stripes along its sides.</p>
+        <div class="species-category">FRESHWATER & SALTWATER</div>
+        <p>A powerful fish recognized by several dark horizontal stripes.</p>
         <details>
-          <summary>Explore full species guide</summary>
-          <h4>Identification</h4>
-          <p>Silvery body with several dark horizontal stripes that run from the gill area toward the tail.</p>
-          <h4>Habitat</h4>
-          <p>Striped bass are anadromous, meaning they can move between saltwater and freshwater. They also live in freshwater reservoirs where populations have been established.</p>
-          <h4>Diet</h4>
-          <p>Feeds mainly on smaller fish and other aquatic prey.</p>
-          <h4>Behavior</h4>
-          <p>Often travels in groups while following schools of baitfish. Movement depends on water temperature, food, and seasonal patterns.</p>
-          <h4>General fishing information</h4>
-          <p>Common artificial presentations include swimbaits, spoons, plugs, and other baitfish imitations.</p>
-          <h4>Identification tip</h4>
-          <p>The multiple dark horizontal stripes are the most recognizable feature.</p>
-          <h4>Interesting fact</h4>
-          <p>Striped bass are found in California waterways including parts of the Sacramento-San Joaquin Delta.</p>
+          <summary>View full species guide</summary>
+          <p><strong>Identification:</strong> Silvery body with several dark horizontal stripes running along the sides.</p>
+          <p><strong>Habitat:</strong> Coastal waters, bays, estuaries, and some freshwater reservoirs.</p>
+          <p><strong>Diet:</strong> Smaller fish and other aquatic animals.</p>
+          <p><strong>Behavior:</strong> Some populations migrate between freshwater and saltwater, while others live in freshwater.</p>
+          <p><strong>Fishing information:</strong> Different regional methods are used in coastal and inland waters.</p>
+          <p><strong>Interesting fact:</strong> Striped bass have been introduced into several inland reservoirs.</p>
         </details>
       </div>
     </article>
 
-    <!-- 10 CALIFORNIA HALIBUT -->
-    <article class="fish-card" data-name="california halibut" data-type="saltwater">
+    <article class="species-card" data-search="california halibut saltwater ocean">
       <div class="fish-picture" style="background-position:33.333% 100%"></div>
-      <div class="fish-info">
+      <div class="species-content">
         <h3>California Halibut</h3>
-        <div class="scientific">Paralichthys californicus</div>
-        <span class="type">Saltwater · Flatfish</span>
-        <p>A flat-bodied fish that rests along sandy and muddy ocean bottoms.</p>
+        <div class="species-category">SALTWATER · FLATFISH</div>
+        <p>A flatfish with both eyes on one side of its body.</p>
         <details>
-          <summary>Explore full species guide</summary>
-          <h4>Identification</h4>
-          <p>Has a flattened oval body with both eyes on one side. The upper side is usually brown or mottled, while the underside is pale.</p>
-          <h4>Habitat</h4>
-          <p>Common in coastal bays, sandy areas, estuaries, and nearshore ocean habitat.</p>
-          <h4>Diet</h4>
-          <p>Feeds on small fish, squid, and crustaceans.</p>
-          <h4>Behavior</h4>
-          <p>Often lies partly buried in sand, using camouflage to blend into the bottom while waiting for prey.</p>
-          <h4>General fishing information</h4>
-          <p>Anglers commonly use presentations that imitate small baitfish near the bottom.</p>
-          <h4>Identification tip</h4>
-          <p>Its flattened body and eyes located on one side make it easy to distinguish from round-bodied fish.</p>
-          <h4>Interesting fact</h4>
-          <p>Young halibut begin life with an eye on each side. As they develop, one eye moves to the other side of the head.</p>
+          <summary>View full species guide</summary>
+          <p><strong>Identification:</strong> Flat body, both eyes on the upper side, and coloring that helps it blend into the seafloor.</p>
+          <p><strong>Habitat:</strong> Sandy and muddy coastal bottoms, bays, and estuaries.</p>
+          <p><strong>Diet:</strong> Small fish, squid, and crustaceans.</p>
+          <p><strong>Behavior:</strong> Often rests on the bottom and blends into surrounding habitat.</p>
+          <p><strong>Fishing information:</strong> Coastal anglers use a variety of bait and artificial presentations.</p>
+          <p><strong>Interesting fact:</strong> Young halibut begin life with an eye on each side before one eye moves as they develop.</p>
         </details>
       </div>
     </article>
 
-    <!-- 11 RED DRUM -->
-    <article class="fish-card" data-name="red drum" data-type="saltwater">
+    <article class="species-card" data-search="red drum redfish saltwater">
       <div class="fish-picture" style="background-position:66.666% 100%"></div>
-      <div class="fish-info">
+      <div class="species-content">
         <h3>Red Drum</h3>
-        <div class="scientific">Sciaenops ocellatus</div>
-        <span class="type">Saltwater · Coastal Fish</span>
-        <p>A copper-colored coastal fish often marked with a dark spot near its tail.</p>
+        <div class="species-category">SALTWATER · DRUM</div>
+        <p>A coastal fish often recognized by a dark spot near its tail.</p>
         <details>
-          <summary>Explore full species guide</summary>
-          <h4>Identification</h4>
-          <p>Usually bronze, copper, or reddish with a pale underside. A dark spot is commonly present near the base of the tail.</p>
-          <h4>Habitat</h4>
-          <p>Found in coastal waters, bays, estuaries, and shallow nearshore areas, especially along the Atlantic and Gulf coasts.</p>
-          <h4>Diet</h4>
-          <p>Feeds on crabs, shrimp, small fish, and other bottom-dwelling animals.</p>
-          <h4>Behavior</h4>
-          <p>May travel in groups and forage along sandy or muddy bottoms and shallow coastal flats.</p>
-          <h4>General fishing information</h4>
-          <p>Common presentations include natural bait and artificial lures that resemble small crabs or baitfish.</p>
-          <h4>Identification tip</h4>
-          <p>Look for the copper coloring and distinctive dark tail spot.</p>
-          <h4>Interesting fact</h4>
-          <p>Red drum are also known as redfish and are famous for the drumming sound they can produce using muscles around their swim bladder.</p>
+          <summary>View full species guide</summary>
+          <p><strong>Identification:</strong> Copper or reddish body, with one or more dark spots near the tail.</p>
+          <p><strong>Habitat:</strong> Coastal bays, estuaries, shallow flats, and nearshore waters.</p>
+          <p><strong>Diet:</strong> Crabs, shrimp, and smaller fish.</p>
+          <p><strong>Behavior:</strong> Often feeds near the bottom in coastal habitats.</p>
+          <p><strong>Fishing information:</strong> Coastal anglers use a range of bait and lure presentations.</p>
+          <p><strong>Interesting fact:</strong> Red drum are also commonly called redfish.</p>
         </details>
       </div>
     </article>
 
-    <!-- 12 SURFPERCH -->
-    <article class="fish-card" data-name="surfperch" data-type="saltwater">
+    <article class="species-card" data-search="surfperch saltwater beach">
       <div class="fish-picture" style="background-position:100% 100%"></div>
-      <div class="fish-info">
+      <div class="species-content">
         <h3>Surfperch</h3>
-        <div class="scientific">Embiotocidae family</div>
-        <span class="type">Saltwater · Coastal Fish</span>
-        <p>A group of coastal fish commonly found along Pacific beaches and rocky shorelines.</p>
+        <div class="species-category">SALTWATER · SURFPERCH</div>
+        <p>A coastal fish commonly found in Pacific shoreline environments.</p>
         <details>
-          <summary>Explore full species guide</summary>
-          <h4>Identification</h4>
-          <p>Surfperch vary by species, but many have deep, compressed bodies, prominent fins, and vertical bars or other markings.</p>
-          <h4>Habitat</h4>
-          <p>Found along the Pacific coast in surf zones, sandy beaches, rocky shorelines, kelp areas, and bays.</p>
-          <h4>Diet</h4>
-          <p>Depending on the species, surfperch feed on small crustaceans, worms, mollusks, and other tiny marine animals.</p>
-          <h4>Behavior</h4>
-          <p>Many species remain relatively close to shore and forage in areas where waves move food through the water.</p>
-          <h4>General fishing information</h4>
-          <p>Small natural baits and light presentations are commonly used. Species and local conditions influence what is appropriate.</p>
-          <h4>Identification tip</h4>
-          <p>There are many surfperch species. Body shape, markings, fin patterns, and location help narrow down the identification.</p>
-          <h4>Interesting fact</h4>
-          <p>Unlike many fish, surfperch give birth to live young rather than laying eggs externally.</p>
+          <summary>View full species guide</summary>
+          <p><strong>Identification:</strong> Surfperch species vary in color and pattern, but many have deep, compressed bodies.</p>
+          <p><strong>Habitat:</strong> Pacific coast beaches, rocky shorelines, and nearshore waters.</p>
+          <p><strong>Diet:</strong> Small crustaceans, worms, and other invertebrates.</p>
+          <p><strong>Behavior:</strong> Many species feed in shallow coastal areas.</p>
+          <p><strong>Fishing information:</strong> Surfperch are commonly associated with beach fishing.</p>
+          <p><strong>Interesting fact:</strong> There are several different surfperch species along the Pacific coast.</p>
         </details>
       </div>
     </article>
 
   </div>
 
-  <div class="empty" id="noResults">
-    No fish found. Try another search or category.
-  </div>
+  <p class="empty-message" id="emptyMessage">
+    No matching fish species found. Try another search.
+  </p>
 </section>
 
-<section class="info-section">
+<!-- KNOTS -->
+<section class="guide-section" id="knots">
   <div class="section-heading">
-    <h2>Fishing Knowledge Center</h2>
-    <p>Build your understanding of fish, water, equipment, and responsible fishing.</p>
+    <small>FISHING FUNDAMENTALS</small>
+    <h2>Common Fishing Knots</h2>
+    <p>Learn what different fishing knots are commonly used for.</p>
   </div>
 
   <div class="info-grid">
-
     <div class="info-card">
-      <h3>Getting Started</h3>
-      <p>Fishing is easier to learn when you understand the basics.</p>
-      <ul>
-        <li>Learn the difference between spinning and baitcasting equipment.</li>
-        <li>Understand hooks, weights, swivels, and bobbers.</li>
-        <li>Learn how to tie and check fishing knots.</li>
-        <li>Practice casting in a safe, open area.</li>
-        <li>Learn how to identify common fish species.</li>
-      </ul>
+      <h3>Improved Clinch Knot</h3>
+      <p>
+        A commonly used knot for attaching fishing line to
+        many hooks, swivels, and lures. Its suitability depends
+        on line material and knot tying technique.
+      </p>
     </div>
 
     <div class="info-card">
-      <h3>Understanding Fish Habitat</h3>
-      <p>Different fish prefer different environments.</p>
-      <ul>
-        <li>Vegetation provides cover and food.</li>
-        <li>Rocky areas can support crayfish and aquatic insects.</li>
-        <li>Deeper water can offer cooler temperatures.</li>
-        <li>Current carries food through rivers and streams.</li>
-        <li>Water clarity and temperature affect fish behavior.</li>
-      </ul>
+      <h3>Palomar Knot</h3>
+      <p>
+        A popular knot used to connect fishing line to hooks
+        and other terminal tackle. It is commonly used with
+        several types of fishing line.
+      </p>
     </div>
 
     <div class="info-card">
-      <h3>Freshwater Fishing</h3>
-      <p>Freshwater fishing takes place in lakes, ponds, reservoirs, rivers, and streams.</p>
-      <ul>
-        <li>Bass are commonly associated with structure and cover.</li>
-        <li>Trout generally prefer cooler, oxygen-rich water.</li>
-        <li>Catfish use sensory features to locate food.</li>
-        <li>Panfish are often found in groups.</li>
-        <li>Water conditions change throughout the year.</li>
-      </ul>
+      <h3>Uni Knot</h3>
+      <p>
+        A versatile knot used for attaching line to tackle.
+        It is also used in some line-to-line connections.
+      </p>
     </div>
 
     <div class="info-card">
-      <h3>Saltwater Fishing</h3>
-      <p>Saltwater environments include beaches, bays, estuaries, and open ocean.</p>
-      <ul>
-        <li>Learn the difference between tidal and non-tidal waters.</li>
-        <li>Understand how currents move bait and food.</li>
-        <li>Identify common coastal fish species.</li>
-        <li>Learn about sandy, rocky, and kelp habitats.</li>
-        <li>Check local access and fishing regulations.</li>
-      </ul>
+      <h3>Loop Knot</h3>
+      <p>
+        Loop knots create a connection that allows a lure
+        or fly to move more freely.
+      </p>
     </div>
+  </div>
 
-    <div class="info-card">
-      <h3>Fishing Equipment</h3>
-      <p>Understanding equipment helps you choose suitable gear.</p>
-      <ul>
-        <li>Rods have different lengths, powers, and actions.</li>
-        <li>Reels come in several designs.</li>
-        <li>Fishing line has different strengths and materials.</li>
-        <li>Hooks vary in size and shape.</li>
-        <li>Artificial lures imitate different types of prey.</li>
-      </ul>
-    </div>
-
-    <div class="info-card">
-      <h3>Fish Identification Tips</h3>
-      <p>Always look at several features before deciding which species you have found.</p>
-      <ul>
-        <li>Compare body shape and proportions.</li>
-        <li>Look at the mouth and jaw.</li>
-        <li>Check the number and shape of fins.</li>
-        <li>Look for spots, stripes, and other markings.</li>
-        <li>Consider the location and type of water.</li>
-      </ul>
-    </div>
-
-    <div class="info-card">
-      <h3>Fishing Knots</h3>
-      <p>Knots connect line to hooks, lures, and other tackle.</p>
-      <ul>
-        <li>Improved clinch knot</li>
-        <li>Palomar knot</li>
-        <li>Uni knot</li>
-        <li>Loop knot</li>
-        <li>Double-uni knot</li>
-      </ul>
-      <p>Always check that a knot is properly tied and secure before fishing.</p>
-    </div>
-
-    <div class="info-card">
-      <h3>Responsible Fishing</h3>
-      <p>Protect fish populations and the places where they live.</p>
-      <ul>
-        <li>Follow current fishing regulations.</li>
-        <li>Respect protected areas and closures.</li>
-        <li>Keep waterways free of litter.</li>
-        <li>Use appropriate fish-handling practices.</li>
-        <li>Respect private property and public access rules.</li>
-        <li>Follow local guidance for invasive species.</li>
-      </ul>
-    </div>
-
-    <div class="info-card">
-      <h3>Fishing Vocabulary</h3>
-      <ul>
-        <li><b>Structure:</b> Physical features such as rocks, trees, or drop-offs.</li>
-        <li><b>Cover:</b> Objects that provide shelter for fish.</li>
-        <li><b>Current:</b> Movement of water in a river or stream.</li>
-        <li><b>Spawning:</b> The process of producing offspring.</li>
-        <li><b>Fry:</b> A young fish that has recently hatched.</li>
-        <li><b>Barbel:</b> A whisker-like sensory structure near a fish's mouth.</li>
-      </ul>
-    </div>
-
+  <div class="tip">
+    Always check that knots are tied correctly and securely.
+    Knot performance can vary depending on the line material,
+    line condition, and connection being used.
   </div>
 </section>
 
-<div class="notice">
-  <b>Important:</b> This encyclopedia is an educational identification guide.
-  Fish identification from illustrations is not a substitute for confirming
-  a species in person. Fishing seasons, size limits, bag limits, closures,
-  and permitted methods can change. Always check current official regulations
-  for the exact water you plan to visit.
-</div>
-
-<section class="info-section resources">
+<!-- RESPONSIBLE FISHING -->
+<section class="guide-section" id="responsible">
   <div class="section-heading">
-    <h2>Official Fishing Resources</h2>
-    <p>Use trusted sources for regulations and additional species information.</p>
+    <small>PROTECT OUR WATERS</small>
+    <h2>Responsible Fishing</h2>
+    <p>Healthy fisheries depend on good stewardship of fish and aquatic habitats.</p>
   </div>
+
   <div class="info-grid">
     <div class="info-card">
-      <h3>California Fish & Wildlife</h3>
-      <p>California fishing regulations, fish species information, and official updates.</p>
-      <a href="https://wildlife.ca.gov/Fishing" target="_blank" rel="noopener">Visit California Fish & Wildlife →</a>
+      <h3>Follow Fishing Regulations</h3>
+      <p>
+        Check current rules for the exact water you plan to visit.
+        Regulations can differ by species, location, season,
+        and fishing method.
+      </p>
     </div>
+
+    <div class="info-card">
+      <h3>Respect Catch Limits</h3>
+      <p>
+        Follow all size limits, bag limits, and possession limits.
+        These rules help manage fish populations.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <h3>Protect Fish Habitat</h3>
+      <p>
+        Avoid damaging aquatic vegetation, shorelines, and
+        sensitive habitat. Leave natural areas as you found them.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <h3>Keep Waterways Clean</h3>
+      <p>
+        Collect fishing line, hooks, packaging, and other trash.
+        Never leave fishing equipment behind.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <h3>Handle Fish Carefully</h3>
+      <p>
+        Learn the recommended handling practices for the species
+        and follow local rules when releasing fish.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <h3>Prevent the Spread of Invasive Species</h3>
+      <p>
+        Clean, drain, and dry boats and equipment when required.
+        Follow local guidance for moving between waterways.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- REGULATIONS -->
+<section class="guide-section" id="regulations">
+  <div class="section-heading">
+    <small>KNOW THE RULES</small>
+    <h2>Fishing Regulations & Resources</h2>
+    <p>
+      Fishing regulations are location-specific and can change.
+      Always use current official information before a trip.
+    </p>
+  </div>
+
+  <div class="info-grid">
+    <div class="info-card">
+      <h3>California Fishing Regulations</h3>
+      <p>
+        Find official California fishing regulations, license
+        information, seasons, and species rules.
+      </p>
+      <br>
+      <a class="resource-link"
+        href="https://wildlife.ca.gov/Regulations"
+        target="_blank" rel="noopener">
+        California Regulations →
+      </a>
+    </div>
+
     <div class="info-card">
       <h3>California Fish Identification</h3>
-      <p>Explore additional fish species and identification information.</p>
-      <a href="https://oehha.ca.gov/fish/species" target="_blank" rel="noopener">Explore fish species →</a>
+      <p>
+        Explore fish species information and identification
+        resources from California's wildlife agency.
+      </p>
+      <br>
+      <a class="resource-link"
+        href="https://wildlife.ca.gov/Fishing"
+        target="_blank" rel="noopener">
+        California Fishing Resources →
+      </a>
     </div>
+
     <div class="info-card">
-      <h3>East Bay Regional Parks</h3>
-      <p>Learn about common freshwater fish and fishing in local waters.</p>
-      <a href="https://www.ebparks.org/recreation/fishing/facts" target="_blank" rel="noopener">Read Fishy Facts →</a>
+      <h3>NOAA Fisheries</h3>
+      <p>
+        Learn about marine fish, ocean habitats, conservation,
+        and saltwater fisheries.
+      </p>
+      <br>
+      <a class="resource-link"
+        href="https://www.fisheries.noaa.gov/"
+        target="_blank" rel="noopener">
+        NOAA Fisheries →
+      </a>
+    </div>
+
+    <div class="info-card">
+      <h3>U.S. Fish & Wildlife Service</h3>
+      <p>
+        Explore information about fish, aquatic habitats,
+        conservation, and wildlife.
+      </p>
+      <br>
+      <a class="resource-link"
+        href="https://www.fws.gov/"
+        target="_blank" rel="noopener">
+        U.S. Fish & Wildlife →
+      </a>
+    </div>
+  </div>
+
+  <div class="tip">
+    This guide is educational. It does not replace official
+    fishing regulations. Check the current rules for your
+    exact fishing location before heading out.
+  </div>
+</section>
+
+<!-- GLOSSARY -->
+<section class="guide-section" id="glossary">
+  <div class="section-heading">
+    <small>LEARN THE LANGUAGE</small>
+    <h2>Fishing Glossary</h2>
+    <p>Common fishing terms and what they mean.</p>
+  </div>
+
+  <div class="info-grid">
+    <div class="info-card">
+      <h3>Angler</h3>
+      <p>A person who fishes.</p>
+    </div>
+
+    <div class="info-card">
+      <h3>Bait</h3>
+      <p>Natural or prepared material used to attract fish.</p>
+    </div>
+
+    <div class="info-card">
+      <h3>Drag</h3>
+      <p>A reel mechanism that allows line to release under tension.</p>
+    </div>
+
+    <div class="info-card">
+      <h3>Retrieve</h3>
+      <p>The process of bringing fishing line and a lure back toward the angler.</p>
+    </div>
+
+    <div class="info-card">
+      <h3>Structure</h3>
+      <p>Physical features in the water, such as rocks, logs, and submerged vegetation.</p>
+    </div>
+
+    <div class="info-card">
+      <h3>Current</h3>
+      <p>The movement of water, especially in rivers and streams.</p>
+    </div>
+
+    <div class="info-card">
+      <h3>Topwater</h3>
+      <p>A fishing presentation that takes place on or near the water's surface.</p>
+    </div>
+
+    <div class="info-card">
+      <h3>Fry</h3>
+      <p>A young fish that has developed beyond the earliest larval stage.</p>
     </div>
   </div>
 </section>
 
-</main>
-
 <footer>
-  <p><b>CAST & BLAST</b> | Fishing Encyclopedia</p>
-  <p><a href="index.html">Home</a> · <a href="map.html">Fishing Map</a> · <a href="guides.html">Fishing Guides</a></p>
-  <p>Learn more. Explore more. Respect the outdoors.</p>
+  CAST & BLAST | EXPLORE. DISCOVER. RESPECT THE OUTDOORS.
+  <br><br>© 2026 Cast & Blast
 </footer>
 
 <script>
-let selectedCategory = "all";
+const searchInput = document.getElementById("guideSearch");
+const speciesCards = document.querySelectorAll(".species-card");
+const emptyMessage = document.getElementById("emptyMessage");
 
-function setCategory(category, button) {
-  selectedCategory = category;
+searchInput.addEventListener("input", function() {
+  const search = this.value.toLowerCase().trim();
+  let visibleCount = 0;
 
-  document.querySelectorAll(".filter").forEach(function(item) {
-    item.classList.remove("active");
+  speciesCards.forEach(card => {
+    const text = (
+      card.innerText + " " +
+      (card.dataset.search || "")
+    ).toLowerCase();
+
+    const matches = text.includes(search);
+    card.hidden = !matches;
+
+    if(matches) visibleCount++;
   });
 
-  button.classList.add("active");
-  filterFish();
-}
+  emptyMessage.style.display =
+    visibleCount === 0 ? "block" : "none";
 
-function filterFish() {
-  const search = document.getElementById("fishSearch").value.toLowerCase().trim();
-  const cards = document.querySelectorAll(".fish-card");
-  let visible = 0;
-
-  cards.forEach(function(card) {
-    const name = card.dataset.name.toLowerCase();
-    const type = card.dataset.type.toLowerCase();
-
-    const matchesSearch = name.includes(search) || type.includes(search);
-
-    let matchesCategory = selectedCategory === "all";
-
-    if (selectedCategory === "freshwater") {
-      matchesCategory = type.includes("freshwater");
-    } else if (selectedCategory === "saltwater") {
-      matchesCategory = type.includes("saltwater");
-    } else {
-      matchesCategory = selectedCategory === "all" ||
-        type.includes(selectedCategory);
-    }
-
-    const show = matchesSearch && matchesCategory;
-    card.style.display = show ? "" : "none";
-
-    if (show) visible++;
-  });
-
-  document.getElementById("noResults").style.display =
-    visible === 0 ? "block" : "none";
-}
+  if(search.length > 0) {
+    document.getElementById("species").scrollIntoView({
+      behavior:"smooth",
+      block:"start"
+    });
+  }
+});
 </script>
 
 </body>
