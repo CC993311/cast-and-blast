@@ -167,6 +167,28 @@ section { padding: 65px 7%; }
   border-color: var(--green);
 }
 
+/* Clickable homepage cards */
+.card-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.card-link:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 4px;
+}
+
+.card-action {
+  display: inline-block;
+  margin-top: 18px;
+  color: var(--green);
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
 .card-icon {
   width: 48px;
   height: 48px;
@@ -284,7 +306,9 @@ footer {
   </div>
 
   <div class="cards">
-    <div class="card">
+
+    <!-- CLICKABLE FISHING LOCATIONS CARD -->
+    <a href="map.html" class="card card-link">
       <div class="card-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
           <path d="M3 12s4-6 11-6c3 0 5 2 7 6-2 4-4 6-7 6-7 0-11-6-11-6Z"/>
@@ -293,7 +317,8 @@ footer {
       </div>
       <h3>Fishing Locations</h3>
       <p>Discover lakes, rivers, reservoirs, and fishing access locations.</p>
-    </div>
+      <span class="card-action">EXPLORE FISHING LOCATIONS →</span>
+    </a>
 
     <div class="card">
       <div class="card-icon">
@@ -317,6 +342,7 @@ footer {
       <h3>Fishing Guides</h3>
       <p>Learn about fishing techniques, equipment, and local regulations.</p>
     </div>
+
   </div>
 </section>
 
@@ -361,7 +387,6 @@ footer {
   </div>
 </section>
 
-
 <section id="maps">
   <div class="section-heading">
     <small>FIND YOUR NEXT ADVENTURE</small>
@@ -387,7 +412,6 @@ footer {
   </div>
 </section>
 
-
 <section id="community" class="community">
   <div class="section-heading">
     <small>CONNECT & SHARE</small>
@@ -412,5 +436,3 @@ footer {
 
 </body>
 </html>
-
-
