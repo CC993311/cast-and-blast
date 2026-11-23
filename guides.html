@@ -1,0 +1,299 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fishing Guides | Cast & Blast</title>
+<style>
+:root {
+ --bg:#101710;--panel:#19251a;--panel2:#223224;
+ --green:#78b85a;--light:#e8eee5;--muted:#aab8a6;
+ --border:#354735;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--light);font-family:Arial,sans-serif;line-height:1.6}
+header{padding:18px 6%;background:#142016;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:15px}
+.logo{font-size:23px;font-weight:bold;color:var(--green);text-decoration:none}
+nav{display:flex;gap:20px;flex-wrap:wrap}
+nav a{color:var(--light);text-decoration:none;font-size:14px}
+nav a:hover{color:var(--green)}
+.hero{text-align:center;padding:65px 20px;background:linear-gradient(135deg,#1c3020,#101710)}
+.hero h1{font-size:clamp(35px,6vw,54px);margin:0}
+.hero h1 span{color:var(--green)}
+.hero p{color:var(--muted);max-width:650px;margin:12px auto}
+.container{max-width:1150px;margin:auto;padding:35px 20px}
+h2{margin-top:0}
+.muted{color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:17px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px}
+.guide-card{cursor:pointer;transition:.2s;text-align:left;color:var(--light);font:inherit;width:100%}
+.guide-card:hover{border-color:var(--green);background:var(--panel2);transform:translateY(-2px)}
+.guide-card h3{color:var(--green);margin:5px 0}
+.guide-card p{color:var(--muted);margin:5px 0}
+.icon{font-size:30px}
+.small-label{color:var(--green);font-size:11px;letter-spacing:1px;font-weight:bold}
+button{font-family:inherit}
+.section-heading{margin:32px 0 15px}
+#guideDetail{display:none;margin-top:30px}
+#guideDetail.active{display:block}
+.detail-top{display:flex;justify-content:space-between;gap:15px;align-items:center;flex-wrap:wrap}
+.back{background:var(--panel2);color:var(--light);border:1px solid var(--border);padding:10px 15px;border-radius:7px;cursor:pointer}
+.back:hover{border-color:var(--green)}
+.tip{background:var(--panel2);border-left:4px solid var(--green);padding:16px 19px;border-radius:7px;margin:18px 0}
+.article h3{color:var(--green);margin-bottom:5px}
+.article p,.article li{color:var(--muted)}
+.article ul{padding-left:22px}
+.tag{display:inline-block;background:#2b412b;color:var(--green);padding:4px 9px;border-radius:5px;font-size:12px;margin:3px}
+.search{width:100%;padding:13px;background:var(--panel);border:1px solid var(--border);border-radius:8px;color:var(--light);margin:10px 0 20px;font-size:15px}
+footer{text-align:center;padding:28px;color:var(--muted);border-top:1px solid var(--border);margin-top:40px}
+a{color:var(--green)}
+</style>
+</head>
+<body>
+
+<header>
+ <a class="logo" href="index.html">CAST & BLAST</a>
+ <nav>
+  <a href="index.html">Home</a>
+  <a href="map.html">Fishing Locations</a>
+  <a href="map.html">Share Your Catch</a>
+ </nav>
+</header>
+
+<section class="hero">
+ <h1>Fishing <span>Guides</span></h1>
+ <p>Learn new techniques, explore fish species, understand your gear, and become a more knowledgeable angler.</p>
+</section>
+
+<main class="container">
+
+<div id="guideHome">
+ <h2>Explore Fishing Guides</h2>
+ <p class="muted">Choose a category to explore. New guides can be added as Cast & Blast grows.</p>
+
+ <input class="search" id="guideSearch" placeholder="Search fishing guides..." oninput="filterGuides()">
+
+ <div class="grid" id="guideGrid">
+  <button class="card guide-card" data-search="beginner rod reel casting fishing line" onclick="openGuide('beginner')">
+   <div class="icon">🎣</div><span class="small-label">START HERE</span>
+   <h3>Beginner Fishing</h3><p>Learn rods, reels, line, casting, and basic equipment.</p>
+  </button>
+  <button class="card guide-card" data-search="bait lures worms spinners crankbaits plastics" onclick="openGuide('bait')">
+   <div class="icon">🪱</div><h3>Bait & Lures</h3><p>Explore bait types, artificial lures, and presentations.</p>
+  </button>
+  <button class="card guide-card" data-search="freshwater bass trout catfish crappie bluegill" onclick="openGuide('freshwater')">
+   <div class="icon">🏞️</div><h3>Freshwater Fishing</h3><p>Learn about lakes, ponds, rivers, and freshwater species.</p>
+  </button>
+  <button class="card guide-card" data-search="saltwater surf pier inshore ocean" onclick="openGuide('saltwater')">
+   <div class="icon">🌊</div><h3>Saltwater Fishing</h3><p>Explore surf, pier, and inshore fishing basics.</p>
+  </button>
+  <button class="card guide-card" data-search="fish species identification bass trout catfish" onclick="openGuide('species')">
+   <div class="icon">🐟</div><h3>Fish Species Library</h3><p>Explore common fish and learn how to identify them.</p>
+  </button>
+  <button class="card guide-card" data-search="responsible fishing regulations license catch release" onclick="openGuide('responsible')">
+   <div class="icon">🌿</div><h3>Responsible Fishing</h3><p>Learn about regulations, fish handling, and conservation.</p>
+  </button>
+  <button class="card guide-card" data-search="trip preparation checklist equipment weather" onclick="openGuide('trip')">
+   <div class="icon">🎒</div><h3>Trip Preparation</h3><p>Prepare your equipment and plan a fishing trip.</p>
+  </button>
+  <button class="card guide-card" data-search="fishing knots improved clinch palomar" onclick="openGuide('knots')">
+   <div class="icon">🪢</div><h3>Knot Library</h3><p>Learn about common fishing knots and their uses.</p>
+  </button>
+  <button class="card guide-card" data-search="glossary fishing terminology drag leader jig retrieve" onclick="openGuide('glossary')">
+   <div class="icon">📖</div><h3>Fishing Glossary</h3><p>Understand common fishing words and terminology.</p>
+  </button>
+  <button class="card guide-card" data-search="pro tips bass trout catfish fishing advice" onclick="openGuide('tips')">
+   <div class="icon">⭐</div><h3>Fishing Tips</h3><p>Helpful ideas organized by fishing conditions and species.</p>
+  </button>
+ </div>
+ <p id="noResults" class="muted" style="display:none">No matching guides found.</p>
+</div>
+
+<section id="guideDetail">
+ <div class="detail-top">
+  <div><span class="small-label">CAST & BLAST LEARNING CENTER</span><h2 id="detailTitle"></h2></div>
+  <button class="back" onclick="showHome()">← All Guides</button>
+ </div>
+ <div id="detailContent" class="article"></div>
+</section>
+
+</main>
+
+<footer>
+ <strong>CAST & BLAST</strong>
+ <p>Explore Outdoors. Share Your Adventures.</p>
+</footer>
+
+<script>
+const guides = {
+beginner:{
+title:"Beginner Fishing Guide",
+content:`
+<div class="tip"><strong>Start simple:</strong> A basic spinning rod and reel is a popular first setup because it can be used for many types of fishing.</div>
+<h3>1. Understanding your rod</h3>
+<p>The rod helps cast your line and control a fish. Rods come in different lengths, powers, and actions. Choose one suited to the fish and location you plan to visit.</p>
+<h3>2. Understanding your reel</h3>
+<p>A spinning reel holds fishing line and allows you to cast and retrieve it. Learn how the bail, handle, and drag work before fishing.</p>
+<h3>3. Fishing line</h3>
+<p>Monofilament, fluorocarbon, and braided line each have different characteristics. Match line strength to your rod, reel, target species, and local conditions.</p>
+<h3>4. Basic casting</h3>
+<ul><li>Practice in a safe, open area.</li><li>Check that nobody is behind or beside you.</li><li>Keep hooks secured during practice.</li><li>Learn to control the line and reel smoothly.</li></ul>
+<h3>5. Essential equipment</h3>
+<p>Bring suitable hooks, weights, pliers, a measuring tool, water, sun protection, and a first-aid kit.</p>
+<div class="tip"><strong>Practice tip:</strong> Learn a reliable fishing knot and how to adjust reel drag before your first trip.</div>`
+},
+bait:{
+title:"Bait & Lure Guide",
+content:`
+<h3>Natural bait</h3>
+<p>Natural bait includes worms, insects, and other bait types permitted by local rules. Different fish respond to different food sources.</p>
+<h3>Soft plastic lures</h3>
+<p>Soft plastics imitate worms, baitfish, and other prey. They come in many shapes, sizes, and colors.</p>
+<h3>Spinnerbaits and inline spinners</h3>
+<p>These lures use rotating blades that create flash and vibration in the water.</p>
+<h3>Crankbaits</h3>
+<p>Crankbaits are hard-bodied lures designed to imitate swimming prey. Different designs run at different depths.</p>
+<h3>Jigs</h3>
+<p>Jigs use a weighted head and hook. They can be paired with different trailers and are used in many freshwater and saltwater situations.</p>
+<div class="tip"><strong>Choosing a lure:</strong> Consider the target species, water clarity, depth, current, and local fishing rules. There is no single lure that works everywhere.</div>`
+},
+freshwater:{
+title:"Freshwater Fishing Guide",
+content:`
+<h3>Lakes and ponds</h3>
+<p>These waters may hold bass, trout, catfish, crappie, bluegill, and many other species. Fish habitat can include vegetation, submerged structure, and deeper water.</p>
+<h3>Rivers and streams</h3>
+<p>Current, water depth, and seasonal conditions influence where fish may be found. Learn to recognize safe access points and changing water conditions.</p>
+<h3>Common freshwater fish</h3>
+<ul><li><strong>Bass:</strong> Includes largemouth and smallmouth bass.</li><li><strong>Trout:</strong> Includes rainbow, brown, and brook trout.</li><li><strong>Catfish:</strong> Includes channel, blue, and flathead catfish.</li><li><strong>Crappie:</strong> Includes black and white crappie.</li><li><strong>Bluegill:</strong> A common sunfish found in many lakes and ponds.</li></ul>
+<h3>Reading the water</h3>
+<p>Look at water clarity, depth changes, vegetation, current, and weather. These factors help explain how a waterbody changes throughout the year.</p>
+<div class="tip"><strong>Remember:</strong> Always check local access rules and fishing regulations for the waterbody you visit.</div>`
+},
+saltwater:{
+title:"Saltwater Fishing Guide",
+content:`
+<h3>Surf fishing</h3>
+<p>Surf fishing takes place from a beach or shoreline. Learn about waves, tides, beach access, and changing water conditions.</p>
+<h3>Pier fishing</h3>
+<p>Piers provide access over water. Follow posted rules, use designated areas, and be aware of other anglers and people walking nearby.</p>
+<h3>Inshore fishing</h3>
+<p>Inshore fishing takes place in bays, estuaries, and coastal waters. Conditions can change with tides, wind, and freshwater runoff.</p>
+<h3>Saltwater equipment</h3>
+<p>Saltwater can corrode equipment. Rinse appropriate gear with fresh water after use and follow manufacturer care instructions.</p>
+<h3>Common saltwater species</h3>
+<p>Species vary by region. Examples include striped bass, red drum, flounder, halibut, and various surfperch.</p>
+<div class="tip"><strong>Safety:</strong> Check surf, tides, weather, and local advisories before visiting coastal waters. Never fish from unsafe rocks or exposed structures.</div>`
+},
+species:{
+title:"Fish Species Library",
+content:`
+<p>Here are common fish families and species to start learning. Identification should use several features together, not color alone.</p>
+<h3>Largemouth Bass</h3><p>Recognized by a large mouth and a dark horizontal stripe along the side. Found in many lakes, ponds, and slow-moving waters.</p><span class="tag">Freshwater</span><span class="tag">Bass</span>
+<h3>Smallmouth Bass</h3><p>Often has vertical bars along its sides and a bronze or brown appearance. Common in rivers and lakes.</p><span class="tag">Freshwater</span><span class="tag">Bass</span>
+<h3>Rainbow Trout</h3><p>Often has a pink or reddish lateral stripe and dark spots. Found in many cold-water streams, lakes, and stocked fisheries.</p><span class="tag">Freshwater</span><span class="tag">Trout</span>
+<h3>Channel Catfish</h3><p>Has whisker-like barbels around its mouth and a deeply forked tail. Color varies with habitat.</p><span class="tag">Freshwater</span><span class="tag">Catfish</span>
+<h3>Bluegill</h3><p>A deep-bodied sunfish with a dark spot near the rear of the dorsal fin and a dark ear flap.</p><span class="tag">Freshwater</span><span class="tag">Sunfish</span>
+<h3>Black Crappie</h3><p>Has a silvery body with dark mottled spots and a relatively deep body shape.</p><span class="tag">Freshwater</span><span class="tag">Panfish</span>
+<div class="tip"><strong>Identification tip:</strong> Check the fish's body shape, mouth, fins, markings, and geographic range. When uncertain, release it carefully and consult an official identification guide.</div>`
+},
+responsible:{
+title:"Responsible Fishing Guide",
+content:`
+<h3>Know the regulations</h3>
+<p>Fishing laws vary by state, waterbody, species, and season. Check license requirements, open seasons, size limits, bag limits, and special restrictions before fishing.</p>
+<p><a href="https://www.fishwildlife.org/" target="_blank" rel="noopener">Find your state fish and wildlife agency</a></p>
+<h3>Catch and release</h3>
+<ul><li>Prepare your tools before handling a fish.</li><li>Wet your hands before touching a fish.</li><li>Keep the fish in water when practical.</li><li>Minimize handling time.</li><li>Follow local rules for protected species and release methods.</li></ul>
+<h3>Protect the water</h3>
+<ul><li>Pack out trash and discarded fishing line.</li><li>Clean, drain, and dry equipment when required to prevent invasive species spread.</li><li>Respect wildlife and private property.</li><li>Use designated access areas.</li></ul>
+<div class="tip"><strong>Important:</strong> This guide is educational, not a substitute for current official regulations.</div>`
+},
+trip:{
+title:"Fishing Trip Preparation",
+content:`
+<h3>Before leaving</h3>
+<ul><li>Check the weather forecast.</li><li>Confirm access is open and permitted.</li><li>Check fishing licenses and regulations.</li><li>Tell someone where you plan to go.</li><li>Check water and boating advisories.</li></ul>
+<h3>Equipment checklist</h3>
+<ul><li>Rod and reel</li><li>Appropriate fishing line and tackle</li><li>Hooks and permitted bait or lures</li><li>Plier tool and measuring device</li><li>Water and snacks</li><li>Sun protection and suitable clothing</li><li>First-aid kit</li><li>Phone and emergency supplies</li></ul>
+<h3>On the water</h3>
+<p>Be aware of changing weather, slippery banks, currents, boat traffic, and other visitors. Wear an appropriate life jacket when boating.</p>
+<div class="tip"><strong>Planning tip:</strong> Save your fishing location and keep notes about the weather, water conditions, and species you observe.</div>
+<a href="map.html">Explore the Cast & Blast fishing map</a>`
+},
+knots:{
+title:"Fishing Knot Library",
+content:`
+<h3>Improved Clinch Knot</h3>
+<p>A common knot used to attach fishing line to many hooks and terminal tackle items. It is often used with monofilament line.</p>
+<h3>Palomar Knot</h3>
+<p>A popular knot for attaching line to hooks and swivels. It is valued for its straightforward structure.</p>
+<h3>Uni Knot</h3>
+<p>A versatile knot used for connecting line to terminal tackle. It can also be adapted for some line-to-line connections.</p>
+<h3>Arbor Knot</h3>
+<p>Used to attach fishing line to the spool of a reel.</p>
+<h3>Practice and inspection</h3>
+<p>Use reputable illustrated knot tutorials to learn the exact tying steps. Wet knots before tightening when appropriate, trim tag ends, and inspect knots regularly for damage.</p>
+<div class="tip"><strong>Important:</strong> Knot strength depends on line type, condition, and tying quality. Practice with spare line before relying on a knot while fishing.</div>`
+},
+glossary:{
+title:"Fishing Glossary",
+content:`
+<h3>Action</h3><p>How a fishing rod bends under load.</p>
+<h3>Drag</h3><p>A reel mechanism that allows line to release under tension.</p>
+<h3>Leader</h3><p>A section of line between the main line and terminal tackle or lure.</p>
+<h3>Jig</h3><p>A weighted fishing lure, often used with a hook and optional soft plastic or other trailer.</p>
+<h3>Retrieve</h3><p>The way an angler reels in or moves a lure through the water.</p>
+<h3>Structure</h3><p>Physical features such as submerged logs, rocks, or drop-offs that affect underwater habitat.</p>
+<h3>Current</h3><p>The movement of water in a river, stream, or other waterbody.</p>
+<h3>Topwater</h3><p>A lure or fishing presentation designed to work on the water's surface.</p>
+<h3>Spool</h3><p>The part of a reel that holds fishing line.</p>
+<h3>Terminal tackle</h3><p>Items attached near the end of the fishing line, such as hooks, swivels, and weights.</p>`
+},
+tips:{
+title:"Fishing Tips",
+content:`
+<h3>General tips</h3>
+<ul><li>Keep your equipment organized.</li><li>Learn to tie and inspect your knots.</li><li>Observe weather and water conditions.</li><li>Keep a fishing journal to record observations.</li><li>Be patient and keep learning.</li></ul>
+<h3>Bass fishing</h3>
+<p>Learn to recognize different types of habitat and how lure design changes presentation. Conditions and local fisheries vary.</p>
+<h3>Trout fishing</h3>
+<p>Pay attention to water temperature, current, depth, and local regulations. Trout fisheries can have special seasonal rules.</p>
+<h3>Catfish fishing</h3>
+<p>Learn about the catfish species in your area and check which baits and methods are permitted.</p>
+<h3>Crappie and bluegill</h3>
+<p>Learn to identify these panfish and understand their habitat. Regulations may include special limits.</p>
+<div class="tip"><strong>Best habit:</strong> Keep notes about each trip. Over time, your observations can help you understand different fisheries.</div>`
+}
+};
+
+function openGuide(id){
+ const guide=guides[id];
+ if(!guide)return;
+ document.getElementById('guideHome').style.display='none';
+ document.getElementById('guideDetail').classList.add('active');
+ document.getElementById('detailTitle').textContent=guide.title;
+ document.getElementById('detailContent').innerHTML=guide.content;
+ window.scrollTo({top:0,behavior:'smooth'});
+}
+function showHome(){
+ document.getElementById('guideDetail').classList.remove('active');
+ document.getElementById('guideHome').style.display='block';
+ document.getElementById('guideSearch').value='';
+ filterGuides();
+ window.scrollTo({top:0,behavior:'smooth'});
+}
+function filterGuides(){
+ const q=document.getElementById('guideSearch').value.toLowerCase();
+ let count=0;
+ document.querySelectorAll('.guide-card').forEach(card=>{
+  const match=(card.dataset.search+' '+card.innerText).toLowerCase().includes(q);
+  card.style.display=match?'block':'none';
+  if(match)count++;
+ });
+ document.getElementById('noResults').style.display=count?'none':'block';
+}
+</script>
+</body>
+</html>
