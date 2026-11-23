@@ -30,6 +30,10 @@ button:disabled{opacity:.5;cursor:not-allowed}
 #status,#authStatus{font-size:12px;color:#bde2c7;line-height:1.5}
 #authMessage,#reviewMessage,#catchMessage{font-size:12px;line-height:1.5;color:#b8e8c7;min-height:16px}
 #selectedLake{background:#234b34;border-radius:9px;padding:12px;margin-bottom:12px}
+.favorite-card{background:#28543b;border-radius:8px;padding:10px;margin:7px 0;font-size:13px}
+.favorite-card strong{display:block;color:#d6f3de;margin-bottom:5px}
+.favorite-card button{margin:4px 4px 0 0;padding:7px 9px;font-size:12px}
+#favoriteMessage{font-size:12px;color:#b8e8c7;min-height:16px}
 #selectedLake h2{font-size:18px;margin:0 0 5px}
 .rating-summary{font-size:14px;color:#ffcf55;margin:8px 0}
 .review{border-top:1px solid #456b50;padding:10px 0;font-size:13px}
@@ -103,6 +107,14 @@ button:disabled{opacity:.5;cursor:not-allowed}
    <h2>Nothing selected</h2>
    <p class="help">Click a lake, pond, river, or stream on the map.</p>
   </div>
+ </div>
+
+ <div class="section" id="favoritesSection">
+  <h3>Favorite Fishing Spots</h3>
+  <p class="help">Save lakes, ponds, rivers, and streams to your personal list.</p>
+  <button id="favoriteCurrentButton" style="width:100%" disabled>☆ Add Selected Spot to Favorites</button>
+  <div id="favoriteMessage"></div>
+  <div id="favoritesList" class="help">Sign in to see your saved spots.</div>
  </div>
 
  <div class="section" id="catchSection" style="display:none">
@@ -216,6 +228,8 @@ let selectedLake=null;
 let selectedLakeDatabaseId=null;
 let selectedWaterbody=null;
 let catchRequestNumber=0;
+let favoritesCache=[];
+let favoritesRequestNumber=0;
 
 const map=L.map("map",{center:[39.5,-98.35],zoom:5,minZoom:3,preferCanvas:true});
 
@@ -238,6 +252,7 @@ function setStatus(message){document.getElementById("status").textContent=messag
 function setAuthMessage(message){document.getElementById("authMessage").textContent=message;}
 function setReviewMessage(message){document.getElementById("reviewMessage").textContent=message;}
 function setCatchMessage(message){document.getElementById("catchMessage").textContent=message;}
+function setFavoriteMessage(message){document.getElementById("favoriteMessage").textContent=message;}
 
 function getLakeName(p){
  for(const value of [p.gnisidlabel,p.GNIS_NAME,p.GNIS_Name,p.name,p.NAME]){
@@ -456,6 +471,113 @@ document.getElementById("blmToggle").addEventListener("change",function(){
  else map.removeLayer(blmLayer);
 });
 
+// FAVORITES
+function updateFavoriteButton(){
+ const button=document.getElementById("favoriteCurrentButton");
+ if(!button)return;
+ button.disabled=!currentUser||!selectedWaterbody;
+ if(!currentUser){button.textContent="Sign in to Save Favorites";return;}
+ if(!selectedWaterbody){button.textContent="☆ Add Selected Spot to Favorites";return;}
+ const exists=favoritesCache.some(f=>
+  f.waterbody_type===selectedWaterbody.type&&String(f.waterbody_id)===String(selectedWaterbody.id)
+ );
+ button.textContent=exists?"★ Remove from Favorites":"☆ Add Selected Spot to Favorites";
+}
+async function loadFavorites(){
+ const request=++favoritesRequestNumber;
+ const list=document.getElementById("favoritesList");
+ if(!currentUser){
+  favoritesCache=[];
+  list.textContent="Sign in to save and view your favorite spots.";
+  updateFavoriteButton();
+  return;
+ }
+ list.textContent="Loading your favorites...";
+ const {data,error}=await supabaseClient.from("favorites")
+  .select("id,waterbody_type,waterbody_id,waterbody_name,latitude,longitude,created_at")
+  .eq("user_id",currentUser.id)
+  .order("created_at",{ascending:false});
+ if(request!==favoritesRequestNumber)return;
+ if(error){
+  console.error("Favorites loading error:",error);
+  list.textContent="Could not load favorites: "+error.message;
+  updateFavoriteButton();
+  return;
+ }
+ favoritesCache=data||[];
+ if(!favoritesCache.length){
+  list.textContent="You haven't saved any spots yet. Select a lake or river and add it to Favorites.";
+ }else{
+  list.innerHTML=favoritesCache.map(f=>
+   "<div class='favorite-card'><strong>★ "+escapeHTML(f.waterbody_name)+"</strong>"+
+   "<span class='help'>"+(f.waterbody_type==="lake"?"Lake or pond":"River or stream")+"</span><br>"+
+   "<button class='open-favorite' data-id='"+Number(f.id)+"'>View on Map</button>"+
+   "<button class='remove-favorite btn-secondary' data-id='"+Number(f.id)+"'>Remove</button></div>"
+  ).join("");
+ }
+ updateFavoriteButton();
+}
+async function toggleCurrentFavorite(){
+ if(!currentUser){setFavoriteMessage("Please sign in to save favorites.");return;}
+ if(!selectedWaterbody){setFavoriteMessage("Select a lake, pond, river, or stream first.");return;}
+ const waterbody={...selectedWaterbody};
+ const existing=favoritesCache.find(f=>
+  f.waterbody_type===waterbody.type&&String(f.waterbody_id)===String(waterbody.id)
+ );
+ const button=document.getElementById("favoriteCurrentButton");
+ button.disabled=true;
+ if(existing){
+  const {error}=await supabaseClient.from("favorites").delete()
+   .eq("id",existing.id).eq("user_id",currentUser.id);
+  button.disabled=false;
+  if(error){setFavoriteMessage("Could not remove favorite: "+error.message);return;}
+  setFavoriteMessage("Removed from your favorites.");
+ }else{
+  const center=getFeatureCenter(waterbody.feature);
+  const {error}=await supabaseClient.from("favorites").insert({
+   user_id:currentUser.id,
+   waterbody_type:waterbody.type,
+   waterbody_id:waterbody.id,
+   waterbody_name:waterbody.name,
+   latitude:center?center[0]:map.getCenter().lat,
+   longitude:center?center[1]:map.getCenter().lng
+  });
+  button.disabled=false;
+  if(error){setFavoriteMessage("Could not save favorite: "+error.message);return;}
+  setFavoriteMessage("Saved to your favorites!");
+ }
+ await loadFavorites();
+}
+document.getElementById("favoriteCurrentButton").addEventListener("click",toggleCurrentFavorite);
+document.getElementById("favoritesList").addEventListener("click",async function(event){
+ const openButton=event.target.closest(".open-favorite");
+ const removeButton=event.target.closest(".remove-favorite");
+ if(!currentUser)return;
+ if(removeButton){
+  const id=Number(removeButton.dataset.id);
+  if(!Number.isSafeInteger(id))return;
+  removeButton.disabled=true;
+  const {error}=await supabaseClient.from("favorites").delete().eq("id",id).eq("user_id",currentUser.id);
+  if(error){setFavoriteMessage("Could not remove favorite: "+error.message);removeButton.disabled=false;return;}
+  setFavoriteMessage("Favorite removed.");
+  await loadFavorites();
+  return;
+ }
+ if(openButton){
+  const id=Number(openButton.dataset.id);
+  const favorite=favoritesCache.find(f=>Number(f.id)===id);
+  if(!favorite)return;
+  const lat=Number(favorite.latitude),lon=Number(favorite.longitude);
+  if(Number.isFinite(lat)&&Number.isFinite(lon)){
+   map.setView([lat,lon],Math.max(map.getZoom(),12));
+   L.popup().setLatLng([lat,lon]).setContent("<strong>"+escapeHTML(favorite.waterbody_name)+"</strong><br>Saved favorite").openOn(map);
+   setStatus("Showing saved favorite: "+favorite.waterbody_name+". If its outline is not loaded yet, wait for the map layer and select it.");
+  }else{
+   setFavoriteMessage("This saved spot has no stored map coordinates.");
+  }
+ }
+});
+
 // AUTHENTICATION
 function updateAuthUI(){
  const signedIn=!!currentUser;
@@ -468,6 +590,8 @@ function updateAuthUI(){
  }
  updateReviewForm();
  updateCatchForm();
+ updateFavoriteButton();
+ loadFavorites();
 }
 function updateReviewForm(){
  document.getElementById("reviewSection").style.display=selectedLake?"block":"none";
@@ -609,6 +733,8 @@ async function selectWaterbody(type,feature){
  const name=type==="lake"?getLakeName(p):(p.gnisidlabel||p.GNIS_NAME||p.name||"Unnamed river or stream");
  if(!id){setCatchMessage("This map feature does not have an available identifier.");return;}
  selectedWaterbody={type,id,name,feature};
+ updateFavoriteButton();
+ setFavoriteMessage("");
  catchRequestNumber++;
  document.getElementById("selectedLake").innerHTML="<h2>"+escapeHTML(name)+"</h2><p class='help'>"+(type==="lake"?"Lake or pond":"River or stream")+"</p><p class='help'>Loading catch information...</p>";
  document.getElementById("speciesSummary").textContent="Loading reported species...";
