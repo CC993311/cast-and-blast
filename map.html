@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,43 +7,43 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
 *{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#101d27;color:#fff}
-header{background:#172e3e;padding:15px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+body{margin:0;font-family:Arial,sans-serif;background:#101f18;color:#fff}
+header{background:#183b2a;padding:15px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 header h1{margin:0;font-size:23px}
-header small{color:#a9dafa}
+header small{color:#b8e8c7}
 #layout{display:flex;height:calc(100vh - 65px)}
-#sidebar{width:340px;min-width:300px;background:#172e3e;padding:16px;overflow-y:auto}
+#sidebar{width:340px;min-width:300px;background:#183b2a;padding:16px;overflow-y:auto}
 #map{flex:1;min-width:0}
 .section{margin-bottom:20px}
-.section h3{color:#9bd6ff;font-size:14px;text-transform:uppercase;letter-spacing:.6px;margin:0 0 10px}
-.layer-option{display:flex;align-items:center;gap:10px;padding:11px;background:#244255;border-radius:8px;margin-bottom:7px;cursor:pointer}
+.section h3{color:#9cdbad;font-size:14px;text-transform:uppercase;letter-spacing:.6px;margin:0 0 10px}
+.layer-option{display:flex;align-items:center;gap:10px;padding:11px;background:#28543b;border-radius:8px;margin-bottom:7px;cursor:pointer}
 .layer-option input{width:17px;height:17px;margin:0}
-input,textarea,select{width:100%;padding:10px;border:1px solid #526d7d;border-radius:7px;background:#fff;color:#172e3e;font:14px Arial;margin:5px 0 10px}
+input,textarea,select{width:100%;padding:10px;border:1px solid #527b61;border-radius:7px;background:#fff;color:#183b2a;font:14px Arial;margin:5px 0 10px}
 textarea{min-height:75px;resize:vertical}
-button{border:0;border-radius:7px;padding:10px 12px;background:#1688c5;color:white;font-weight:bold;cursor:pointer}
-button:hover{background:#0872aa}
+button{border:0;border-radius:7px;padding:10px 12px;background:#23864b;color:white;font-weight:bold;cursor:pointer}
+button:hover{background:#176b3a}
 button:disabled{opacity:.5;cursor:not-allowed}
-.btn-secondary{background:#425c6c}
+.btn-secondary{background:#456b50}
 .button-row{display:flex;gap:8px}
 .button-row button{flex:1}
-.help{font-size:12px;color:#b9cbd6;line-height:1.5}
-#status,#authStatus{font-size:12px;color:#b9d8e9;line-height:1.5}
-#authMessage,#reviewMessage,#catchMessage{font-size:12px;line-height:1.5;color:#a9dafa;min-height:16px}
-#selectedLake{background:#203c4e;border-radius:9px;padding:12px;margin-bottom:12px}
+.help{font-size:12px;color:#c1d7c6;line-height:1.5}
+#status,#authStatus{font-size:12px;color:#bde2c7;line-height:1.5}
+#authMessage,#reviewMessage,#catchMessage{font-size:12px;line-height:1.5;color:#b8e8c7;min-height:16px}
+#selectedLake{background:#234b34;border-radius:9px;padding:12px;margin-bottom:12px}
 #selectedLake h2{font-size:18px;margin:0 0 5px}
 .rating-summary{font-size:14px;color:#ffcf55;margin:8px 0}
-.review{border-top:1px solid #3a5668;padding:10px 0;font-size:13px}
-.review strong,.catch-card strong{color:#b9dfff}
+.review{border-top:1px solid #456b50;padding:10px 0;font-size:13px}
+.review strong,.catch-card strong{color:#c7f0d2}
 .review-stars{color:#ffcf55;letter-spacing:2px}
-.review-date{font-size:11px;color:#9bb1bf;margin-top:4px}
+.review-date{font-size:11px;color:#a9c6ae;margin-top:4px}
 #reviewsList,#catchList{max-height:360px;overflow-y:auto}
-.catch-card{border-top:1px solid #3a5668;padding:11px 0;font-size:13px}
-.catch-species{font-size:15px;font-weight:bold;color:#70d3a0}
-.catch-meta{font-size:11px;color:#9bb1bf;margin:5px 0}
+.catch-card{border-top:1px solid #456b50;padding:11px 0;font-size:13px}
+.catch-species{font-size:15px;font-weight:bold;color:#72df9b}
+.catch-meta{font-size:11px;color:#a9c6ae;margin:5px 0}
 .catch-photo{display:block;width:100%;max-height:190px;object-fit:cover;border-radius:7px;margin-top:8px}
-.catch-summary{background:#244255;padding:10px;border-radius:7px;margin:9px 0;font-size:13px;line-height:1.6}
-.species-tag{display:inline-block;background:#315c70;color:#d8f1ff;padding:4px 7px;border-radius:12px;margin:3px;font-size:11px}
-#mapStatusNote{font-size:11px;color:#9bb1bf;margin-top:5px}
+.catch-summary{background:#28543b;padding:10px;border-radius:7px;margin:9px 0;font-size:13px;line-height:1.6}
+.species-tag{display:inline-block;background:#326b47;color:#e1f5e5;padding:4px 7px;border-radius:12px;margin:3px;font-size:11px}
+#mapStatusNote{font-size:11px;color:#a9c6ae;margin-top:5px}
 .leaflet-popup-content{color:#1b3040;line-height:1.5}
 .leaflet-popup-content button{margin-top:6px}
 @media(max-width:750px){
@@ -69,7 +68,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
   <label class="layer-option"><input type="checkbox" id="lakesToggle" checked><span>Lakes & Ponds</span></label>
   <label class="layer-option"><input type="checkbox" id="riversToggle"><span>Rivers & Streams</span></label>
   <label class="layer-option"><input type="checkbox" id="blmToggle" checked><span>BLM Recreation</span></label>
-  <p class="help">BLM Recreation locations appear at zoom level 10 and closer. Lakes and rivers load as you zoom and move around.</p>
+  <p class="help">All three layers appear at zoom level 10 and higher. Turn on Rivers & Streams to display waterways.</p>
  </div>
 
  <div class="section">
@@ -113,35 +112,35 @@ button:disabled{opacity:.5;cursor:not-allowed}
   <label for="catchSpecies">Fish species</label>
   <select id="catchSpecies">
    <option value="">Choose a species</option>
-   <option>Black Bass</option>
-   <option>Largemouth Bass</option>
-   <option>Smallmouth Bass</option>
-   <option>Spotted Bass</option>
-   <option>Striped Bass</option>
-   <option>White Bass</option>
-   <option>Bluegill</option>
-   <option>Redear Sunfish</option>
-   <option>Green Sunfish</option>
-   <option>Crappie</option>
-   <option>Black Crappie</option>
-   <option>White Crappie</option>
-   <option>Rainbow Trout</option>
-   <option>Brown Trout</option>
-   <option>Brook Trout</option>
-   <option>Cutthroat Trout</option>
-   <option>Catfish</option>
-   <option>Channel Catfish</option>
-   <option>Blue Catfish</option>
-   <option>Flathead Catfish</option>
-   <option>Carp</option>
-   <option>Common Carp</option>
-   <option>Grass Carp</option>
-   <option>Walleye</option>
-   <option>Sauger</option>
-   <option>Northern Pike</option>
-   <option>Muskie</option>
-   <option>Yellow Perch</option>
-   <option>White Sturgeon</option>
+   <optgroup label="Freshwater fish">
+    <option>Black Bass</option><option>Largemouth Bass</option><option>Smallmouth Bass</option>
+    <option>Spotted Bass</option><option>Striped Bass</option><option>White Bass</option>
+    <option>Bluegill</option><option>Redear Sunfish</option><option>Green Sunfish</option>
+    <option>Crappie</option><option>Black Crappie</option><option>White Crappie</option>
+    <option>Rainbow Trout</option><option>Brown Trout</option><option>Brook Trout</option>
+    <option>Cutthroat Trout</option><option>Lake Trout</option><option>Bull Trout</option>
+    <option>Catfish</option><option>Channel Catfish</option><option>Blue Catfish</option>
+    <option>Flathead Catfish</option><option>Carp</option><option>Common Carp</option>
+    <option>Grass Carp</option><option>Walleye</option><option>Sauger</option>
+    <option>Northern Pike</option><option>Muskie</option><option>Yellow Perch</option>
+    <option>White Perch</option><option>White Sturgeon</option><option>Kokanee Salmon</option>
+    <option>Chinook Salmon</option><option>Coho Salmon</option><option>Freshwater Drum</option>
+    <option>Bowfin</option><option>Gar</option>
+   </optgroup>
+   <optgroup label="Saltwater fish">
+    <option>Pacific Halibut</option><option>California Halibut</option><option>Atlantic Halibut</option>
+    <option>Lingcod</option><option>Rockfish</option><option>Pacific Ocean Perch</option>
+    <option>Cabezon</option><option>Greenling</option><option>California Sheephead</option>
+    <option>White Seabass</option><option>Black Seabass</option><option>Surfperch</option>
+    <option>Barred Surfperch</option><option>Jacksmelt</option><option>Pacific Mackerel</option>
+    <option>Spanish Mackerel</option><option>Albacore Tuna</option><option>Bluefin Tuna</option>
+    <option>Yellowfin Tuna</option><option>Yellowtail</option><option>Pacific Bonito</option>
+    <option>Salmon</option><option>Shark</option><option>Leopard Shark</option>
+    <option>Soupfin Shark</option><option>Bat Ray</option><option>California Corbina</option>
+    <option>Spotfin Croaker</option><option>White Croaker</option><option>California Scorpionfish</option>
+    <option>Queenfish</option><option>Opaleye</option><option>Garibaldi</option>
+    <option>Pacific Sardine</option><option>Anchovy</option>
+   </optgroup>
    <option>Other</option>
   </select>
 
@@ -197,7 +196,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
  <div class="section">
   <h3>Map Status</h3>
   <div id="status">Preparing map...</div>
-  <div id="mapStatusNote">Lake outlines and river data load as you zoom and move around.</div>
+  <div id="mapStatusNote">Lakes, rivers, and BLM Recreation appear at zoom level 10 and higher and load as you move around.</div>
  </div>
 
  <p class="help">Lake outlines and river data: USGS 3D Hydrography Program. Recreation locations: Bureau of Land Management. Catch reports and reviews are community-submitted and are not official evaluations.</p>
@@ -266,7 +265,7 @@ const lakeLayer=L.geoJSON(null,{
   layer.on("mouseover",function(){this.setStyle({fillOpacity:.65,weight:2.5});});
   layer.on("mouseout",function(){lakeLayer.resetStyle(this);});
  }
-}).addTo(map);
+});
 
 const riverLayer=L.geoJSON(null,{
  style:function(feature){
@@ -301,8 +300,16 @@ const loadedLakeAreas=new Set(),lakeFeatureIds=new Set();
 let lakeCount=0,lakeLoading=false;
 
 async function loadLakes(){
- if(!document.getElementById("lakesToggle").checked)return;
- if(map.getZoom()<5){setStatus("Zoom in to see lake and pond outlines.");return;}
+ if(!document.getElementById("lakesToggle").checked){
+  if(map.hasLayer(lakeLayer))map.removeLayer(lakeLayer);
+  return;
+ }
+ if(map.getZoom()<10){
+  if(map.hasLayer(lakeLayer))map.removeLayer(lakeLayer);
+  setStatus("Zoom in to level 10 or higher to see lakes and ponds.");
+  return;
+ }
+ if(!map.hasLayer(lakeLayer))map.addLayer(lakeLayer);
  const area=getRequestBounds(),key=boundsKey(area);
  if(loadedLakeAreas.has(key)||lakeLoading)return;
  lakeLoading=true;setStatus("Loading lakes and ponds...");
@@ -335,8 +342,16 @@ const loadedRiverAreas=new Set(),riverFeatureIds=new Set();
 let riverCount=0,riverLoading=false;
 
 async function loadRivers(){
- if(!document.getElementById("riversToggle").checked)return;
- if(map.getZoom()<8){setStatus("Zoom in closer to see rivers and streams.");return;}
+ if(!document.getElementById("riversToggle").checked){
+  if(map.hasLayer(riverLayer))map.removeLayer(riverLayer);
+  return;
+ }
+ if(map.getZoom()<10){
+  if(map.hasLayer(riverLayer))map.removeLayer(riverLayer);
+  setStatus("Zoom in to level 10 or higher to see rivers and streams.");
+  return;
+ }
+ if(!map.hasLayer(riverLayer))map.addLayer(riverLayer);
  const area=getRiverRequestBounds(),key=boundsKey(area);
  if(loadedRiverAreas.has(key)||riverLoading)return;
  riverLoading=true;setStatus("Loading rivers and streams...");
@@ -364,7 +379,7 @@ async function loadRivers(){
  }catch(error){console.error(error);setStatus("River loading failed: "+error.message);}
  finally{
   riverLoading=false;
-  if(document.getElementById("riversToggle").checked&&map.getZoom()>=8){
+  if(document.getElementById("riversToggle").checked&&map.getZoom()>=10){
    const current=boundsKey(getRiverRequestBounds());
    if(current!==key&&!loadedRiverAreas.has(current))setTimeout(loadRivers,350);
   }
@@ -429,11 +444,11 @@ map.on("moveend",loadMapData);
 map.whenReady(loadMapData);
 
 document.getElementById("lakesToggle").addEventListener("change",function(){
- if(this.checked){map.addLayer(lakeLayer);loadLakes();}
+ if(this.checked)loadLakes();
  else map.removeLayer(lakeLayer);
 });
 document.getElementById("riversToggle").addEventListener("change",function(){
- if(this.checked){map.addLayer(riverLayer);loadRivers();}
+ if(this.checked)loadRivers();
  else map.removeLayer(riverLayer);
 });
 document.getElementById("blmToggle").addEventListener("change",function(){
