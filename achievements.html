@@ -1,0 +1,51 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FishBound | Achievements</title><style>
+:root{--bg:#101710;--panel:#1b281e;--panel2:#243529;--green:#a9c77b;--white:#f1f4ec;--muted:#aab6a7;--border:#354735}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--white);font-family:Arial,sans-serif}
+header{padding:17px 7%;background:#172319;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
+.logo{font-size:23px;font-weight:800;letter-spacing:1px}.logo span{color:var(--green)}
+nav{display:flex;gap:17px;flex-wrap:wrap}nav a{color:var(--muted);text-decoration:none;font-size:13px;font-weight:bold}nav a:hover{color:var(--green)}
+main{max-width:1000px;margin:auto;padding:32px 20px 70px}.panel{background:var(--panel);border:1px solid var(--border);border-radius:11px;padding:20px;margin-bottom:18px}
+h1{font-size:clamp(30px,5vw,46px);margin:8px 0 12px}h2{font-size:20px;margin:0 0 14px}h3{font-size:15px;color:var(--green);margin:0 0 10px}
+p{line-height:1.6}.muted,.help,.message{color:var(--muted);font-size:13px;line-height:1.6}.message{min-height:18px}
+button,.button{border:0;border-radius:7px;padding:10px 13px;background:#23864b;color:white;font-weight:bold;cursor:pointer;text-decoration:none;display:inline-block}
+button:hover,.button:hover{background:#176b3a}button:disabled{opacity:.5;cursor:not-allowed}.secondary{background:#456b50}
+input{width:100%;padding:11px;border:1px solid #527b61;border-radius:7px;background:#fff;color:#183b2a;font:14px Arial;margin:5px 0 10px}
+.profile-head{display:flex;align-items:center;gap:20px;flex-wrap:wrap}.avatar{width:112px;height:112px;border-radius:50%;object-fit:cover;background:#304a35;border:2px solid var(--green)}.avatar-placeholder{width:112px;height:112px;border-radius:50%;display:grid;place-items:center;background:#304a35;color:var(--green);font-size:40px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:20px 0}.stat{background:var(--panel2);padding:14px;border-radius:8px}.stat strong{display:block;font-size:24px;color:var(--green)}.stat span{font-size:12px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.badge-card,.catch-card,.angler-card{background:var(--panel2);border:1px solid var(--border);border-radius:9px;padding:14px}.badge-card.locked{opacity:.48}.badge-icon{font-size:25px;margin-bottom:7px}.badge-card strong{display:block;margin-bottom:5px}.catch-card{margin:10px 0}.catch-card img{width:100%;max-height:240px;object-fit:contain;background:#0c140e;border-radius:7px;margin-top:8px}.catch-meta{font-size:12px;color:var(--muted);margin:5px 0}.row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:11px 8px;border-bottom:1px solid var(--border);font-size:14px}th{color:var(--green)}td a{color:var(--white);text-decoration:none}td a:hover{color:var(--green)}
+@media(max-width:650px){header{justify-content:center}nav{justify-content:center}.profile-head{justify-content:center;text-align:center}}
+</style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head><body><header><div class="logo">FISH<span>BOUND</span></div><nav><a href="index.html">Home</a><a href="map.html">Fishing Locations</a><a href="community.html">Community</a><a href="journal.html">My Journal</a><a href="achievements.html">Achievements</a><a href="leaderboard.html">Leaderboard</a></nav></header><main><section class="panel"><p class="muted">FISHING MILESTONES</p><h1>Fishing Achievements</h1><p class="muted" id="intro">Loading your achievements...</p><div class="stats" id="stats"></div><div class="grid" id="badges"></div><p class="message" id="status"></p></section></main><script>const SUPABASE_URL="https://ubnmhqxitiigsctbsmqy.supabase.co";
+const SUPABASE_KEY="sb_publishable_g-6tScB0HFIVcVkAhCN5Ug_fpm-jFrq";
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const safePhoto=v=>{try{const u=new URL(v);return ["https:","http:"].includes(u.protocol)?u.href:"";}catch(e){return "";}};
+const dateText=v=>v?new Date(v+"T12:00:00").toLocaleDateString():"Date not provided";
+const qs=new URLSearchParams(location.search);
+const defs=[
+ ["🐟","First Catch","Record your first catch",n=>n>=1],
+ ["🎣","Getting Started","Record 5 catches",n=>n>=5],
+ ["🏅","Dedicated Angler","Record 10 catches",n=>n>=10],
+ ["🏆","Catch Collector","Record 25 catches",n=>n>=25],
+ ["🌊","Species Explorer","Catch 5 different species",(_,s)=>s>=5],
+ ["🧭","Species Expert","Catch 10 different species",(_,s)=>s>=10],
+ ["📸","Picture Perfect","Share a catch photo",(_,__,p)=>p>=1],
+ ["📝","Storyteller","Add notes to a catch",(_,__,___,n)=>n>=1],
+ ["🌟","Big Season","Record 50 catches",n=>n>=50],
+ ["👑","Legendary Angler","Record 100 catches",n=>n>=100]
+];
+(async()=>{
+ let userId=qs.get("user");
+ if(!userId){const {data}=await db.auth.getSession();userId=data.session?.user?.id;}
+ if(!userId){document.getElementById("intro").textContent="Sign in on the Community page to view your achievements.";return;}
+ const [{data:p},{data:c,error}]=await Promise.all([
+  db.from("profiles").select("display_name").eq("user_id",userId).maybeSingle(),
+  db.from("catch_reports").select("id,species,image_url,notes").eq("user_id",userId).limit(500)
+ ]);
+ if(error){document.getElementById("status").textContent="Could not load achievements: "+error.message;return;}
+ const rows=c||[],species=new Set(rows.map(x=>x.species).filter(Boolean)).size,photos=rows.filter(x=>x.image_url).length,notes=rows.filter(x=>x.notes?.trim()).length;
+ document.getElementById("intro").textContent=(p?.display_name||"This angler")+"'s fishing milestones";
+ document.getElementById("stats").innerHTML=[[""+rows.length,"Catches"],[""+species,"Species"],[""+photos,"Photos"],[""+notes,"Catch notes"]].map(x=>"<div class='stat'><strong>"+x[0]+"</strong><span>"+x[1]+"</span></div>").join("");
+ document.getElementById("badges").innerHTML=defs.map(([icon,title,desc,fn])=>{const earned=fn(rows.length,species,photos,notes);return "<div class='badge-card "+(earned?"":"locked")+"'><div class='badge-icon'>"+icon+"</div><strong>"+title+"</strong><span class='muted'>"+desc+"</span><p class='muted'>"+(earned?"✓ Earned":"Keep fishing to unlock")+"</p></div>";}).join("");
+})().catch(e=>document.getElementById("status").textContent=e.message);
+</script></body></html>
