@@ -59,6 +59,37 @@ const fileInput=document.getElementById('fishPhoto'),preview=document.getElement
 fileInput.addEventListener('change',()=>{const f=fileInput.files[0];if(!f)return;if(!/^image\/(jpeg|png|webp)$/.test(f.type)||f.size>10*1024*1024){alert('Please choose a JPG, PNG, or WEBP image under 10 MB.');fileInput.value='';return}if(imageUrl)URL.revokeObjectURL(imageUrl);imageUrl=URL.createObjectURL(f);previewImage.src=imageUrl;document.getElementById('photoName').textContent=f.name;preview.style.display='block'});
 document.getElementById('clearPhoto').onclick=()=>{fileInput.value='';preview.style.display='none';previewImage.removeAttribute('src');if(imageUrl)URL.revokeObjectURL(imageUrl);imageUrl=''};
 const aiResults=document.getElementById('aiResults');
+async function saveIdentification(species,scientificName,certainty,button){
+  const {data:sessionData}=await db.auth.getSession();
+  const user=sessionData.session?.user;
+  if(!user){alert('Please sign in to save an identification.');return;}
+  const photo=fileInput.files?.[0];
+  button.disabled=true;button.textContent='Saving…';
+  let uploadedPath=null,imageURL=null;
+  try{
+    if(photo){
+      const ext=photo.type==='image/jpeg'?'jpg':photo.type==='image/png'?'png':'webp';
+      const path=user.id+'/identifications/'+Date.now()+'-'+(crypto.randomUUID?crypto.randomUUID():Math.random().toString(36).slice(2))+'.'+ext;
+      const {data:uploadData,error:uploadError}=await db.storage.from('catch-photos').upload(path,photo,{cacheControl:'3600',upsert:false,contentType:photo.type});
+      if(uploadError)throw new Error('Photo upload failed: '+uploadError.message);
+      uploadedPath=uploadData.path;
+      const {data:publicData}=db.storage.from('catch-photos').getPublicUrl(uploadData.path);
+      imageURL=publicData?.publicUrl||null;
+    }
+    const {error}=await db.from('fish_identifications').insert({
+      user_id:user.id,species,scientific_name:scientificName||null,
+      confidence:typeof certainty==='number'?Math.round(certainty*100):null,
+      image_url:imageURL
+    });
+    if(error)throw new Error('Could not save identification: '+error.message);
+    button.textContent='Saved to Journal ✓';
+  }catch(error){
+    if(uploadedPath)await db.storage.from('catch-photos').remove([uploadedPath]);
+    console.error('Save identification failed:',error);
+    alert(error.message||'Could not save this identification.');
+    button.disabled=false;button.textContent='Save to Journal';
+  }
+}
 function renderAiResults(data){
   aiResults.innerHTML='';
   const heading=document.createElement('h3');
@@ -74,12 +105,15 @@ function renderAiResults(data){
     if(!matches.length){const p=document.createElement('p');p.textContent='No species matches were returned.';section.append(p);}
     matches.forEach(match=>{
       const definition=data.definitions?.[match.id]||{};
-      const line=document.createElement('p');line.className='ai-match';
       const common=definition.commonName||'Unknown species';
       const scientific=definition.scientificName||'';
       const percent=typeof match.certainty==='number'?Math.round(match.certainty*100)+'%':'Confidence unavailable';
+      const line=document.createElement('p');line.className='ai-match';
       line.textContent=common+(scientific?' ('+scientific+')':'')+' — '+percent;
       section.append(line);
+      const save=document.createElement('button');save.type='button';save.className='btn secondary';save.textContent='Save to Journal';
+      save.addEventListener('click',()=>saveIdentification(common,scientific,match.certainty,save));
+      section.append(save);
     });
     aiResults.append(section);
   });
