@@ -45,6 +45,14 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .catch-card{border-top:1px solid #456b50;padding:11px 0;font-size:13px}
 .catch-species{font-size:15px;font-weight:bold;color:#72df9b}
 .catch-meta{font-size:11px;color:#a9c6ae;margin:5px 0}
+.social-actions{display:flex;gap:8px;align-items:center;margin:9px 0;flex-wrap:wrap}
+.social-actions button{padding:7px 10px;font-size:12px}
+.social-count{font-size:11px;color:#c1d7c6}
+.comment-list{border-left:2px solid #456b50;padding-left:9px;margin:8px 0}
+.comment-item{font-size:12px;color:#d6e9db;margin:6px 0;overflow-wrap:anywhere}
+.comment-form{display:flex;gap:6px;margin-top:7px}
+.comment-form input{flex:1;min-width:0;margin:0;padding:8px}
+.comment-form button{padding:7px 9px;font-size:11px}
 .catch-photo{display:block;width:100%;max-height:190px;object-fit:cover;border-radius:7px;margin-top:8px}
 #catchImagePreview{display:none;width:100%;max-height:190px;object-fit:contain;background:#10271a;border-radius:7px;margin:5px 0 10px}
 .species-tag{display:inline-block;background:#326b47;color:#e1f5e5;padding:4px 7px;border-radius:12px;margin:3px;font-size:11px}
@@ -840,6 +848,14 @@ async function loadCatchReports(){
  }
  const counts={};
  catches.forEach(c=>{counts[c.species]=(counts[c.species]||0)+1;});
+ const catchIds=catches.map(c=>c.id);
+ const [{data:likesData,error:likesError},{data:commentsData,error:commentsError}]=await Promise.all([
+  supabaseClient.from("catch_likes").select("catch_id,user_id").in("catch_id",catchIds),
+  supabaseClient.from("catch_comments").select("id,catch_id,user_id,comment_text,created_at").in("catch_id",catchIds).order("created_at",{ascending:true})
+ ]);
+ if(likesError)console.warn("Could not load catch likes:",likesError);
+ if(commentsError)console.warn("Could not load catch comments:",commentsError);
+ const likes=likesData||[],comments=commentsData||[];
  summary.innerHTML=Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([species,count])=>
   "<span class='species-tag'>"+escapeHTML(species)+" ("+count+")</span>"
  ).join("");
@@ -851,6 +867,12 @@ async function loadCatchReports(){
    "<div class='catch-meta'>Posted by "+escapeHTML(c.display_name||"Member")+" · "+escapeHTML(date)+"</div>"+
    (c.notes?"<p>"+escapeHTML(c.notes)+"</p>":"")+
    (photo?"<img class='catch-photo' src='"+escapeHTML(photo)+"' alt='Community catch photo' loading='lazy' referrerpolicy='no-referrer'>":"")+
+   "<div class='social-actions'>"+
+   "<button class='toggle-catch-like btn-secondary' data-id='"+Number(c.id)+"'>"+(currentUser&&likes.some(l=>String(l.catch_id)===String(c.id)&&l.user_id===currentUser.id)?"♥ Liked":"♡ Like")+"</button>"+
+   "<span class='social-count'>"+likes.filter(l=>String(l.catch_id)===String(c.id)).length+" likes</span>"+
+   "<span class='social-count'>"+comments.filter(x=>String(x.catch_id)===String(c.id)).length+" comments</span></div>"+
+   "<div class='comment-list'>"+comments.filter(x=>String(x.catch_id)===String(c.id)).map(x=>"<div class='comment-item'>"+escapeHTML(x.comment_text)+"</div>").join("")+"</div>"+
+   (currentUser?"<form class='comment-form' data-id='"+Number(c.id)+"'><input name='comment' maxlength='500' placeholder='Write a comment...' required><button type='submit'>Send</button></form>":"<p class='help'>Sign in to like or comment.</p>")+
    (currentUser&&currentUser.id===c.user_id?
     "<div class='button-row' style='margin-top:8px'>"+
     "<button class='edit-catch btn-secondary' data-id='"+Number(c.id)+"'>Edit</button>"+
@@ -875,6 +897,36 @@ function validPhotoURL(value){
 document.getElementById("catchList").addEventListener("click",async function(event){
  if(!currentUser)return;
 
+ const likeButton=event.target.closest(".toggle-catch-like");
+ if(likeButton){
+  const catchId=Number(likeButton.dataset.id);
+  if(!Number.isSafeInteger(catchId)||catchId<=0)return;
+  likeButton.disabled=true;
+  const {data:existing,error:lookupError}=await supabaseClient.from("catch_likes")
+   .select("id").eq("catch_id",catchId).eq("user_id",currentUser.id).maybeSingle();
+  if(lookupError){setCatchMessage("Could not check like: "+lookupError.message);likeButton.disabled=false;return;}
+  const result=existing
+   ?await supabaseClient.from("catch_likes").delete().eq("id",existing.id).eq("user_id",currentUser.id)
+   :await supabaseClient.from("catch_likes").insert({catch_id:catchId,user_id:currentUser.id});
+  if(result.error){setCatchMessage("Could not update like: "+result.error.message);likeButton.disabled=false;return;}
+  await loadCatchReports();
+  return;
+ }
+ const commentForm=event.target.closest(".comment-form");
+ if(commentForm){
+  event.preventDefault();
+  const catchId=Number(commentForm.dataset.id);
+  const input=commentForm.querySelector("input[name='comment']");
+  const commentText=input.value.trim();
+  if(!Number.isSafeInteger(catchId)||catchId<=0||!commentText)return;
+  const sendButton=commentForm.querySelector("button");
+  sendButton.disabled=true;
+  const {error}=await supabaseClient.from("catch_comments").insert({catch_id:catchId,user_id:currentUser.id,comment_text:commentText});
+  if(error){setCatchMessage("Could not post comment: "+error.message);sendButton.disabled=false;return;}
+  setCatchMessage("Comment posted!");
+  await loadCatchReports();
+  return;
+ }
  const editButton=event.target.closest(".edit-catch");
  const changePhotoButton=event.target.closest(".change-catch-photo");
  const removePhotoButton=event.target.closest(".remove-catch-photo");
