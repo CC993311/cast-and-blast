@@ -30,6 +30,16 @@ button:hover,.button:hover{background:#176b3a}button:disabled{opacity:.5;cursor:
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="app-icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="app-icon.svg">
+
+.mobile-app-nav{display:none}
+@media(max-width:700px){
+  body{padding-bottom:76px}
+  .mobile-app-nav{position:fixed;z-index:9999;left:0;right:0;bottom:0;display:flex;justify-content:space-around;align-items:center;gap:2px;padding:8px 5px calc(8px + env(safe-area-inset-bottom));background:#172319;border-top:1px solid #456044;box-shadow:0 -5px 18px rgba(0,0,0,.28)}
+  .mobile-app-nav a{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:5px 2px;color:#aab6a7;text-decoration:none;font-size:21px;line-height:1.1;border-radius:8px}
+  .mobile-app-nav a small{font-size:10px;font-weight:700;letter-spacing:.1px}
+  .mobile-app-nav a[aria-current="page"]{color:#a9c77b;background:#243529}
+  .mobile-app-nav a:focus-visible{outline:2px solid #a9c77b;outline-offset:2px}
+}
 </head>
 <body>
 <header><div class="logo">FISH<span>BOUND</span></div><nav><a href="index.html">Home</a><a href="map.html">Fishing Locations</a><a href="guides.html">Guides</a><a href="conditions.html">Weather</a><a href="community.html">Community</a><a href="journal.html">My Journal</a><a href="achievements.html">Achievements</a><a href="leaderboard.html">Leaderboard</a><a href="notifications.html">Notifications</a></nav></header>
@@ -136,6 +146,23 @@ if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("/fishbound/service-worker.js").catch(error => console.error("FishBound offline setup failed:", error));
   });
 }
+</script>
+
+<nav class="mobile-app-nav" aria-label="Main app navigation">
+  <a href="index.html"><span>⌂</span><small>Home</small></a>
+  <a href="map.html"><span>⌖</span><small>Map</small></a>
+  <a href="identify.html"><span>🐟</span><small>Identify</small></a>
+  <a href="conditions.html"><span>☀</span><small>Forecast</small></a>
+  <a href="journal.html"><span>▤</span><small>Journal</small></a>
+</nav>
+<script>
+(() => {
+  const current = location.pathname.split("/").pop() || "index.html";
+  document.querySelectorAll(".mobile-app-nav a").forEach(link => {
+    const target = link.getAttribute("href");
+    if (target === current || (current === "" && target === "index.html")) link.setAttribute("aria-current", "page");
+  });
+})();
 </script>
 </body>
 </html>
