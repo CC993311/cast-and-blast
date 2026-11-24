@@ -694,25 +694,48 @@ function renderSpecies(list) {
     card.className = "species-card search-item";
     card.dataset.search = fish.join(" ").toLowerCase();
 
+    const illustrationPositions = {
+      "Largemouth Bass": [0,0],
+      "Smallmouth Bass": [1,0],
+      "Rainbow Trout": [2,0],
+      "Brown Trout": [3,0],
+      "Channel Catfish": [0,1],
+      "Blue Catfish": [1,1],
+      "Black Crappie": [2,1],
+      "Bluegill": [3,1],
+      "Striped Bass": [0,2],
+      "Halibut": [1,2],
+      "Red Drum": [2,2],
+      "Surfperch": [3,2],
+      "Barred Surfperch": [3,2]
+    };
+
+    const illustrationPosition = illustrationPositions[fish[0]];
     const chartPosition = getChartPosition(fish[0]);
 
-    if (chartPosition) {
-      const [chart, column, row] = chartPosition;
-
+    if (illustrationPosition) {
+      const [column, row] = illustrationPosition;
       const picture = document.createElement("div");
       picture.className = "fish-picture chart";
-
-      picture.style.backgroundImage =
-        `url("fish-chart-${chart}.png")`;
-
+      picture.style.backgroundImage = 'url("fish-illustrations.png")';
       picture.style.backgroundSize = "400% 300%";
       picture.style.backgroundPosition =
         `${column * 100 / 3}% ${row * 50}%`;
-
       picture.style.backgroundRepeat = "no-repeat";
       picture.setAttribute("role", "img");
       picture.setAttribute("aria-label", fish[0]);
-
+      card.appendChild(picture);
+    } else if (chartPosition) {
+      const [chart, column, row] = chartPosition;
+      const picture = document.createElement("div");
+      picture.className = "fish-picture chart";
+      picture.style.backgroundImage = `url("fish-chart-${chart}.png")`;
+      picture.style.backgroundSize = "400% 300%";
+      picture.style.backgroundPosition =
+        `${column * 100 / 3}% ${row * 50}%`;
+      picture.style.backgroundRepeat = "no-repeat";
+      picture.setAttribute("role", "img");
+      picture.setAttribute("aria-label", fish[0]);
       card.appendChild(picture);
     }
 
