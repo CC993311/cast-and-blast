@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fishing Guides | Cast & Blast</title>
+<title>Fishing Guides | FishBound</title>
 
 <style>
 :root {
@@ -18,6 +18,8 @@
 }
 
 * { box-sizing:border-box; margin:0; padding:0; }
+
+html { scroll-behavior:smooth; }
 
 body {
   background:var(--bg);
@@ -38,7 +40,7 @@ header {
 }
 
 .logo {
-  font-size:22px;
+  font-size:23px;
   font-weight:800;
   letter-spacing:1px;
 }
@@ -90,13 +92,13 @@ nav a:hover { color:var(--green); }
 }
 
 .search-wrap {
-  max-width:560px;
+  max-width:600px;
   margin:28px auto 0;
 }
 
 .search-wrap input {
   width:100%;
-  padding:15px 18px;
+  padding:16px 18px;
   border-radius:7px;
   border:1px solid var(--border);
   background:#101710;
@@ -106,6 +108,13 @@ nav a:hover { color:var(--green); }
 }
 
 .search-wrap input:focus { border-color:var(--green); }
+
+.search-status {
+  color:var(--muted);
+  font-size:13px;
+  margin-top:10px;
+  min-height:20px;
+}
 
 section { padding:55px 7%; }
 
@@ -136,10 +145,18 @@ section { padding:55px 7%; }
 }
 
 .card {
+  display:block;
   background:var(--panel);
   border:1px solid var(--border);
   border-radius:10px;
   padding:24px;
+  text-decoration:none;
+  transition:transform .2s,border-color .2s;
+}
+
+.card:hover {
+  transform:translateY(-3px);
+  border-color:var(--green);
 }
 
 .card h3 {
@@ -153,16 +170,12 @@ section { padding:55px 7%; }
   font-size:14px;
 }
 
-.card-icon {
-  width:43px;
-  height:43px;
-  border-radius:9px;
-  display:grid;
-  place-items:center;
-  background:var(--panel2);
+.card-label {
   color:var(--green);
-  font-size:22px;
-  margin-bottom:15px;
+  font-size:11px;
+  font-weight:bold;
+  letter-spacing:1px;
+  margin-bottom:9px;
 }
 
 .guide-section {
@@ -192,6 +205,8 @@ section { padding:55px 7%; }
   color:var(--muted);
   font-size:14px;
 }
+
+.info-card p + p { margin-top:10px; }
 
 .info-card ul {
   padding-left:19px;
@@ -275,14 +290,6 @@ details p {
 
 details strong { color:var(--white); }
 
-.species-card[hidden] { display:none; }
-
-.empty-message {
-  display:none;
-  color:var(--muted);
-  padding:20px 0;
-}
-
 .resource-link {
   color:var(--green);
   text-decoration:none;
@@ -290,6 +297,15 @@ details strong { color:var(--white); }
 }
 
 .resource-link:hover { text-decoration:underline; }
+
+.empty-message {
+  display:none;
+  color:var(--muted);
+  padding:25px 0;
+  text-align:center;
+}
+
+[hidden] { display:none !important; }
 
 footer {
   background:#172319;
@@ -302,7 +318,7 @@ footer {
 
 @media(max-width:600px) {
   header { justify-content:center; }
-  nav { justify-content:center; }
+  nav { justify-content:center; gap:13px; }
   section { padding:42px 6%; }
   .hero { padding:60px 6%; }
 }
@@ -312,7 +328,7 @@ footer {
 <body>
 
 <header>
-  <div class="logo">CAST <span>&</span> BLAST</div>
+  <div class="logo">FISH<span>BOUND</span></div>
   <nav>
     <a href="index.html">Home</a>
     <a href="map.html">Fishing Map</a>
@@ -323,80 +339,96 @@ footer {
 </header>
 
 <div class="hero">
-  <div class="eyebrow">THE CAST & BLAST FISHING LIBRARY</div>
+  <div class="eyebrow">THE FISHBOUND LEARNING CENTER</div>
   <h1>THE COMPLETE<br><span>FISHING GUIDE</span></h1>
   <p>
-    Learn about fishing techniques, equipment, fish species,
-    freshwater and saltwater fishing, knots, and responsible
-    fishing practices.
+    Build your fishing knowledge with guides covering equipment,
+    techniques, fish identification, freshwater and saltwater
+    environments, knots, and responsible fishing.
   </p>
 
   <div class="search-wrap">
-    <input id="guideSearch" type="text"
-      placeholder="Search fish species, equipment, or techniques...">
+    <input id="guideSearch" type="search"
+      placeholder="Search the entire fishing guide..."
+      aria-label="Search fishing guides">
+    <div class="search-status" id="searchStatus">
+      Search fish species, equipment, techniques, and more.
+    </div>
   </div>
 </div>
 
-<!-- GUIDE CATEGORIES -->
-<section>
+<!-- TOPICS -->
+<section id="topics">
   <div class="section-heading">
     <small>EXPLORE THE LIBRARY</small>
     <h2>Fishing Topics</h2>
-    <p>Explore different parts of fishing and learn something new.</p>
+    <p>Choose a topic to explore and improve your fishing knowledge.</p>
   </div>
 
   <div class="cards">
-    <a class="card" href="#beginner" style="text-decoration:none">
-      <div class="card-icon">🎣</div>
-      <h3>Getting Started</h3>
-      <p>Learn the basics of fishing and how to prepare for your first trip.</p>
+    <a class="card search-item" href="#beginner">
+      <div class="card-label">GETTING STARTED</div>
+      <h3>Beginner Fishing Guide</h3>
+      <p>Learn the basics of fishing and how to prepare for a trip.</p>
     </a>
 
-    <a class="card" href="#equipment" style="text-decoration:none">
-      <div class="card-icon">🧰</div>
+    <a class="card search-item" href="#equipment">
+      <div class="card-label">FISHING GEAR</div>
       <h3>Fishing Equipment</h3>
-      <p>Understand rods, reels, lines, hooks, and tackle.</p>
+      <p>Understand rods, reels, fishing line, hooks, and tackle.</p>
     </a>
 
-    <a class="card" href="#techniques" style="text-decoration:none">
-      <div class="card-icon">🌊</div>
+    <a class="card search-item" href="#techniques">
+      <div class="card-label">FISHING METHODS</div>
       <h3>Fishing Techniques</h3>
       <p>Explore different ways anglers fish in different environments.</p>
     </a>
 
-    <a class="card" href="#freshwater" style="text-decoration:none">
-      <div class="card-icon">🏞️</div>
+    <a class="card search-item" href="#freshwater">
+      <div class="card-label">INLAND WATERS</div>
       <h3>Freshwater Fishing</h3>
       <p>Learn about lakes, ponds, rivers, and reservoirs.</p>
     </a>
 
-    <a class="card" href="#saltwater" style="text-decoration:none">
-      <div class="card-icon">🌅</div>
+    <a class="card search-item" href="#saltwater">
+      <div class="card-label">COASTAL WATERS</div>
       <h3>Saltwater Fishing</h3>
       <p>Explore bays, beaches, estuaries, and ocean environments.</p>
     </a>
 
-    <a class="card" href="#species" style="text-decoration:none">
-      <div class="card-icon">🐟</div>
+    <a class="card search-item" href="#species">
+      <div class="card-label">IDENTIFICATION</div>
       <h3>Fish Species</h3>
       <p>Explore fish identification, habitat, diet, and behavior.</p>
     </a>
 
-    <a class="card" href="#knots" style="text-decoration:none">
-      <div class="card-icon">🪢</div>
+    <a class="card search-item" href="#knots">
+      <div class="card-label">FISHING FUNDAMENTALS</div>
       <h3>Fishing Knots</h3>
-      <p>Learn about common knots and their uses.</p>
+      <p>Learn about common fishing knots and their uses.</p>
     </a>
 
-    <a class="card" href="#responsible" style="text-decoration:none">
-      <div class="card-icon">🌱</div>
+    <a class="card search-item" href="#responsible">
+      <div class="card-label">CONSERVATION</div>
       <h3>Responsible Fishing</h3>
       <p>Learn how anglers can help protect fish and waterways.</p>
+    </a>
+
+    <a class="card search-item" href="#regulations">
+      <div class="card-label">FISHING RULES</div>
+      <h3>Regulations & Resources</h3>
+      <p>Find official information about fishing rules and regulations.</p>
+    </a>
+
+    <a class="card search-item" href="#glossary">
+      <div class="card-label">LEARN THE LANGUAGE</div>
+      <h3>Fishing Glossary</h3>
+      <p>Understand common fishing terms and definitions.</p>
     </a>
   </div>
 </section>
 
-<!-- BEGINNER GUIDE -->
+<!-- BEGINNER -->
 <section class="guide-section" id="beginner">
   <div class="section-heading">
     <small>START HERE</small>
@@ -405,8 +437,8 @@ footer {
   </div>
 
   <div class="info-grid">
-    <div class="info-card">
-      <h3>1. Understand Your Location</h3>
+    <div class="info-card search-item">
+      <h3>Understand Your Location</h3>
       <p>
         Start by learning about the water you plan to visit.
         Lakes, rivers, ponds, and ocean areas all have different
@@ -414,40 +446,40 @@ footer {
       </p>
     </div>
 
-    <div class="info-card">
-      <h3>2. Choose Suitable Equipment</h3>
+    <div class="info-card search-item">
+      <h3>Choose Suitable Equipment</h3>
       <p>
         Select a rod, reel, line, and tackle that are appropriate
         for the type of fishing and fish you are learning about.
       </p>
     </div>
 
-    <div class="info-card">
-      <h3>3. Learn Basic Fishing Terms</h3>
+    <div class="info-card search-item">
+      <h3>Learn Basic Fishing Terms</h3>
       <p>
-        Learn what terms such as casting, retrieve, drag, tackle,
-        lure, bait, and catch-and-release mean.
+        Learn what casting, retrieving, drag, tackle, lure,
+        bait, and catch-and-release mean.
       </p>
     </div>
 
-    <div class="info-card">
-      <h3>4. Check Local Rules</h3>
+    <div class="info-card search-item">
+      <h3>Check Local Rules</h3>
       <p>
         Before fishing, check license requirements, fishing seasons,
         size limits, bag limits, and area-specific restrictions.
       </p>
     </div>
 
-    <div class="info-card">
-      <h3>5. Prepare for the Day</h3>
+    <div class="info-card search-item">
+      <h3>Prepare for the Day</h3>
       <p>
         Check the weather, bring drinking water, sun protection,
-        suitable clothing, and a way to keep your equipment organized.
+        suitable clothing, and a way to organize your equipment.
       </p>
     </div>
 
-    <div class="info-card">
-      <h3>6. Keep Learning</h3>
+    <div class="info-card search-item">
+      <h3>Keep Learning</h3>
       <p>
         Pay attention to water conditions, fish behavior, and
         what you learn from each fishing trip.
@@ -470,11 +502,11 @@ footer {
   </div>
 
   <div class="info-grid">
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>Fishing Rods</h3>
       <p>
-        A fishing rod is used to cast line and help control the
-        fishing presentation. Rods vary in length, power, and action.
+        A fishing rod is used to cast line and help control a fishing
+        presentation. Rods vary in length, power, and action.
       </p>
       <ul>
         <li>Spinning rods</li>
@@ -484,7 +516,7 @@ footer {
       </ul>
     </div>
 
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>Fishing Reels</h3>
       <p>
         A reel stores fishing line and helps an angler retrieve
@@ -498,7 +530,7 @@ footer {
       </ul>
     </div>
 
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>Fishing Line</h3>
       <p>
         Fishing line connects the angler's equipment to the hook
@@ -511,7 +543,7 @@ footer {
       </ul>
     </div>
 
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>Hooks</h3>
       <p>
         Hooks come in many shapes and sizes. The appropriate hook
@@ -525,7 +557,7 @@ footer {
       </ul>
     </div>
 
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>Bait and Lures</h3>
       <p>
         Bait and artificial lures are used to attract fish.
@@ -540,11 +572,11 @@ footer {
       </ul>
     </div>
 
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>Other Useful Equipment</h3>
       <p>
         Other equipment can help organize a fishing trip and
-        support safe, responsible fish handling.
+        support responsible fish handling.
       </p>
       <ul>
         <li>Tackle box</li>
@@ -566,7 +598,7 @@ footer {
   </div>
 
   <div class="info-grid">
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>Spinning</h3>
       <p>
         Spinning is a popular fishing style that uses a spinning
@@ -575,7 +607,7 @@ footer {
       </p>
     </div>
 
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>Bait Fishing</h3>
       <p>
         Bait fishing uses natural or prepared bait to attract fish.
@@ -583,7 +615,7 @@ footer {
       </p>
     </div>
 
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>Fly Fishing</h3>
       <p>
         Fly fishing uses specialized equipment and lightweight
@@ -592,7 +624,7 @@ footer {
       </p>
     </div>
 
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>Trolling</h3>
       <p>
         Trolling involves presenting fishing lines from a moving
@@ -600,7 +632,7 @@ footer {
       </p>
     </div>
 
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>Jigging</h3>
       <p>
         Jigging uses a weighted lure, often moved through the
@@ -608,11 +640,29 @@ footer {
       </p>
     </div>
 
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>Surf Fishing</h3>
       <p>
         Surf fishing takes place along ocean beaches. Anglers
         must understand changing tides, waves, and local beach rules.
+      </p>
+    </div>
+
+    <div class="info-card search-item">
+      <h3>Understanding Casting</h3>
+      <p>
+        Casting is the process of sending a bait or lure away
+        from the angler. Different rods and reels are designed
+        for different casting styles.
+      </p>
+    </div>
+
+    <div class="info-card search-item">
+      <h3>Understanding Retrieval</h3>
+      <p>
+        Retrieval is bringing line and a lure back toward the angler.
+        Different lures are designed to move through the water
+        in different ways.
       </p>
     </div>
   </div>
@@ -627,7 +677,7 @@ footer {
   </div>
 
   <div class="info-grid">
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>Lakes</h3>
       <p>
         Lakes contain different habitats, including shallow shorelines,
@@ -639,7 +689,7 @@ footer {
       </p>
     </div>
 
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>Ponds</h3>
       <p>
         Ponds are smaller bodies of freshwater that may contain
@@ -651,18 +701,16 @@ footer {
       </p>
     </div>
 
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>Rivers</h3>
       <p>
         Rivers have flowing water. Current, depth, temperature,
         and underwater structure all influence fish habitat.
       </p>
-      <p>
-        Fish species vary widely depending on the river and region.
-      </p>
+      <p>Fish species vary widely depending on the river and region.</p>
     </div>
 
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>Reservoirs</h3>
       <p>
         Reservoirs are human-made lakes created by dams.
@@ -670,7 +718,7 @@ footer {
       </p>
       <p>
         Some reservoirs support bass, trout, catfish, crappie,
-        and other game fish.
+        and other fish.
       </p>
     </div>
   </div>
@@ -691,7 +739,7 @@ footer {
   </div>
 
   <div class="info-grid">
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>Ocean Fishing</h3>
       <p>
         Ocean environments contain a wide variety of fish.
@@ -700,7 +748,7 @@ footer {
       </p>
     </div>
 
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>Bay Fishing</h3>
       <p>
         Bays are coastal areas that are partly enclosed by land.
@@ -708,7 +756,7 @@ footer {
       </p>
     </div>
 
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>Estuaries</h3>
       <p>
         Estuaries are places where freshwater and saltwater mix.
@@ -717,7 +765,7 @@ footer {
       </p>
     </div>
 
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>Beach Fishing</h3>
       <p>
         Beach fishing takes place along the shoreline.
@@ -741,7 +789,7 @@ footer {
 
   <div class="species-grid" id="speciesGrid">
 
-    <article class="species-card" data-search="largemouth bass freshwater bass">
+    <article class="species-card search-item" data-search="largemouth bass freshwater bass">
       <div class="fish-picture" style="background-position:0% 0%"></div>
       <div class="species-content">
         <h3>Largemouth Bass</h3>
@@ -759,7 +807,7 @@ footer {
       </div>
     </article>
 
-    <article class="species-card" data-search="smallmouth bass freshwater bass">
+    <article class="species-card search-item" data-search="smallmouth bass freshwater bass">
       <div class="fish-picture" style="background-position:33.333% 0%"></div>
       <div class="species-content">
         <h3>Smallmouth Bass</h3>
@@ -777,7 +825,7 @@ footer {
       </div>
     </article>
 
-    <article class="species-card" data-search="rainbow trout freshwater trout">
+    <article class="species-card search-item" data-search="rainbow trout freshwater trout">
       <div class="fish-picture" style="background-position:66.666% 0%"></div>
       <div class="species-content">
         <h3>Rainbow Trout</h3>
@@ -795,7 +843,7 @@ footer {
       </div>
     </article>
 
-    <article class="species-card" data-search="brown trout freshwater trout">
+    <article class="species-card search-item" data-search="brown trout freshwater trout">
       <div class="fish-picture" style="background-position:100% 0%"></div>
       <div class="species-content">
         <h3>Brown Trout</h3>
@@ -813,7 +861,7 @@ footer {
       </div>
     </article>
 
-    <article class="species-card" data-search="channel catfish freshwater catfish">
+    <article class="species-card search-item" data-search="channel catfish freshwater catfish">
       <div class="fish-picture" style="background-position:0% 50%"></div>
       <div class="species-content">
         <h3>Channel Catfish</h3>
@@ -831,7 +879,7 @@ footer {
       </div>
     </article>
 
-    <article class="species-card" data-search="blue catfish freshwater catfish">
+    <article class="species-card search-item" data-search="blue catfish freshwater catfish">
       <div class="fish-picture" style="background-position:33.333% 50%"></div>
       <div class="species-content">
         <h3>Blue Catfish</h3>
@@ -849,7 +897,7 @@ footer {
       </div>
     </article>
 
-    <article class="species-card" data-search="black crappie freshwater panfish">
+    <article class="species-card search-item" data-search="black crappie freshwater panfish">
       <div class="fish-picture" style="background-position:66.666% 50%"></div>
       <div class="species-content">
         <h3>Black Crappie</h3>
@@ -867,7 +915,7 @@ footer {
       </div>
     </article>
 
-    <article class="species-card" data-search="bluegill freshwater sunfish panfish">
+    <article class="species-card search-item" data-search="bluegill freshwater sunfish panfish">
       <div class="fish-picture" style="background-position:100% 50%"></div>
       <div class="species-content">
         <h3>Bluegill</h3>
@@ -885,7 +933,7 @@ footer {
       </div>
     </article>
 
-    <article class="species-card" data-search="striped bass freshwater saltwater bass">
+    <article class="species-card search-item" data-search="striped bass freshwater saltwater bass">
       <div class="fish-picture" style="background-position:0% 100%"></div>
       <div class="species-content">
         <h3>Striped Bass</h3>
@@ -903,7 +951,7 @@ footer {
       </div>
     </article>
 
-    <article class="species-card" data-search="california halibut saltwater ocean">
+    <article class="species-card search-item" data-search="california halibut saltwater ocean flatfish">
       <div class="fish-picture" style="background-position:33.333% 100%"></div>
       <div class="species-content">
         <h3>California Halibut</h3>
@@ -921,7 +969,7 @@ footer {
       </div>
     </article>
 
-    <article class="species-card" data-search="red drum redfish saltwater">
+    <article class="species-card search-item" data-search="red drum redfish saltwater">
       <div class="fish-picture" style="background-position:66.666% 100%"></div>
       <div class="species-content">
         <h3>Red Drum</h3>
@@ -939,7 +987,7 @@ footer {
       </div>
     </article>
 
-    <article class="species-card" data-search="surfperch saltwater beach">
+    <article class="species-card search-item" data-search="surfperch saltwater beach pacific">
       <div class="fish-picture" style="background-position:100% 100%"></div>
       <div class="species-content">
         <h3>Surfperch</h3>
@@ -960,7 +1008,7 @@ footer {
   </div>
 
   <p class="empty-message" id="emptyMessage">
-    No matching fish species found. Try another search.
+    No matching fish species found.
   </p>
 </section>
 
@@ -973,7 +1021,7 @@ footer {
   </div>
 
   <div class="info-grid">
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>Improved Clinch Knot</h3>
       <p>
         A commonly used knot for attaching fishing line to
@@ -982,7 +1030,7 @@ footer {
       </p>
     </div>
 
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>Palomar Knot</h3>
       <p>
         A popular knot used to connect fishing line to hooks
@@ -991,7 +1039,7 @@ footer {
       </p>
     </div>
 
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>Uni Knot</h3>
       <p>
         A versatile knot used for attaching line to tackle.
@@ -999,7 +1047,7 @@ footer {
       </p>
     </div>
 
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>Loop Knot</h3>
       <p>
         Loop knots create a connection that allows a lure
@@ -1010,8 +1058,8 @@ footer {
 
   <div class="tip">
     Always check that knots are tied correctly and securely.
-    Knot performance can vary depending on the line material,
-    line condition, and connection being used.
+    Knot performance can vary depending on line material,
+    line condition, and the connection being made.
   </div>
 </section>
 
@@ -1024,7 +1072,7 @@ footer {
   </div>
 
   <div class="info-grid">
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>Follow Fishing Regulations</h3>
       <p>
         Check current rules for the exact water you plan to visit.
@@ -1033,7 +1081,7 @@ footer {
       </p>
     </div>
 
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>Respect Catch Limits</h3>
       <p>
         Follow all size limits, bag limits, and possession limits.
@@ -1041,7 +1089,7 @@ footer {
       </p>
     </div>
 
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>Protect Fish Habitat</h3>
       <p>
         Avoid damaging aquatic vegetation, shorelines, and
@@ -1049,7 +1097,7 @@ footer {
       </p>
     </div>
 
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>Keep Waterways Clean</h3>
       <p>
         Collect fishing line, hooks, packaging, and other trash.
@@ -1057,7 +1105,7 @@ footer {
       </p>
     </div>
 
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>Handle Fish Carefully</h3>
       <p>
         Learn the recommended handling practices for the species
@@ -1065,8 +1113,8 @@ footer {
       </p>
     </div>
 
-    <div class="info-card">
-      <h3>Prevent the Spread of Invasive Species</h3>
+    <div class="info-card search-item">
+      <h3>Prevent Invasive Species</h3>
       <p>
         Clean, drain, and dry boats and equipment when required.
         Follow local guidance for moving between waterways.
@@ -1087,7 +1135,7 @@ footer {
   </div>
 
   <div class="info-grid">
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>California Fishing Regulations</h3>
       <p>
         Find official California fishing regulations, license
@@ -1097,12 +1145,12 @@ footer {
       <a class="resource-link"
         href="https://wildlife.ca.gov/Regulations"
         target="_blank" rel="noopener">
-        California Regulations →
+        California Regulations
       </a>
     </div>
 
-    <div class="info-card">
-      <h3>California Fish Identification</h3>
+    <div class="info-card search-item">
+      <h3>California Fishing Resources</h3>
       <p>
         Explore fish species information and identification
         resources from California's wildlife agency.
@@ -1111,11 +1159,11 @@ footer {
       <a class="resource-link"
         href="https://wildlife.ca.gov/Fishing"
         target="_blank" rel="noopener">
-        California Fishing Resources →
+        California Fishing Resources
       </a>
     </div>
 
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>NOAA Fisheries</h3>
       <p>
         Learn about marine fish, ocean habitats, conservation,
@@ -1125,11 +1173,11 @@ footer {
       <a class="resource-link"
         href="https://www.fisheries.noaa.gov/"
         target="_blank" rel="noopener">
-        NOAA Fisheries →
+        NOAA Fisheries
       </a>
     </div>
 
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>U.S. Fish & Wildlife Service</h3>
       <p>
         Explore information about fish, aquatic habitats,
@@ -1139,7 +1187,7 @@ footer {
       <a class="resource-link"
         href="https://www.fws.gov/"
         target="_blank" rel="noopener">
-        U.S. Fish & Wildlife →
+        U.S. Fish & Wildlife Service
       </a>
     </div>
   </div>
@@ -1160,84 +1208,123 @@ footer {
   </div>
 
   <div class="info-grid">
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>Angler</h3>
       <p>A person who fishes.</p>
     </div>
 
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>Bait</h3>
       <p>Natural or prepared material used to attract fish.</p>
     </div>
 
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>Drag</h3>
       <p>A reel mechanism that allows line to release under tension.</p>
     </div>
 
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>Retrieve</h3>
       <p>The process of bringing fishing line and a lure back toward the angler.</p>
     </div>
 
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>Structure</h3>
       <p>Physical features in the water, such as rocks, logs, and submerged vegetation.</p>
     </div>
 
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>Current</h3>
       <p>The movement of water, especially in rivers and streams.</p>
     </div>
 
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>Topwater</h3>
       <p>A fishing presentation that takes place on or near the water's surface.</p>
     </div>
 
-    <div class="info-card">
+    <div class="info-card search-item">
       <h3>Fry</h3>
       <p>A young fish that has developed beyond the earliest larval stage.</p>
+    </div>
+
+    <div class="info-card search-item">
+      <h3>Leader</h3>
+      <p>A separate section of line connected between the main fishing line and terminal tackle.</p>
+    </div>
+
+    <div class="info-card search-item">
+      <h3>Terminal Tackle</h3>
+      <p>Equipment attached near the end of the fishing line, such as hooks, swivels, and weights.</p>
+    </div>
+
+    <div class="info-card search-item">
+      <h3>Habitat</h3>
+      <p>The natural environment where a fish lives, finds food, and reproduces.</p>
+    </div>
+
+    <div class="info-card search-item">
+      <h3>Catch and Release</h3>
+      <p>A fishing practice where a caught fish is returned to the water, following local rules and recommended handling practices.</p>
     </div>
   </div>
 </section>
 
 <footer>
-  CAST & BLAST | EXPLORE. DISCOVER. RESPECT THE OUTDOORS.
-  <br><br>© 2026 Cast & Blast
+  FISHBOUND | EXPLORE. DISCOVER. RESPECT THE WATER.
+  <br><br>© 2026 FishBound
 </footer>
 
 <script>
 const searchInput = document.getElementById("guideSearch");
-const speciesCards = document.querySelectorAll(".species-card");
+const searchItems = document.querySelectorAll(".search-item");
+const sections = document.querySelectorAll("body > section");
+const searchStatus = document.getElementById("searchStatus");
 const emptyMessage = document.getElementById("emptyMessage");
 
-searchInput.addEventListener("input", function() {
-  const search = this.value.toLowerCase().trim();
+function searchGuides() {
+  const search = searchInput.value.toLowerCase().trim();
   let visibleCount = 0;
+  let visibleSpecies = 0;
 
-  speciesCards.forEach(card => {
-    const text = (
-      card.innerText + " " +
-      (card.dataset.search || "")
-    ).toLowerCase();
+  searchItems.forEach(item => {
+    const text = (item.textContent + " " +
+      (item.dataset.search || "")).toLowerCase();
 
-    const matches = text.includes(search);
-    card.hidden = !matches;
+    const matches = !search || text.includes(search);
+    item.hidden = !matches;
 
-    if(matches) visibleCount++;
+    if (matches) {
+      visibleCount++;
+      if (item.classList.contains("species-card")) {
+        visibleSpecies++;
+      }
+    }
+  });
+
+  sections.forEach(section => {
+    const items = section.querySelectorAll(".search-item");
+    if (!items.length) return;
+
+    const hasVisibleItem = Array.from(items).some(item => !item.hidden);
+    section.hidden = search.length > 0 && !hasVisibleItem;
   });
 
   emptyMessage.style.display =
-    visibleCount === 0 ? "block" : "none";
+    search && visibleSpecies === 0 &&
+    !document.getElementById("species").hidden
+      ? "block" : "none";
 
-  if(search.length > 0) {
-    document.getElementById("species").scrollIntoView({
-      behavior:"smooth",
-      block:"start"
-    });
+  if (!search) {
+    searchStatus.textContent =
+      "Search fish species, equipment, techniques, and more.";
+  } else {
+    searchStatus.textContent =
+      visibleCount + " matching guide result(s) found.";
   }
-});
+}
+
+searchInput.addEventListener("input", searchGuides);
 </script>
 
 </body>
