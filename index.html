@@ -5,6 +5,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#101710">
+<meta name="manifest" content="FishBound app manifest">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="app-icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="app-icon.svg">
 <meta name="description" content="FishBound is your fishing companion. Discover fishing locations, explore fish species, check water and weather conditions, and share your catches.">
 <title>FishBound | Your Fishing Companion</title>
 
@@ -387,5 +391,13 @@ footer {
   <br><br>© 2026 FishBound
 </footer>
 
+
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/fishbound/service-worker.js").catch(error => console.error("FishBound offline setup failed:", error));
+  });
+}
+</script>
 </body>
 </html>
