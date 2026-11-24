@@ -381,9 +381,25 @@ function renderSpeciesSuggestions(place,current){
   if(Number.isFinite(wind)&&wind>15)reason+=" Wind is elevated, so choose a sheltered, safe area and use caution.";
   if([95,96,99].includes(code))reason+=" Thunderstorm conditions are in the forecast; postpone fishing until conditions are safe.";
   $("speciesReason").textContent=reason;
-  $("speciesSuggestions").innerHTML=choices.map((item,index)=>
-    "<div class='metric'><div class='metric-label'>Suggestion "+(index+1)+"</div><div class='metric-value' style='font-size:21px'>"+item[0]+"</div><div class='metric-note'>"+item[1]+"</div></div>"
-  ).join("");
+  const tackleGuides=[
+    {match:/largemouth|smallmouth bass/i,bait:"Worms, minnows, or crawfish-style soft baits",lure:"Jigs, spinnerbaits, or crankbaits",color:"Natural colors in clear water; darker colors in stained water",method:"Work near cover, points, and depth changes. Slow down if the water is cool."},
+    {match:/trout/i,bait:"Worms, insects, or locally permitted trout bait",lure:"Small spinners or spoons",color:"Silver or gold; natural patterns in clear water",method:"Use a light presentation around current, deeper pools, or cool-water areas."},
+    {match:/catfish/i,bait:"Worms, prepared catfish bait, or cut bait where legal",lure:"A simple bottom rig with an appropriate hook and sinker",color:"Color is usually less important than scent and presentation",method:"Fish near the bottom in suitable areas; follow local bait and gear rules."},
+    {match:/crappie/i,bait:"Small minnows or small soft plastics",lure:"Small jigs",color:"White, chartreuse, or natural colors",method:"Try slowly around brush, docks, and submerged structure."},
+    {match:/bluegill/i,bait:"Worm pieces or small insects",lure:"Tiny jigs or small spinners",color:"Natural or subtle colors",method:"Use a light setup near shallow vegetation and other cover."},
+    {match:/walleye/i,bait:"Minnows or nightcrawlers where permitted",lure:"Jigs, bottom bouncers, or diving crankbaits",color:"Natural baitfish colors; brighter accents in stained water",method:"Check rocky points, drop-offs, and current breaks."},
+    {match:/perch/i,bait:"Worms or small minnows",lure:"Small jigs or spoons",color:"Natural baitfish colors or yellow",method:"Try near weed edges and deeper structure."}
+  ];
+  $("speciesSuggestions").innerHTML=choices.map((item,index)=>{
+    const guide=tackleGuides.find(x=>x.match.test(item[0]))||{
+      bait:"Use locally common natural bait where permitted",
+      lure:"Try a small jig or a lure that matches local forage",
+      color:"Start with natural colors and adjust to water clarity",
+      method:"Cover suitable habitat slowly and adjust based on conditions."
+    };
+    const windTip=Number.isFinite(wind)&&wind>12?" With stronger wind, favor a sheltered bank and keep casts controlled.":"";
+    return "<div class='metric'><div class='metric-label'>Suggestion "+(index+1)+"</div><div class='metric-value' style='font-size:21px'>"+item[0]+"</div><div class='metric-note'>"+item[1]+"</div><div class='metric-note'><strong>Bait:</strong> "+guide.bait+"</div><div class='metric-note'><strong>Lure:</strong> "+guide.lure+"</div><div class='metric-note'><strong>Colors:</strong> "+guide.color+"</div><div class='metric-note'><strong>Technique:</strong> "+guide.method+windTip+"</div></div>";
+  }).join("");
 }
 
 async function loadWeather(lat,lon){
