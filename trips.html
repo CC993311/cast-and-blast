@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FishBound | Fishing Trip Planner</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--bg:#101710;--panel:#1b281e;--panel2:#243529;--green:#a9c77b;--white:#f1f4ec;--muted:#aab6a7;--border:#354735}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--white);font-family:Arial,sans-serif}
@@ -44,22 +45,42 @@ a{color:var(--green)}
 <p class="note">These are general weather- and season-based ideas, not live fish-location data. Confirm local species, regulations, access, and advisories. Weather forecasts can change.</p>
 </section>
 <section class="panel">
-<h3>My saved trips</h3><p class="note">Trips are saved in this browser on this device. They are not synced to your FishBound account yet.</p>
+<h3>My saved trips</h3><p class="note">Trips are saved securely to your signed-in FishBound account and can be accessed on other devices.</p>
 <div id="savedTrips" class="note">No trips saved yet.</div>
 </section>
 </main>
 <script>
 const $=id=>document.getElementById(id);
+const SUPABASE_URL="https://ubnmhqxitiigsctbsmqy.supabase.co";
+const SUPABASE_KEY="sb_publishable_g-6tScB0HFIVcVkAhCN5Ug_fpm-jFrq";
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const today=new Date();const localDate=new Date(today.getTime()-today.getTimezoneOffset()*60000).toISOString().slice(0,10);
 $("tripDate").min=localDate;$("tripDate").value=localDate;
-let currentPlan=null;
+let currentPlan=null,currentUser=null;
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-function saved(){try{return JSON.parse(localStorage.getItem("fishboundTrips")||"[]")}catch(e){return[]}}
-function renderSaved(){
- const trips=saved();$("savedTrips").innerHTML=trips.length?trips.map((t,i)=>'<article class="trip"><h4>'+esc(t.place)+' · '+esc(t.date)+'</h4><p class="muted">'+esc(t.notes||"No notes")+'</p><button class="danger" onclick="deleteTrip('+i+')">Delete Trip</button></article>').join(""):"No trips saved yet.";
+async function renderSaved(){
+ if(!currentUser){$("savedTrips").innerHTML='Sign in to save and view your trips. <a href="community.html">Go to Community to sign in.</a>';return;}
+ $("savedTrips").textContent="Loading your saved trips...";
+ const {data:trips,error}=await db.from("trip_plans").select("id,destination,trip_date,notes,location,region,forecast,species,created_at").eq("user_id",currentUser.id).order("trip_date",{ascending:true});
+ if(error){$("savedTrips").textContent="Could not load trips: "+error.message;return;}
+ $("savedTrips").innerHTML=trips?.length?trips.map(t=>'<article class="trip"><h4>'+esc(t.destination)+' · '+esc(t.trip_date)+'</h4><p class="muted">'+esc(t.location||"")+(t.region?", "+esc(t.region):"")+'</p><p class="muted">'+esc(t.notes||"No notes")+'</p><button class="danger delete-trip" data-id="'+esc(t.id)+'" type="button">Delete Trip</button></article>').join(""):"No trips saved yet.";
 }
-function deleteTrip(i){const trips=saved();trips.splice(i,1);localStorage.setItem("fishboundTrips",JSON.stringify(trips));renderSaved()}
-window.deleteTrip=deleteTrip;
+async function deleteTrip(id){
+ if(!currentUser||!id||!confirm("Delete this saved trip?"))return;
+ const {data,error}=await db.from("trip_plans").delete().eq("id",id).eq("user_id",currentUser.id).select("id");
+ if(error||!data?.length){$("status").textContent="Could not delete trip: "+(error?.message||"No trip was deleted.");return;}
+ $("status").textContent="Trip deleted.";await renderSaved();
+}
+$("savedTrips").addEventListener("click",event=>{
+ const button=event.target.closest(".delete-trip");if(button)deleteTrip(button.dataset.id);
+});
+(async()=>{
+ const {data,error}=await db.auth.getSession();
+ if(error){$("status").textContent="Could not check your sign-in: "+error.message;return;}
+ currentUser=data.session?.user||null;
+ if(!currentUser)$("status").textContent="You can check forecasts without signing in. Sign in through Community to save trips to your account.";
+ await renderSaved();
+})().catch(e=>$("status").textContent=e.message);
 function speciesFor(month,temp){
  const season=month<=2||month===12?"winter":month<=5?"spring":month<=8?"summer":"fall";
  const choices={winter:["Trout","Crappie","Bluegill"],spring:["Largemouth bass","Crappie","Trout"],summer:["Largemouth bass","Bluegill","Channel catfish"],fall:["Largemouth bass","Crappie","Trout"]};
@@ -99,14 +120,28 @@ $("checkButton").addEventListener("click",async()=>{
   $("forecastPanel").classList.remove("hidden");
   $("status").textContent="Forecast loaded for "+loc.name+(loc.admin1?", "+loc.admin1:"")+".";
   currentPlan={place:place,date,notes:$("tripNotes").value.trim(),location:loc.name,region:loc.admin1||"",forecast:{weather,high,low,rain,maxWind},species:names};
-  $("saveButton").disabled=false;
+  $("saveButton").disabled=!currentUser; if(!currentUser)$("status").textContent+=" Sign in through Community to save this trip.";
  }catch(e){$("status").textContent=e.message||"Something went wrong. Please try again."}
 });
-$("saveButton").addEventListener("click",()=>{
+$("saveButton").addEventListener("click",async()=>{
  if(!currentPlan)return;
- const trips=saved();trips.unshift({...currentPlan,createdAt:new Date().toISOString()});
- try{localStorage.setItem("fishboundTrips",JSON.stringify(trips));renderSaved();$("status").textContent="Trip saved in this browser."; $("saveButton").disabled=true;}
+ if(!currentUser){$("status").textContent="Sign in through Community before saving trips.";return;}
+ $("saveButton").disabled=true;$("status").textContent="Saving trip to your FishBound account...";
+ const {error}=await db.from("trip_plans").insert({
+  user_id:currentUser.id,
+  destination:currentPlan.place,
+  trip_date:currentPlan.date,
+  notes:currentPlan.notes||null,
+  location:currentPlan.location,
+  region:currentPlan.region||null,
+  forecast:currentPlan.forecast,
+  species:currentPlan.species
+ });
+ if(error){$("status").textContent="Could not save trip: "+error.message;$("saveButton").disabled=false;return;}
+ $("status").textContent="Trip saved to your FishBound account.";
+ await renderSaved();
+});
+renderSaved();$("status").textContent="Trip saved in this browser."; $("saveButton").disabled=true;}
  catch(e){$("status").textContent="Could not save this trip. Browser storage may be full or disabled."}
 });
-renderSaved();
 </script></body></html>
