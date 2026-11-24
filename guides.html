@@ -407,36 +407,36 @@ const fishData = [
 ]);
 
 // Each uploaded fish chart is a 3-column by 4-row image grid.
-// Values are [chart, column, row].
+// Values are [chart, column, row], starting at 0.
 const chartFishPositions = {
-  // Freshwater chart: 4 columns by 3 rows.
-  "Atlantic Salmon": ["freshwater",0,0],
+  // Freshwater chart: 3 columns by 4 rows, confirmed from the chart.
+  "Coho Salmon": ["freshwater",0,0],
   "Brown Trout": ["freshwater",1,0],
   "Rainbow Trout": ["freshwater",2,0],
-  "Brook Trout": ["freshwater",3,0],
-  "Lake Trout": ["freshwater",0,1],
-  "Northern Pike": ["freshwater",1,1],
-  "Walleye": ["freshwater",2,1],
-  "Smallmouth Bass": ["freshwater",3,1],
-  "Largemouth Bass": ["freshwater",0,2],
-  "Bluegill": ["freshwater",1,2],
-  "Yellow Perch": ["freshwater",2,2],
-  "Perch": ["freshwater",2,2],
-  "Channel Catfish": ["freshwater",3,2],
+  "Brook Trout": ["freshwater",0,1],
+  "Lake Trout": ["freshwater",1,1],
+  "Northern Pike": ["freshwater",2,1],
+  "Walleye": ["freshwater",0,2],
+  "Smallmouth Bass": ["freshwater",1,2],
+  "Largemouth Bass": ["freshwater",2,2],
+  "Bluegill": ["freshwater",0,3],
+  "Yellow Perch": ["freshwater",1,3],
+  "Perch": ["freshwater",1,3],
+  "Channel Catfish": ["freshwater",2,3],
 
-  // Coastal chart: 4 columns by 3 rows.
+  // Coastal chart positions will be matched separately.
   "Striped Bass": ["coastal",0,0],
   "Bluefish": ["coastal",1,0],
   "Tautog": ["coastal",2,0],
-  "Summer Flounder": ["coastal",3,0],
-  "Black Sea Bass": ["coastal",0,1],
-  "Weakfish": ["coastal",1,1],
-  "Scup": ["coastal",2,1],
-  "Sheepshead": ["coastal",3,1],
-  "Red Drum": ["coastal",0,2],
-  "Hogfish": ["coastal",1,2],
-  "Speckled Trout": ["coastal",2,2],
-  "Cobia": ["coastal",3,2]
+  "Summer Flounder": ["coastal",0,1],
+  "Black Sea Bass": ["coastal",1,1],
+  "Weakfish": ["coastal",2,1],
+  "Scup": ["coastal",0,2],
+  "Sheepshead": ["coastal",1,2],
+  "Red Drum": ["coastal",2,2],
+  "Hogfish": ["coastal",0,3],
+  "Speckled Trout": ["coastal",1,3],
+  "Cobia": ["coastal",2,3]
 };
 
 function getChartPosition(speciesName) {
