@@ -52,7 +52,7 @@ const el=id=>document.getElementById(id);
 function esc(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function photoURL(value){try{const u=new URL(value);return u.protocol==="https:"||u.protocol==="http:"?u.href:"";}catch(e){return "";}}
 function authMessage(v){el("authMessage").textContent=v;}
-function updateAuth(){const yes=!!currentUser;el("signedOut").style.display=yes?"none":"block";el("signedIn").style.display=yes?"block":"none";if(yes)el("accountName").textContent="Signed in as "+(currentUser.user_metadata?.display_name||currentUser.email||"Member");loadFollowing();}
+function updateAuth(){const yes=!!currentUser;el("signedOut").style.display=yes?"none":"block";el("signedIn").style.display=yes?"block":"none";if(yes){el("accountName").textContent="Signed in as "+(currentUser.user_metadata?.display_name||currentUser.email||"Member");el("myProfileLink").href="angler.html?user="+encodeURIComponent(currentUser.id);}loadFollowing();}
 async function loadFeed(){
  el("feed").textContent="Loading catches...";
  const {data:catches,error}=await db.from("catch_reports").select("id,species,caught_at,notes,image_url,display_name,created_at,user_id").order("created_at",{ascending:false}).limit(50);
