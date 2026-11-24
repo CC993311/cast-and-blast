@@ -612,6 +612,30 @@ function makeFishIllustration(fish, index) {
   </svg>`;
 }
 
+function renderSpecies(list) {
+  speciesGrid.innerHTML = "";
+
+  list.forEach((fish) => {
+    const originalIndex = fishData.indexOf(fish);
+    const number = String(originalIndex + 1).padStart(3,"0");
+
+    const card = document.createElement("article");
+    card.className = "species-card search-item";
+    card.dataset.search = fish.join(" ").toLowerCase();
+
+    const picture = document.createElement("div");
+    picture.className = "fish-picture";
+
+    if (originalIndex < 12) {
+      picture.classList.add("original");
+      picture.style.backgroundPosition = originalPositions[originalIndex];
+      picture.setAttribute("role", "img");
+      picture.setAttribute("aria-label", fish[0] + " illustration");
+    } else {
+      picture.classList.add("generated");
+      picture.innerHTML = makeFishIllustration(fish, originalIndex);
+    }
+
     const content = document.createElement("div");
     content.className = "species-content";
 
