@@ -1,0 +1,495 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cast & Blast | Water & Weather</title>
+
+<style>
+:root {
+  --bg:#101710;
+  --panel:#1b281e;
+  --panel2:#243529;
+  --green:#a9c77b;
+  --white:#f1f4ec;
+  --muted:#aab6a7;
+  --border:#354735;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--white);font-family:Arial,sans-serif}
+header{
+  padding:18px 7%;
+  background:#172319;
+  border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+  flex-wrap:wrap;gap:15px
+}
+header h1{font-size:22px;color:var(--green)}
+header a{color:var(--muted);text-decoration:none}
+header a:hover{color:var(--green)}
+main{max-width:1100px;margin:auto;padding:35px 20px 65px}
+.hero{text-align:center;padding:35px 10px}
+.hero small{color:var(--green);letter-spacing:3px;font-weight:bold}
+.hero h2{font-size:clamp(30px,5vw,45px);margin:15px 0}
+.hero p{color:var(--muted);line-height:1.7;max-width:650px;margin:auto}
+.search-panel,.panel{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:22px;
+  margin-bottom:20px
+}
+.search-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+input{
+  flex:1;min-width:220px;
+  padding:13px;border-radius:7px;
+  border:1px solid var(--border);
+  background:#f4f5f0;color:#111;font-size:15px
+}
+button{
+  padding:13px 19px;border:0;border-radius:7px;
+  background:var(--green);color:#172319;
+  font-weight:bold;cursor:pointer
+}
+button:hover{background:#c2dc9a}
+button:disabled{opacity:.6;cursor:wait}
+#status{margin-top:13px;color:var(--muted);font-size:13px;line-height:1.5}
+.section-title{font-size:22px;margin:28px 0 14px;color:var(--green)}
+.location-name{font-size:25px;margin-bottom:5px}
+.location-detail{color:var(--muted);font-size:13px}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:13px
+}
+.metric{
+  background:var(--panel2);
+  border:1px solid var(--border);
+  padding:18px;border-radius:9px;
+  min-height:112px
+}
+.metric-label{
+  color:var(--muted);font-size:12px;
+  text-transform:uppercase;letter-spacing:1px
+}
+.metric-value{font-size:25px;font-weight:bold;margin-top:12px}
+.metric-note{color:var(--muted);font-size:12px;margin-top:6px}
+.forecast-day{
+  background:var(--panel2);
+  border:1px solid var(--border);
+  padding:15px;border-radius:8px
+}
+.forecast-day strong{display:block;margin-bottom:10px}
+.forecast-day div{font-size:14px;line-height:1.8;color:var(--muted)}
+.notice{
+  color:var(--muted);font-size:13px;line-height:1.7;
+  margin-top:14px
+}
+.hidden{display:none}
+footer{text-align:center;color:#899687;font-size:12px;padding:25px}
+a{color:var(--green)}
+@media(max-width:550px){
+  header{justify-content:center}
+  .search-row{flex-direction:column}
+  .search-row input{min-width:0;width:100%}
+  .search-row button{width:100%}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>CAST & BLAST</h1>
+  <a href="index.html">Home</a>
+</header>
+
+<main>
+  <div class="hero">
+    <small>ON THE WATER</small>
+    <h2>Water & Weather</h2>
+    <p>
+      Search for a lake, pond, or river to check local weather
+      and available water-monitoring information.
+    </p>
+  </div>
+
+  <section class="search-panel">
+    <h3>Search for a waterbody</h3>
+    <div class="search-row">
+      <input id="placeSearch" type="text"
+        placeholder="Example: Lake Tahoe, California">
+      <button id="searchButton">Search</button>
+    </div>
+    <div id="status">Enter a lake, pond, river, or nearby town to begin.</div>
+  </section>
+
+  <section id="results" class="hidden">
+    <div class="panel">
+      <div class="location-name" id="placeName"></div>
+      <div class="location-detail" id="placeDetail"></div>
+    </div>
+
+    <h3 class="section-title">Current Weather</h3>
+    <div class="grid">
+      <div class="metric">
+        <div class="metric-label">Temperature</div>
+        <div class="metric-value" id="temperature">--</div>
+        <div class="metric-note" id="feelsLike"></div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Conditions</div>
+        <div class="metric-value" id="conditions">--</div>
+        <div class="metric-note" id="cloudCover"></div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Wind</div>
+        <div class="metric-value" id="wind">--</div>
+        <div class="metric-note" id="windDirection"></div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Precipitation</div>
+        <div class="metric-value" id="precipitation">--</div>
+        <div class="metric-note">Current conditions</div>
+      </div>
+    </div>
+
+    <h3 class="section-title">Five-Day Forecast</h3>
+    <div class="grid" id="forecast"></div>
+
+    <h3 class="section-title">Nearby Water Conditions</h3>
+    <div class="grid">
+      <div class="metric">
+        <div class="metric-label">Water Temperature</div>
+        <div class="metric-value" id="waterTemp">Unavailable</div>
+        <div class="metric-note" id="waterTempNote">Checking nearby stations</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Water Level</div>
+        <div class="metric-value" id="waterLevel">Unavailable</div>
+        <div class="metric-note" id="waterLevelNote">Checking nearby stations</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">River Flow</div>
+        <div class="metric-value" id="riverFlow">Unavailable</div>
+        <div class="metric-note" id="riverFlowNote">Checking nearby stations</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Water Clarity</div>
+        <div class="metric-value">Unavailable</div>
+        <div class="metric-note">No general public clarity reading found</div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:18px">
+      <h3>Water Data Information</h3>
+      <p class="notice" id="waterSource">
+        Water-monitoring information will appear here when available.
+      </p>
+      <p class="notice">
+        Nearby monitoring stations may be on a different part of the
+        watershed. Their readings are not guaranteed to represent the
+        exact lake or river you searched for.
+      </p>
+    </div>
+
+    <div class="panel">
+      <p class="notice" id="updated"></p>
+      <p class="notice">
+        Weather provided by Open-Meteo. Water readings are retrieved
+        from available USGS monitoring stations. Conditions can change
+        quickly; always check official local advisories.
+      </p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  CAST & BLAST | EXPLORE. DISCOVER. RESPECT THE OUTDOORS.
+</footer>
+
+<script>
+const $ = id => document.getElementById(id);
+
+function setStatus(message){
+  $("status").textContent = message;
+}
+
+function weatherDescription(code){
+  const descriptions = {
+    0:"Clear",
+    1:"Mostly clear",
+    2:"Partly cloudy",
+    3:"Overcast",
+    45:"Fog",
+    48:"Fog",
+    51:"Light drizzle",
+    53:"Drizzle",
+    55:"Heavy drizzle",
+    61:"Light rain",
+    63:"Rain",
+    65:"Heavy rain",
+    71:"Light snow",
+    73:"Snow",
+    75:"Heavy snow",
+    80:"Rain showers",
+    81:"Rain showers",
+    82:"Heavy showers",
+    95:"Thunderstorms",
+    96:"Thunderstorms",
+    99:"Thunderstorms"
+  };
+  return descriptions[code] || "Conditions unavailable";
+}
+
+function compassDirection(degrees){
+  const directions=["N","NE","E","SE","S","SW","W","NW"];
+  return directions[Math.round(degrees/45)%8];
+}
+
+function safeNumber(value,digits=1){
+  const number=Number(value);
+  return Number.isFinite(number) ? number.toFixed(digits) : "--";
+}
+
+async function searchPlace(){
+  const query=$("placeSearch").value.trim();
+  if(!query){
+    setStatus("Enter a lake, river, or town name.");
+    return;
+  }
+
+  $("searchButton").disabled=true;
+  $("results").classList.add("hidden");
+  setStatus("Searching for that location...");
+
+  try{
+    const geoUrl=
+      "https://geocoding-api.open-meteo.com/v1/search?name="+
+      encodeURIComponent(query)+
+      "&count=1&language=en&format=json";
+
+    const geoResponse=await fetch(geoUrl);
+    if(!geoResponse.ok) throw new Error("Location search is unavailable.");
+
+    const geoData=await geoResponse.json();
+    if(!geoData.results || !geoData.results.length){
+      throw new Error("No matching location found. Try another spelling or nearby town.");
+    }
+
+    const place=geoData.results[0];
+    const lat=Number(place.latitude);
+    const lon=Number(place.longitude);
+
+    $("placeName").textContent=place.name;
+    $("placeDetail").textContent=
+      [place.admin1,place.country].filter(Boolean).join(", ");
+
+    $("results").classList.remove("hidden");
+    setStatus("Location found. Loading weather and nearby water readings...");
+
+    await Promise.allSettled([
+      loadWeather(lat,lon),
+      loadWaterData(lat,lon)
+    ]);
+
+    $("updated").textContent=
+      "Page refreshed: "+new Date().toLocaleString();
+
+    setStatus("Weather and available water information loaded.");
+  }catch(error){
+    console.error(error);
+    setStatus(error.message || "Could not load this location.");
+  }finally{
+    $("searchButton").disabled=false;
+  }
+}
+
+async function loadWeather(lat,lon){
+  const url=
+    "https://api.open-meteo.com/v1/forecast?latitude="+lat+
+    "&longitude="+lon+
+    "&current=temperature_2m,apparent_temperature,precipitation,weather_code,cloud_cover,wind_speed_10m,wind_direction_10m"+
+    "&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code"+
+    "&temperature_unit=fahrenheit&wind_speed_unit=mph"+
+    "&timezone=auto&forecast_days=5";
+
+  const response=await fetch(url);
+  if(!response.ok) throw new Error("Weather service could not load.");
+
+  const data=await response.json();
+  const current=data.current;
+
+  $("temperature").textContent=
+    safeNumber(current.temperature_2m)+"°F";
+  $("feelsLike").textContent=
+    "Feels like "+safeNumber(current.apparent_temperature)+"°F";
+
+  $("conditions").textContent=
+    weatherDescription(current.weather_code);
+  $("cloudCover").textContent=
+    "Cloud cover: "+current.cloud_cover+"%";
+
+  $("wind").textContent=
+    safeNumber(current.wind_speed_10m)+" mph";
+  $("windDirection").textContent=
+    "Direction: "+compassDirection(current.wind_direction_10m);
+
+  $("precipitation").textContent=
+    safeNumber(current.precipitation)+" mm";
+
+  const daily=data.daily;
+  $("forecast").innerHTML="";
+
+  daily.time.forEach((date,index)=>{
+    const day=document.createElement("div");
+    day.className="forecast-day";
+
+    const dateText=new Date(date+"T12:00:00").toLocaleDateString(
+      undefined,{weekday:"short",month:"short",day:"numeric"}
+    );
+
+    const heading=document.createElement("strong");
+    heading.textContent=dateText;
+
+    const details=document.createElement("div");
+    details.textContent=
+      weatherDescription(daily.weather_code[index])+
+      "\nHigh: "+safeNumber(daily.temperature_2m_max[index])+"°F"+
+      "\nLow: "+safeNumber(daily.temperature_2m_min[index])+"°F"+
+      "\nRain chance: "+
+      (daily.precipitation_probability_max[index] ?? "--")+"%";
+
+    details.style.whiteSpace="pre-line";
+    day.append(heading,details);
+    $("forecast").appendChild(day);
+  });
+}
+
+async function loadWaterData(lat,lon){
+  $("waterTemp").textContent="Searching...";
+  $("waterLevel").textContent="Searching...";
+  $("riverFlow").textContent="Searching...";
+
+  $("waterTempNote").textContent="Nearby USGS stations";
+  $("waterLevelNote").textContent="Nearby USGS stations";
+  $("riverFlowNote").textContent="Nearby USGS stations";
+
+  const delta=.20;
+  const box=[
+    lon-delta,lat-delta,
+    lon+delta,lat+delta
+  ].join(",");
+
+  const url=
+    "https://waterservices.usgs.gov/nwis/iv/?format=json"+
+    "&bBox="+box+
+    "&parameterCd=00010,00060,00065"+
+    "&siteStatus=active";
+
+  try{
+    const response=await fetch(url);
+    if(!response.ok) throw new Error("USGS service unavailable");
+
+    const data=await response.json();
+    const series=data.value?.timeSeries || [];
+
+    const nearest={};
+    let stationNames=new Set();
+
+    for(const item of series){
+      const parameter=item.variable?.variableCode?.[0]?.value;
+      const site=item.sourceInfo || {};
+      const coords=site.geoLocation?.geogLocation || {};
+      const values=item.values?.[0]?.value || [];
+      const latest=values.filter(v=>v.value!=="" && v.value!==null).slice(-1)[0];
+
+      if(!latest) continue;
+
+      const stationLat=Number(coords.latitude);
+      const stationLon=Number(coords.longitude);
+      if(!Number.isFinite(stationLat)||!Number.isFinite(stationLon))continue;
+
+      const distance=distanceMiles(lat,lon,stationLat,stationLon);
+      if(distance>15)continue;
+
+      if(!nearest[parameter] || distance<nearest[parameter].distance){
+        nearest[parameter]={
+          value:Number(latest.value),
+          time:latest.dateTime,
+          distance,
+          name:site.siteName || "USGS monitoring station",
+          siteCode:site.siteCode?.[0]?.value || ""
+        };
+      }
+
+      stationNames.add(site.siteName || "USGS monitoring station");
+    }
+
+    showWaterReading(
+      "00010","waterTemp","waterTempNote","°C",
+      "Water temperature"
+    );
+    showWaterReading(
+      "00065","waterLevel","waterLevelNote","ft",
+      "Water level"
+    );
+    showWaterReading(
+      "00060","riverFlow","riverFlowNote","ft³/s",
+      "River flow"
+    );
+
+    function showWaterReading(code,valueId,noteId,unit,label){
+      const item=nearest[code];
+      if(!item){
+        $(valueId).textContent="Unavailable";
+        $(noteId).textContent="No nearby reading found";
+        return;
+      }
+
+      $(valueId).textContent=
+        safeNumber(item.value,2)+" "+unit;
+
+      $(noteId).textContent=
+        item.name+" ("+safeNumber(item.distance,1)+" mi away)";
+    }
+
+    $("waterSource").textContent=stationNames.size
+      ? "Nearby monitoring stations: "+Array.from(stationNames).join("; ")+
+        ". Readings are from the nearest available station for each measurement."
+      : "No active USGS monitoring stations with these readings were found within approximately 15 miles.";
+
+  }catch(error){
+    console.error(error);
+    ["waterTemp","waterLevel","riverFlow"].forEach(id=>{
+      $(id).textContent="Unavailable";
+    });
+    ["waterTempNote","waterLevelNote","riverFlowNote"].forEach(id=>{
+      $(id).textContent="Water data service could not be reached";
+    });
+    $("waterSource").textContent=
+      "The water monitoring service could not be reached. Please try again later.";
+  }
+}
+
+function distanceMiles(lat1,lon1,lat2,lon2){
+  const radians=value=>value*Math.PI/180;
+  const dLat=radians(lat2-lat1);
+  const dLon=radians(lon2-lon1);
+  const a=
+    Math.sin(dLat/2)**2+
+    Math.cos(radians(lat1))*
+    Math.cos(radians(lat2))*
+    Math.sin(dLon/2)**2;
+  return 3958.8*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+$("searchButton").addEventListener("click",searchPlace);
+$("placeSearch").addEventListener("keydown",event=>{
+  if(event.key==="Enter")searchPlace();
+});
+</script>
+
+</body>
+</html>
