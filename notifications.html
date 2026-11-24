@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#101710">
+<title>FishBound | Notifications</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#101710;--panel:#1b281e;--green:#a9c77b;--white:#f1f4ec;--muted:#aab6a7;--border:#354735}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--white);font-family:Arial,sans-serif}
+header{padding:17px 7%;background:#172319;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
+.logo{font-size:23px;font-weight:800;letter-spacing:1px}.logo span{color:var(--green)}
+nav{display:flex;gap:18px;flex-wrap:wrap}nav a{color:var(--muted);text-decoration:none;font-weight:bold;font-size:14px}nav a:hover{color:var(--green)}
+main{max-width:850px;margin:auto;padding:35px 20px 70px}.panel{background:var(--panel);border:1px solid var(--border);border-radius:11px;padding:22px;margin-bottom:18px}
+h1{margin:0 0 8px;font-size:clamp(30px,5vw,42px)}h2{margin:0 0 12px;font-size:19px;color:var(--green)}
+p,.muted{color:var(--muted);line-height:1.6}.message{color:#b8e8c7;font-size:13px;min-height:18px}
+input{width:100%;padding:11px;border:1px solid #527b61;border-radius:7px;background:#fff;color:#183b2a;font:14px Arial;margin:5px 0 10px}
+button,.button{border:0;border-radius:7px;padding:10px 13px;background:#23864b;color:white;font-weight:bold;cursor:pointer;text-decoration:none;display:inline-block}button:hover,.button:hover{background:#176b3a}button:disabled{opacity:.5;cursor:not-allowed}.secondary{background:#456b50}
+.notification{padding:16px 12px;border-top:1px solid var(--border);display:flex;gap:12px;align-items:flex-start}.notification.unread{background:#243529;border-radius:8px}.dot{width:9px;height:9px;border-radius:50%;background:#72df9b;flex:0 0 9px;margin-top:6px}.dot.read{background:transparent;border:1px solid #657565}.notification-text{flex:1;line-height:1.5}.notification small{display:block;color:var(--muted);margin-top:5px}.empty{padding:18px 0;color:var(--muted)}
+@media(max-width:650px){header{justify-content:center}nav{justify-content:center}main{padding-top:24px}}
+</style>
+</head>
+<body>
+<header><div class="logo">FISH<span>BOUND</span></div><nav><a href="index.html">Home</a><a href="map.html">Fishing Map</a><a href="community.html">Community</a><a href="journal.html">My Journal</a></nav></header>
+<main>
+<section class="panel"><h1>Notifications</h1><p>See when anglers like or comment on your catches, or follow you.</p><div id="authArea"><p class="muted">Checking your account...</p></div><div id="message" class="message"></div></section>
+<section class="panel" id="notificationPanel" style="display:none"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><h2>Your activity</h2><div><button id="refresh" class="secondary">Refresh</button> <button id="markAll" class="secondary">Mark all read</button></div></div><div id="notificationList" class="empty">Loading notifications...</div></section>
+</main>
+<script>
+const SUPABASE_URL="https://ubnmhqxitiigsctbsmqy.supabase.co";
+const SUPABASE_KEY="sb_publishable_g-6tScB0HFIVcVkAhCN5Ug_fpm-jFrq";
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const el=id=>document.getElementById(id);let currentUser=null;
+function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function say(v){el("message").textContent=v;}
+function timeLabel(v){const d=new Date(v);return Number.isNaN(d.getTime())?"":d.toLocaleString();}
+async function loadNotifications(){
+ if(!currentUser)return;
+ el("notificationList").textContent="Loading notifications...";
+ const {data:items,error}=await db.from("notifications").select("id,recipient_id,actor_id,notification_type,catch_id,created_at,read_at").eq("recipient_id",currentUser.id).order("created_at",{ascending:false}).limit(100);
+ if(error){el("notificationList").textContent="Could not load notifications: "+error.message;return;}
+ if(!items?.length){el("notificationList").innerHTML="<div class='empty'>No notifications yet. When someone likes or comments on your catch, or follows you, it will appear here.</div>";return;}
+ const actorIds=[...new Set(items.map(n=>n.actor_id).filter(Boolean))];
+ const catchIds=[...new Set(items.filter(n=>n.catch_id).map(n=>String(n.catch_id)))];
+ const [pr,cr]=await Promise.all([
+  actorIds.length?db.from("profiles").select("user_id,display_name").in("user_id",actorIds):Promise.resolve({data:[]}),
+  catchIds.length?db.from("catch_reports").select("id,species").in("id",catchIds):Promise.resolve({data:[]})
+ ]);
+ const names=new Map((pr.data||[]).map(p=>[p.user_id,p.display_name||"An angler"]));
+ const species=new Map((cr.data||[]).map(c=>[String(c.id),c.species||"your catch"]));
+ el("notificationList").innerHTML=items.map(n=>{
+  const actor=names.get(n.actor_id)||"An angler";
+  const action=n.notification_type==="like"?"liked your catch":n.notification_type==="comment"?"commented on your catch":"started following you";
+  const detail=n.notification_type==="follow"?"": " · "+(species.get(String(n.catch_id))||"your catch");
+  const profile=n.actor_id?"angler.html?user="+encodeURIComponent(n.actor_id):"community.html";
+  return "<article class='notification "+(n.read_at?"":"unread")+"'><span class='dot "+(n.read_at?"read":"")+"'></span><div class='notification-text'><a style='color:#a9c77b;font-weight:bold;text-decoration:none' href='"+profile+"'>"+esc(actor)+"</a> "+action+esc(detail)+(n.catch_id?" · <a style='color:#a9c77b' href='map.html'>View catches</a>":"")+"<small>"+esc(timeLabel(n.created_at))+"</small></div>"+(!n.read_at?"<button class='secondary markRead' data-id='"+esc(n.id)+"'>Mark read</button>":"")+"</article>";
+ }).join("");
+ const unread=items.filter(n=>!n.read_at).length;
+ say(unread+" unread notification"+(unread===1?"":"s")+".");
+}
+async function markRead(ids){
+ if(!ids.length)return;
+ const {error}=await db.from("notifications").update({read_at:new Date().toISOString()}).in("id",ids).eq("recipient_id",currentUser.id);
+ if(error){say("Could not mark notifications read: "+error.message);return;}
+ await loadNotifications();
+}
+el("notificationList").addEventListener("click",e=>{const b=e.target.closest(".markRead");if(b)markRead([b.dataset.id]);});
+el("refresh").addEventListener("click",loadNotifications);
+el("markAll").addEventListener("click",async()=>{
+ const {data,error}=await db.from("notifications").select("id").eq("recipient_id",currentUser.id).is("read_at",null);
+ if(error){say("Could not load unread notifications: "+error.message);return;}
+ await markRead((data||[]).map(n=>n.id));
+});
+async function showSession(session){
+ currentUser=session?.user||null;
+ if(!currentUser){
+  el("notificationPanel").style.display="none";
+  el("authArea").innerHTML="<p class='muted'>Sign in to view your notifications.</p><label>Email</label><input id='email' type='email' autocomplete='email' placeholder='Email address'><label>Password</label><input id='password' type='password' autocomplete='current-password' placeholder='Password'><button id='signIn'>Sign In</button>";
+  el("signIn").onclick=async()=>{say("Signing in...");const {data,error}=await db.auth.signInWithPassword({email:el("email").value.trim(),password:el("password").value});if(error){say(error.message);return;}showSession({user:data.user});};
+  return;
+ }
+ el("authArea").innerHTML="<p class='muted'>Signed in as "+esc(currentUser.user_metadata?.display_name||currentUser.email||"FishBound angler")+".</p><button id='signOut' class='secondary'>Sign Out</button>";
+ el("signOut").onclick=async()=>{const {error}=await db.auth.signOut();if(error){say(error.message);return;}showSession(null);say("Signed out.");};
+ el("notificationPanel").style.display="block";await loadNotifications();
+}
+(async()=>{const {data}=await db.auth.getSession();await showSession(data.session);})();
+db.auth.onAuthStateChange((event,session)=>{showSession(session);});
+</script>
+</body>
+</html>
