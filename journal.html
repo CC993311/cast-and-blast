@@ -1,0 +1,34 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FishBound | My Fishing Journal</title><style>
+:root{--bg:#101710;--panel:#1b281e;--panel2:#243529;--green:#a9c77b;--white:#f1f4ec;--muted:#aab6a7;--border:#354735}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--white);font-family:Arial,sans-serif}
+header{padding:17px 7%;background:#172319;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
+.logo{font-size:23px;font-weight:800;letter-spacing:1px}.logo span{color:var(--green)}
+nav{display:flex;gap:17px;flex-wrap:wrap}nav a{color:var(--muted);text-decoration:none;font-size:13px;font-weight:bold}nav a:hover{color:var(--green)}
+main{max-width:1000px;margin:auto;padding:32px 20px 70px}.panel{background:var(--panel);border:1px solid var(--border);border-radius:11px;padding:20px;margin-bottom:18px}
+h1{font-size:clamp(30px,5vw,46px);margin:8px 0 12px}h2{font-size:20px;margin:0 0 14px}h3{font-size:15px;color:var(--green);margin:0 0 10px}
+p{line-height:1.6}.muted,.help,.message{color:var(--muted);font-size:13px;line-height:1.6}.message{min-height:18px}
+button,.button{border:0;border-radius:7px;padding:10px 13px;background:#23864b;color:white;font-weight:bold;cursor:pointer;text-decoration:none;display:inline-block}
+button:hover,.button:hover{background:#176b3a}button:disabled{opacity:.5;cursor:not-allowed}.secondary{background:#456b50}
+input{width:100%;padding:11px;border:1px solid #527b61;border-radius:7px;background:#fff;color:#183b2a;font:14px Arial;margin:5px 0 10px}
+.profile-head{display:flex;align-items:center;gap:20px;flex-wrap:wrap}.avatar{width:112px;height:112px;border-radius:50%;object-fit:cover;background:#304a35;border:2px solid var(--green)}.avatar-placeholder{width:112px;height:112px;border-radius:50%;display:grid;place-items:center;background:#304a35;color:var(--green);font-size:40px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:20px 0}.stat{background:var(--panel2);padding:14px;border-radius:8px}.stat strong{display:block;font-size:24px;color:var(--green)}.stat span{font-size:12px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.badge-card,.catch-card,.angler-card{background:var(--panel2);border:1px solid var(--border);border-radius:9px;padding:14px}.badge-card.locked{opacity:.48}.badge-icon{font-size:25px;margin-bottom:7px}.badge-card strong{display:block;margin-bottom:5px}.catch-card{margin:10px 0}.catch-card img{width:100%;max-height:240px;object-fit:contain;background:#0c140e;border-radius:7px;margin-top:8px}.catch-meta{font-size:12px;color:var(--muted);margin:5px 0}.row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:11px 8px;border-bottom:1px solid var(--border);font-size:14px}th{color:var(--green)}td a{color:var(--white);text-decoration:none}td a:hover{color:var(--green)}
+@media(max-width:650px){header{justify-content:center}nav{justify-content:center}.profile-head{justify-content:center;text-align:center}}
+</style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head><body><header><div class="logo">FISH<span>BOUND</span></div><nav><a href="index.html">Home</a><a href="map.html">Fishing Locations</a><a href="community.html">Community</a><a href="journal.html">My Journal</a><a href="achievements.html">Achievements</a><a href="leaderboard.html">Leaderboard</a></nav></header><main><section class="panel"><p class="muted">YOUR PERSONAL CATCH HISTORY</p><h1>My Fishing Journal</h1><p class="muted">Every catch you share on FishBound is collected here, with its date, species, notes, photo, and fishing location.</p><div class="stats" id="stats"></div><div class="row"><h2>My Catch Log</h2><a class="button" href="map.html">Add a Catch</a></div><div id="entries" class="muted">Loading your journal...</div><p id="status" class="message"></p></section></main><script>const SUPABASE_URL="https://ubnmhqxitiigsctbsmqy.supabase.co";
+const SUPABASE_KEY="sb_publishable_g-6tScB0HFIVcVkAhCN5Ug_fpm-jFrq";
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const safePhoto=v=>{try{const u=new URL(v);return ["https:","http:"].includes(u.protocol)?u.href:"";}catch(e){return "";}};
+const dateText=v=>v?new Date(v+"T12:00:00").toLocaleDateString():"Date not provided";
+const qs=new URLSearchParams(location.search);
+(async()=>{
+ const {data:s}=await db.auth.getSession(),user=s.session?.user;
+ if(!user){document.getElementById("entries").innerHTML="Sign in to your FishBound account to see your personal journal. <a href='community.html' style='color:#a9c77b'>Go to Community to sign in.</a>";return;}
+ const {data:c,error}=await db.from("catch_reports").select("id,species,caught_at,notes,image_url,waterbody_name,waterbody_type,created_at").eq("user_id",user.id).order("caught_at",{ascending:false}).limit(500);
+ if(error){document.getElementById("status").textContent="Could not load your journal: "+error.message;return;}
+ const rows=c||[],species=new Set(rows.map(x=>x.species).filter(Boolean)).size,photos=rows.filter(x=>x.image_url).length;
+ document.getElementById("stats").innerHTML=[[""+rows.length,"Total catches"],[""+species,"Different species"],[""+photos,"Catch photos"]].map(x=>"<div class='stat'><strong>"+x[0]+"</strong><span>"+x[1]+"</span></div>").join("");
+ document.getElementById("entries").innerHTML=rows.length?rows.map(x=>"<article class='catch-card'><div class='row'><strong>"+esc(x.species)+"</strong><span class='catch-meta'>"+esc(dateText(x.caught_at))+"</span></div><div class='catch-meta'>"+esc(x.waterbody_name||"Fishing location not listed")+"</div>"+(x.notes?"<p>"+esc(x.notes)+"</p>":"")+(safePhoto(x.image_url)?"<img src='"+esc(safePhoto(x.image_url))+"' alt='Catch photo' loading='lazy'>":"")+"</article>").join(""):"Your journal is empty. Share your first catch from Fishing Locations!";
+})().catch(e=>document.getElementById("status").textContent=e.message);
+</script></body></html>
