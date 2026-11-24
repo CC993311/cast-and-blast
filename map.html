@@ -57,6 +57,9 @@ button:disabled{opacity:.5;cursor:not-allowed}
 #catchImagePreview{display:none;width:100%;max-height:190px;object-fit:contain;background:#10271a;border-radius:7px;margin:5px 0 10px}
 .species-tag{display:inline-block;background:#326b47;color:#e1f5e5;padding:4px 7px;border-radius:12px;margin:3px;font-size:11px}
 #mapStatusNote{font-size:11px;color:#a9c6ae;margin-top:5px}
+#profileAvatarPreview{display:none;width:88px;height:88px;object-fit:cover;border-radius:50%;border:2px solid #72df9b;margin:8px 0}
+#profileMessage{font-size:12px;color:#b8e8c7;min-height:16px;line-height:1.5}
+
 .leaflet-popup-content{color:#1b3040;line-height:1.5}
 .leaflet-popup-content button{margin-top:6px}
 @media(max-width:750px){
@@ -107,6 +110,20 @@ button:disabled{opacity:.5;cursor:not-allowed}
    <p id="signedInName" class="help"></p>
    <button id="signOutButton" class="btn-secondary" style="width:100%">Sign Out</button>
   </div>
+ </div>
+
+ <div class="section" id="profileSection" style="display:none">
+  <h3>Angler Profile</h3>
+  <p class="help">Set the name, photo, and bio other anglers will see.</p>
+  <img id="profileAvatarPreview" alt="Profile picture preview">
+  <label for="profileAvatar">Profile picture</label>
+  <input type="file" id="profileAvatar" accept="image/jpeg,image/png,image/webp">
+  <label for="profileDisplayName">Display name</label>
+  <input id="profileDisplayName" maxlength="40" placeholder="Your angler name">
+  <label for="profileBio">Bio</label>
+  <textarea id="profileBio" maxlength="300" placeholder="Tell other anglers a little about yourself..."></textarea>
+  <button id="saveProfileButton" style="width:100%">Save Profile</button>
+  <div id="profileMessage"></div>
  </div>
 
  <div class="section">
@@ -238,6 +255,8 @@ let catchRequestNumber=0;
 let favoritesCache=[];
 let favoritesRequestNumber=0;
 let catchPreviewURL=null;
+let profileAvatarFile=null;
+let profileAvatarURL=null;
 
 const map=L.map("map",{center:[39.5,-98.35],zoom:5,minZoom:3,preferCanvas:true});
 const street=L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap contributors"});
@@ -617,6 +636,82 @@ document.getElementById("favoritesList").addEventListener("click",async function
  }
 });
 
+
+async function loadAnglerProfile(){
+ if(!currentUser)return;
+ const message=document.getElementById("profileMessage");
+ message.textContent="Loading profile...";
+ const {data,error}=await supabaseClient.from("profiles")
+  .select("user_id,display_name,bio,avatar_url")
+  .eq("user_id",currentUser.id).maybeSingle();
+ if(error){message.textContent="Could not load profile: "+error.message;return;}
+ const name=data?.display_name||currentUser.user_metadata?.display_name||"FishBound Member";
+ document.getElementById("profileDisplayName").value=name;
+ document.getElementById("profileBio").value=data?.bio||"";
+ profileAvatarURL=data?.avatar_url||null;
+ const preview=document.getElementById("profileAvatarPreview");
+ if(profileAvatarURL){preview.src=profileAvatarURL;preview.style.display="block";}
+ else{preview.removeAttribute("src");preview.style.display="none";}
+ profileAvatarFile=null;
+ document.getElementById("profileAvatar").value="";
+ message.textContent="";
+}
+
+document.getElementById("profileAvatar").addEventListener("change",function(){
+ const file=this.files?.[0]||null;
+ if(!file)return;
+ if(!["image/jpeg","image/png","image/webp"].includes(file.type)){
+  this.value="";profileAvatarFile=null;
+  document.getElementById("profileMessage").textContent="Choose a JPG, PNG, or WebP picture.";
+  return;
+ }
+ if(file.size>10*1024*1024){
+  this.value="";profileAvatarFile=null;
+  document.getElementById("profileMessage").textContent="The picture must be 10 MB or smaller.";
+  return;
+ }
+ profileAvatarFile=file;
+ const preview=document.getElementById("profileAvatarPreview");
+ preview.src=URL.createObjectURL(file);
+ preview.style.display="block";
+ document.getElementById("profileMessage").textContent="Picture ready. Save your profile to upload it.";
+});
+
+document.getElementById("saveProfileButton").addEventListener("click",async function(){
+ if(!currentUser){document.getElementById("profileMessage").textContent="Sign in to edit your profile.";return;}
+ const button=this;
+ const message=document.getElementById("profileMessage");
+ const displayName=document.getElementById("profileDisplayName").value.trim();
+ const bio=document.getElementById("profileBio").value.trim();
+ if(!displayName){message.textContent="Please enter a display name.";return;}
+ if(displayName.length>40){message.textContent="Display names must be 40 characters or fewer.";return;}
+ if(bio.length>300){message.textContent="Your bio must be 300 characters or fewer.";return;}
+ button.disabled=true;
+ message.textContent="Saving profile...";
+ try{
+  if(profileAvatarFile){
+   const uploaded=await uploadCatchPhoto(profileAvatarFile);
+   profileAvatarURL=uploaded.url;
+  }
+  const {error}=await supabaseClient.from("profiles").upsert({
+   user_id:currentUser.id,
+   display_name:displayName,
+   bio,
+   avatar_url:profileAvatarURL
+  },{onConflict:"user_id"});
+  if(error)throw error;
+  await supabaseClient.auth.updateUser({data:{display_name:displayName}});
+  message.textContent="Profile saved!";
+  document.getElementById("signedInName").textContent="Signed in as "+displayName;
+  profileAvatarFile=null;
+  document.getElementById("profileAvatar").value="";
+ }catch(error){
+  message.textContent="Could not save profile: "+error.message;
+ }finally{
+  button.disabled=false;
+ }
+});
+
 // AUTHENTICATION
 function updateAuthUI(){
  const signedIn=!!currentUser;
@@ -626,6 +721,10 @@ function updateAuthUI(){
  if(signedIn){
   const name=currentUser.user_metadata?.display_name||currentUser.email||"Member";
   document.getElementById("signedInName").textContent="Signed in as "+name;
+  document.getElementById("profileSection").style.display="block";
+  loadAnglerProfile();
+ }else{
+  document.getElementById("profileSection").style.display="none";
  }
  updateReviewForm();
  updateCatchForm();
