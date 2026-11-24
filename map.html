@@ -751,7 +751,7 @@ async function searchAnglers(){
  const {data:links,error:followError}=await supabaseClient.from("user_follows").select("followed_id").eq("follower_id",currentUser.id);
  if(followError){setAnglerSearchMessage("Could not check follows: "+followError.message);return;}
  const followed=new Set((links||[]).map(row=>row.followed_id));
- results.innerHTML=profiles.map(p=>"<div class='favorite-card'><a style='color:#c7f0d2' href='angler.html?user="+encodeURIComponent(p.user_id)+"'><strong>"+escapeHTML(p.display_name||"FishBound Angler")+"</strong></a>+(p.bio?"<div>"+escapeHTML(p.bio)+"</div>":"")+"<button class='toggle-follow btn-secondary' data-user-id='"+escapeHTML(p.user_id)+"' data-following='"+(followed.has(p.user_id)?"true":"false")+"'>"+(followed.has(p.user_id)?"Following · Unfollow":"Follow")+"</button></div>").join("");
+ results.innerHTML=profiles.map(p=>"<div class='favorite-card'><a style='color:#c7f0d2' href='angler.html?user="+encodeURIComponent(p.user_id)+"'><strong>"+escapeHTML(p.display_name||"FishBound Angler")+"</strong></a>"+(p.bio?"<div>"+escapeHTML(p.bio)+"</div>":"")+"<button class='toggle-follow btn-secondary' data-user-id='"+escapeHTML(p.user_id)+"' data-following='"+(followed.has(p.user_id)?"true":"false")+"'>"+(followed.has(p.user_id)?"Following · Unfollow":"Follow")+"</button></div>").join("");
  setAnglerSearchMessage(profiles.length+" angler(s) found.");
 }
 document.getElementById("anglerSearchButton").addEventListener("click",searchAnglers);
