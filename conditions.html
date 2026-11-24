@@ -155,6 +155,15 @@ a{color:var(--green)}
       </div>
     </div>
 
+    <h3 class="section-title">Fishing Conditions Score</h3>
+    <div class="panel">
+      <div class="location-name"><span id="conditionsScore">--</span><span style="font-size:16px;color:var(--muted)"> / 100</span></div>
+      <div style="height:12px;background:var(--panel2);border-radius:20px;overflow:hidden;margin:12px 0">
+        <div id="conditionsScoreBar" style="height:100%;width:0%;background:var(--green);border-radius:20px;transition:width .3s"></div>
+      </div>
+      <div class="metric-label" id="conditionsScoreLabel">Calculating conditions...</div>
+      <p class="notice" id="conditionsScoreReason">A general weather-based estimate, not a prediction of fish activity.</p>
+    </div>
     <h3 class="section-title">Fishing Outlook</h3>
     <div class="panel"><div class="location-name" id="fishingRating">Calculating...</div><p class="notice" id="fishingReason">Suggested fishing windows are estimated from weather conditions, not live fish tracking.</p><div class="grid" id="bestTimes"></div></div>
 
@@ -440,6 +449,34 @@ async function loadWeather(lat,lon){
 
   const hourly=data.hourly;
   const nowIndex=hourly.time.findIndex(t=>new Date(t).getTime()>=Date.now());
+  const scoreWind=Number(current.wind_speed_10m);
+  const scoreTemp=Number(current.temperature_2m);
+  const scoreCode=Number(current.weather_code);
+  const scoreRain=Number(hourly.precipitation_probability[Math.max(0,nowIndex)]);
+  let conditionsScore=100;
+  const scoreReasons=[];
+  if(Number.isFinite(scoreWind)){
+    if(scoreWind>20){conditionsScore-=35;scoreReasons.push("Strong wind lowers the score.");}
+    else if(scoreWind>12){conditionsScore-=18;scoreReasons.push("Breezy conditions lower the score.");}
+    else if(scoreWind>5){conditionsScore-=5;scoreReasons.push("Some wind is present.");}
+    else scoreReasons.push("Light wind is favorable.");
+  }
+  if(Number.isFinite(scoreRain)){
+    if(scoreRain>=70){conditionsScore-=25;scoreReasons.push("High rain chance lowers the score.");}
+    else if(scoreRain>=35){conditionsScore-=12;scoreReasons.push("Some rain is possible.");}
+    else scoreReasons.push("Low rain chance is favorable.");
+  }
+  if(Number.isFinite(scoreTemp)){
+    if(scoreTemp<40||scoreTemp>95){conditionsScore-=15;scoreReasons.push("Air temperature is at an extreme.");}
+    else if(scoreTemp>=55&&scoreTemp<=80){conditionsScore+=5;scoreReasons.push("Moderate air temperature is favorable.");}
+  }
+  if([95,96,99].includes(scoreCode)){conditionsScore-=60;scoreReasons.push("Thunderstorm conditions make this a poor time to fish; wait until conditions are safe.");}
+  else if([45,48,51,53,55,61,63,65,71,73,75,80,81,82].includes(scoreCode)){conditionsScore-=10;scoreReasons.push("Rain or reduced visibility affects the score.");}
+  conditionsScore=Math.max(0,Math.min(100,Math.round(conditionsScore)));
+  $("conditionsScore").textContent=conditionsScore;
+  $("conditionsScoreBar").style.width=conditionsScore+"%";
+  $("conditionsScoreLabel").textContent=conditionsScore>=80?"Very favorable weather":conditionsScore>=65?"Favorable weather":conditionsScore>=45?"Mixed conditions":"Challenging weather";
+  $("conditionsScoreReason").textContent=scoreReasons.join(" ")+" This score uses weather only; it does not measure fish activity, water conditions, or guarantee a catch. Check local advisories and avoid fishing during storms.";
   const candidates=[];
   for(let i=Math.max(0,nowIndex);i<Math.min(hourly.time.length,Math.max(0,nowIndex)+24);i++){
     const wind=Number(hourly.wind_speed_10m[i]);
