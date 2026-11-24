@@ -15,7 +15,10 @@ input{width:100%;padding:11px;border:1px solid #527b61;border-radius:7px;backgro
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.badge-card,.catch-card,.angler-card{background:var(--panel2);border:1px solid var(--border);border-radius:9px;padding:14px}.badge-card.locked{opacity:.48}.badge-icon{font-size:25px;margin-bottom:7px}.badge-card strong{display:block;margin-bottom:5px}.catch-card{margin:10px 0}.catch-card img{width:100%;max-height:240px;object-fit:contain;background:#0c140e;border-radius:7px;margin-top:8px}.catch-meta{font-size:12px;color:var(--muted);margin:5px 0}.row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
 table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:11px 8px;border-bottom:1px solid var(--border);font-size:14px}th{color:var(--green)}td a{color:var(--white);text-decoration:none}td a:hover{color:var(--green)}
 @media(max-width:650px){header{justify-content:center}nav{justify-content:center}.profile-head{justify-content:center;text-align:center}}
-</style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head><body><header><div class="logo">FISH<span>BOUND</span></div><nav><a href="index.html">Home</a><a href="map.html">Fishing Locations</a><a href="community.html">Community</a><a href="journal.html">My Journal</a><a href="achievements.html">Achievements</a><a href="leaderboard.html">Leaderboard</a></nav></header><main><section class="panel"><p class="muted">THE FISHBOUND COMMUNITY</p><h1>Angler Leaderboard</h1><p class="muted">Ranked by the number of catches shared on FishBound. This is a friendly community ranking, not a measure of fishing skill.</p><p id="status" class="message">Loading leaderboard...</p><div style="overflow-x:auto"><table><thead><tr><th>Rank</th><th>Angler</th><th>Catches</th><th>Species</th></tr></thead><tbody id="rankings"></tbody></table></div></section></main><script>const SUPABASE_URL="https://ubnmhqxitiigsctbsmqy.supabase.co";
+</style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="app-icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="app-icon.svg">
+</head><body><header><div class="logo">FISH<span>BOUND</span></div><nav><a href="index.html">Home</a><a href="map.html">Fishing Locations</a><a href="community.html">Community</a><a href="journal.html">My Journal</a><a href="achievements.html">Achievements</a><a href="leaderboard.html">Leaderboard</a></nav></header><main><section class="panel"><p class="muted">THE FISHBOUND COMMUNITY</p><h1>Angler Leaderboard</h1><p class="muted">Ranked by the number of catches shared on FishBound. This is a friendly community ranking, not a measure of fishing skill.</p><p id="status" class="message">Loading leaderboard...</p><div style="overflow-x:auto"><table><thead><tr><th>Rank</th><th>Angler</th><th>Catches</th><th>Species</th></tr></thead><tbody id="rankings"></tbody></table></div></section></main><script>const SUPABASE_URL="https://ubnmhqxitiigsctbsmqy.supabase.co";
 const SUPABASE_KEY="sb_publishable_g-6tScB0HFIVcVkAhCN5Ug_fpm-jFrq";
 const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -31,4 +34,12 @@ const qs=new URLSearchParams(location.search);
  document.getElementById("rankings").innerHTML=ranked.length?ranked.map((g,i)=>"<tr><td>"+(i===0?"🥇":i===1?"🥈":i===2?"🥉":i+1)+"</td><td><a href='angler.html?user="+encodeURIComponent(g.id)+"'>"+esc(g.name)+"</a></td><td>"+g.count+"</td><td>"+g.species.size+"</td></tr>").join(""):"<tr><td colspan='4'>No catches have been shared yet. The leaderboard will appear as anglers post catches.</td></tr>";
  document.getElementById("status").textContent=ranked.length+" anglers ranked by shared catch reports. Showing up to 1,000 recent catches.";
 })().catch(e=>document.getElementById("status").textContent=e.message);
-</script></body></html>
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/fishbound/service-worker.js").catch(error => console.error("FishBound offline setup failed:", error));
+  });
+}
+</script>
+</body></html>
