@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FishBound | Fishing Trip Planner</title>
+<style>
+:root{--bg:#101710;--panel:#1b281e;--panel2:#243529;--green:#a9c77b;--white:#f1f4ec;--muted:#aab6a7;--border:#354735}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--white);font-family:Arial,sans-serif}
+header{padding:18px 7%;background:#172319;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
+header h1{font-size:22px;color:var(--green)}header a{color:var(--muted);text-decoration:none}
+main{max-width:1000px;margin:auto;padding:30px 20px 65px}.hero{text-align:center;padding:25px 10px 35px}
+.hero small{color:var(--green);letter-spacing:3px;font-weight:bold}.hero h2{font-size:clamp(30px,5vw,44px);margin:12px 0}.hero p{color:var(--muted);line-height:1.7;max-width:680px;margin:auto}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:11px;padding:22px;margin-bottom:18px}
+h3{color:var(--green);margin:0 0 14px}.form-grid,.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:13px}
+label{display:block;color:var(--muted);font-size:13px;margin:4px 0 6px}
+input,textarea{width:100%;padding:12px;border-radius:7px;border:1px solid var(--border);background:#f4f5f0;color:#172319;font:15px Arial}
+textarea{min-height:90px;resize:vertical}
+button{padding:12px 17px;border:0;border-radius:7px;background:var(--green);color:#172319;font-weight:bold;cursor:pointer;margin:12px 8px 0 0}
+button.secondary{background:#456b50;color:white}button.danger{background:#75443e;color:white}
+.metric,.trip{background:var(--panel2);border:1px solid var(--border);border-radius:9px;padding:16px}
+.metric strong{font-size:22px;display:block;margin:9px 0}.muted,.note{color:var(--muted);font-size:13px;line-height:1.6}
+.trip{margin:10px 0}.trip h4{margin:0 0 8px;color:var(--green);font-size:17px}.trip p{white-space:pre-wrap}
+#status{margin-top:12px;min-height:18px}.hidden{display:none}
+a{color:var(--green)}
+@media(max-width:550px){header{justify-content:center}}
+</style></head>
+<body>
+<header><h1>FISHBOUND</h1><a href="index.html">Home</a></header>
+<main>
+<div class="hero"><small>PLAN YOUR NEXT ADVENTURE</small><h2>Fishing Trip Planner</h2><p>Choose a destination and date, check the available forecast, get general species and tackle ideas, and save your trip notes.</p></div>
+<section class="panel">
+<h3>Plan a trip</h3>
+<div class="form-grid">
+<div><label for="place">Lake, river, or town</label><input id="place" placeholder="Example: Lake Tahoe, California"></div>
+<div><label for="tripDate">Fishing date</label><input id="tripDate" type="date"></div>
+</div>
+<div><label for="tripNotes">Trip notes (optional)</label><textarea id="tripNotes" placeholder="Who is going? What do you want to try?"></textarea></div>
+<button id="checkButton">Check Forecast & Suggestions</button><button id="saveButton" class="secondary" disabled>Save Trip</button>
+<p id="status" class="note">Forecasts are available only within the weather provider's forecast window (up to 16 days).</p>
+</section>
+<section id="forecastPanel" class="panel hidden">
+<h3>Trip forecast</h3><div class="grid" id="weatherCards"></div>
+<h3 style="margin-top:22px">Species to consider</h3><div class="grid" id="speciesCards"></div>
+<p class="note">These are general weather- and season-based ideas, not live fish-location data. Confirm local species, regulations, access, and advisories. Weather forecasts can change.</p>
+</section>
+<section class="panel">
+<h3>My saved trips</h3><p class="note">Trips are saved in this browser on this device. They are not synced to your FishBound account yet.</p>
+<div id="savedTrips" class="note">No trips saved yet.</div>
+</section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const today=new Date();const localDate=new Date(today.getTime()-today.getTimezoneOffset()*60000).toISOString().slice(0,10);
+$("tripDate").min=localDate;$("tripDate").value=localDate;
+let currentPlan=null;
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function saved(){try{return JSON.parse(localStorage.getItem("fishboundTrips")||"[]")}catch(e){return[]}}
+function renderSaved(){
+ const trips=saved();$("savedTrips").innerHTML=trips.length?trips.map((t,i)=>'<article class="trip"><h4>'+esc(t.place)+' · '+esc(t.date)+'</h4><p class="muted">'+esc(t.notes||"No notes")+'</p><button class="danger" onclick="deleteTrip('+i+')">Delete Trip</button></article>').join(""):"No trips saved yet.";
+}
+function deleteTrip(i){const trips=saved();trips.splice(i,1);localStorage.setItem("fishboundTrips",JSON.stringify(trips));renderSaved()}
+window.deleteTrip=deleteTrip;
+function speciesFor(month,temp){
+ const season=month<=2||month===12?"winter":month<=5?"spring":month<=8?"summer":"fall";
+ const choices={winter:["Trout","Crappie","Bluegill"],spring:["Largemouth bass","Crappie","Trout"],summer:["Largemouth bass","Bluegill","Channel catfish"],fall:["Largemouth bass","Crappie","Trout"]};
+ let list=choices[season];if(temp<48&&!list.some(x=>x.toLowerCase().includes("trout")))list[2]="Trout";return list;
+}
+function tackle(name){
+ if(/bass/i.test(name))return "Bait: worms or minnows · Lures: jigs, spinnerbaits, or crankbaits · Try cover and depth changes.";
+ if(/trout/i.test(name))return "Bait: permitted worms or insects · Lures: small spinners or spoons · Try cool water and current.";
+ if(/catfish/i.test(name))return "Bait: worms or prepared bait where legal · Try a bottom presentation in suitable areas.";
+ if(/crappie/i.test(name))return "Bait: minnows · Lures: small jigs · Try brush and submerged structure.";
+ return "Bait: small worms or insects · Lures: tiny jigs · Try shallow vegetation and cover.";
+}
+$("checkButton").addEventListener("click",async()=>{
+ const place=$("place").value.trim(),date=$("tripDate").value;
+ $("status").textContent="Looking up the location and forecast...";
+ $("saveButton").disabled=true;currentPlan=null;
+ if(!place||!date){$("status").textContent="Enter a destination and fishing date first.";return}
+ const days=Math.round((new Date(date+"T12:00:00")-new Date(localDate+"T12:00:00"))/86400000);
+ if(days<0||days>15){$("status").textContent="Choose today or a date within the next 15 days for a forecast.";return}
+ try{
+  const geo=await fetch("https://geocoding-api.open-meteo.com/v1/search?name="+encodeURIComponent(place)+"&count=1&language=en&format=json");
+  if(!geo.ok)throw new Error("Location search is unavailable.");
+  const gd=await geo.json();if(!gd.results?.length)throw new Error("Couldn't find that location. Try a nearby town or a more specific name.");
+  const loc=gd.results[0];
+  const url="https://api.open-meteo.com/v1/forecast?latitude="+loc.latitude+"&longitude="+loc.longitude+"&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code&hourly=wind_speed_10m,precipitation_probability,temperature_2m&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=auto&forecast_days=16";
+  const wr=await fetch(url);if(!wr.ok)throw new Error("Forecast service could not load.");
+  const data=await wr.json();const index=data.daily.time.indexOf(date);if(index<0)throw new Error("No forecast is available for that date yet.");
+  const high=data.daily.temperature_2m_max[index],low=data.daily.temperature_2m_min[index],rain=data.daily.precipitation_probability_max[index],code=data.daily.weather_code[index];
+  const hourly=data.hourly.time.map((t,i)=>({t,i})).filter(x=>x.t.startsWith(date));
+  const maxWind=hourly.length?Math.max(...hourly.map(x=>Number(data.hourly.wind_speed_10m[x.i])||0)):null;
+  const temp=(Number(high)+Number(low))/2;
+  const month=new Date(date+"T12:00:00").getMonth()+1;
+  const names=speciesFor(month,temp);
+  const weather=code>=95?"Thunderstorms":code>=71?"Snow":code>=61?"Rain":code>=51?"Drizzle":code===45||code===48?"Fog":code>=3?"Cloudy":"Clear or partly cloudy";
+  $("weatherCards").innerHTML=[["Conditions",weather],["High / Low",high+"°F / "+low+"°F"],["Rain chance",rain+"%"],["Peak forecast wind",maxWind===null?"Unavailable":Math.round(maxWind)+" mph"]].map(x=>'<div class="metric"><span class="note">'+x[0]+'</span><strong>'+esc(x[1])+'</strong></div>').join("");
+  $("speciesCards").innerHTML=names.map(n=>'<div class="metric"><strong>'+esc(n)+'</strong><p class="note">'+esc(tackle(n))+'</p></div>').join("");
+  $("forecastPanel").classList.remove("hidden");
+  $("status").textContent="Forecast loaded for "+loc.name+(loc.admin1?", "+loc.admin1:"")+".";
+  currentPlan={place:place,date,notes:$("tripNotes").value.trim(),location:loc.name,region:loc.admin1||"",forecast:{weather,high,low,rain,maxWind},species:names};
+  $("saveButton").disabled=false;
+ }catch(e){$("status").textContent=e.message||"Something went wrong. Please try again."}
+});
+$("saveButton").addEventListener("click",()=>{
+ if(!currentPlan)return;
+ const trips=saved();trips.unshift({...currentPlan,createdAt:new Date().toISOString()});
+ try{localStorage.setItem("fishboundTrips",JSON.stringify(trips));renderSaved();$("status").textContent="Trip saved in this browser."; $("saveButton").disabled=true;}
+ catch(e){$("status").textContent="Could not save this trip. Browser storage may be full or disabled."}
+});
+renderSaved();
+</script></body></html>
