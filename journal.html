@@ -32,12 +32,31 @@ const qs=new URLSearchParams(location.search);
  if(error){document.getElementById("status").textContent="Could not load your journal: "+error.message;return;}
  const rows=c||[],saved=identifications||[],species=new Set(rows.map(x=>x.species).filter(Boolean)).size,photos=rows.filter(x=>x.image_url).length;
  document.getElementById("stats").innerHTML=[[""+rows.length,"Total catches"],[""+species,"Different catch species"],[""+photos,"Catch photos"],[""+saved.length,"AI identifications"]].map(x=>"<div class='stat'><strong>"+x[0]+"</strong><span>"+x[1]+"</span></div>").join("");
- document.getElementById("entries").innerHTML=rows.length?rows.map(x=>"<article class='catch-card'><div class='row'><strong>"+esc(x.species)+"</strong><span class='catch-meta'>"+esc(dateText(x.caught_at))+"</span></div><div class='catch-meta'>"+esc(x.waterbody_name||"Fishing location not listed")+"</div>"+(x.notes?"<p>"+esc(x.notes)+"</p>":"")+(safePhoto(x.image_url)?"<img src='"+esc(safePhoto(x.image_url))+"' alt='Catch photo' loading='lazy'>":"")+"</article>").join(""):"Your catch log is empty. Share your first catch from Fishing Locations!";
+ document.getElementById("entries").innerHTML=rows.length?rows.map(x=>"<article class='catch-card'><div class='row'><strong>"+esc(x.species)+"</strong><span class='catch-meta'>"+esc(dateText(x.caught_at))+"</span></div><div class='catch-meta'>"+esc(x.waterbody_name||"Fishing location not listed")+"</div>"+(x.notes?"<p>"+esc(x.notes)+"</p>":"")+(safePhoto(x.image_url)?"<img src='"+esc(safePhoto(x.image_url))+"' alt='Catch photo' loading='lazy'>":"")+"<div class='row' style='justify-content:flex-end;margin-top:10px'><button class='delete-catch' data-id='"+esc(x.id)+"' type='button' style='background:#8b3939'>Delete Catch</button></div></article>").join(""):"Your catch log is empty. Share your first catch from Fishing Locations!";
  const identifiedRoot=document.getElementById("identifiedEntries");
  if(identificationError){
   identifiedRoot.textContent="Could not load saved identifications: "+identificationError.message;
  }else{
-  identifiedRoot.innerHTML=saved.length?saved.map(x=>"<article class='catch-card'><div class='row'><strong>"+esc(x.species)+"</strong><span class='catch-meta'>"+esc(new Date(x.identified_at).toLocaleString())+"</span></div>"+(x.scientific_name?"<div class='catch-meta'>"+esc(x.scientific_name)+"</div>":"")+(x.confidence!==null&&x.confidence!==undefined?"<div class='catch-meta'>AI confidence: "+esc(x.confidence)+"%</div>":"")+(safePhoto(x.image_url)?"<img src='"+esc(safePhoto(x.image_url))+"' alt='Identified fish photo' loading='lazy'>":"")+"</article>").join(""):"No AI identifications saved yet. Identify a fish and choose Save to Journal.";
+  identifiedRoot.innerHTML=saved.length?saved.map(x=>"<article class='catch-card'><div class='row'><strong>"+esc(x.species)+"</strong><span class='catch-meta'>"+esc(new Date(x.identified_at).toLocaleString())+"</span></div>"+(x.scientific_name?"<div class='catch-meta'>"+esc(x.scientific_name)+"</div>":"")+(x.confidence!==null&&x.confidence!==undefined?"<div class='catch-meta'>AI confidence: "+esc(x.confidence)+"%</div>":"")+(safePhoto(x.image_url)?"<img src='"+esc(safePhoto(x.image_url))+"' alt='Identified fish photo' loading='lazy'>":"")+"<div class='row' style='justify-content:flex-end;margin-top:10px'><button class='delete-identification' data-id='"+esc(x.id)+"' type='button' style='background:#8b3939'>Delete Identification</button></div></article>").join(""):"No AI identifications saved yet. Identify a fish and choose Save to Journal.";
  }
+ document.addEventListener("click",async event=>{
+  const catchButton=event.target.closest(".delete-catch");
+  const identificationButton=event.target.closest(".delete-identification");
+  if(!catchButton&&!identificationButton)return;
+  const button=catchButton||identificationButton;
+  const isCatch=!!catchButton;
+  const id=button.dataset.id;
+  if(!id)return;
+  if(!confirm(isCatch?"Delete this catch from your journal? This will also remove it from your catch totals and achievements.":"Delete this saved AI identification?"))return;
+  button.disabled=true;button.textContent="Deleting…";
+  const table=isCatch?"catch_reports":"fish_identifications";
+  const {data:deleted,error:deleteError}=await db.from(table).delete().eq("id",id).eq("user_id",user.id).select("id");
+  if(deleteError||!deleted||deleted.length===0){
+   document.getElementById("status").textContent="Could not delete: "+(deleteError?.message||"No record was deleted. Check your permissions.");
+   button.disabled=false;button.textContent=isCatch?"Delete Catch":"Delete Identification";
+   return;
+  }
+  location.reload();
+ });
 })().catch(e=>document.getElementById("status").textContent=e.message);
 </script></body></html>
