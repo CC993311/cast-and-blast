@@ -1,0 +1,67 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FishBound | Angler Profile</title><style>
+:root{--bg:#101710;--panel:#1b281e;--panel2:#243529;--green:#a9c77b;--white:#f1f4ec;--muted:#aab6a7;--border:#354735}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--white);font-family:Arial,sans-serif}
+header{padding:17px 7%;background:#172319;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
+.logo{font-size:23px;font-weight:800;letter-spacing:1px}.logo span{color:var(--green)}
+nav{display:flex;gap:17px;flex-wrap:wrap}nav a{color:var(--muted);text-decoration:none;font-size:13px;font-weight:bold}nav a:hover{color:var(--green)}
+main{max-width:1000px;margin:auto;padding:32px 20px 70px}.panel{background:var(--panel);border:1px solid var(--border);border-radius:11px;padding:20px;margin-bottom:18px}
+h1{font-size:clamp(30px,5vw,46px);margin:8px 0 12px}h2{font-size:20px;margin:0 0 14px}h3{font-size:15px;color:var(--green);margin:0 0 10px}
+p{line-height:1.6}.muted,.help,.message{color:var(--muted);font-size:13px;line-height:1.6}.message{min-height:18px}
+button,.button{border:0;border-radius:7px;padding:10px 13px;background:#23864b;color:white;font-weight:bold;cursor:pointer;text-decoration:none;display:inline-block}
+button:hover,.button:hover{background:#176b3a}button:disabled{opacity:.5;cursor:not-allowed}.secondary{background:#456b50}
+input{width:100%;padding:11px;border:1px solid #527b61;border-radius:7px;background:#fff;color:#183b2a;font:14px Arial;margin:5px 0 10px}
+.profile-head{display:flex;align-items:center;gap:20px;flex-wrap:wrap}.avatar{width:112px;height:112px;border-radius:50%;object-fit:cover;background:#304a35;border:2px solid var(--green)}.avatar-placeholder{width:112px;height:112px;border-radius:50%;display:grid;place-items:center;background:#304a35;color:var(--green);font-size:40px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:20px 0}.stat{background:var(--panel2);padding:14px;border-radius:8px}.stat strong{display:block;font-size:24px;color:var(--green)}.stat span{font-size:12px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.badge-card,.catch-card,.angler-card{background:var(--panel2);border:1px solid var(--border);border-radius:9px;padding:14px}.badge-card.locked{opacity:.48}.badge-icon{font-size:25px;margin-bottom:7px}.badge-card strong{display:block;margin-bottom:5px}.catch-card{margin:10px 0}.catch-card img{width:100%;max-height:240px;object-fit:contain;background:#0c140e;border-radius:7px;margin-top:8px}.catch-meta{font-size:12px;color:var(--muted);margin:5px 0}.row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:11px 8px;border-bottom:1px solid var(--border);font-size:14px}th{color:var(--green)}td a{color:var(--white);text-decoration:none}td a:hover{color:var(--green)}
+@media(max-width:650px){header{justify-content:center}nav{justify-content:center}.profile-head{justify-content:center;text-align:center}}
+</style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head><body><header><div class="logo">FISH<span>BOUND</span></div><nav><a href="index.html">Home</a><a href="map.html">Fishing Locations</a><a href="community.html">Community</a><a href="journal.html">My Journal</a><a href="achievements.html">Achievements</a><a href="leaderboard.html">Leaderboard</a></nav></header><main>
+<section class="panel" id="profile"><p class="muted">FISHBOUND ANGLER</p><h1>Loading angler profile...</h1></section>
+<section class="panel"><div class="row"><h2>Fishing Achievements</h2><a class="button secondary" id="allAchievements" href="achievements.html">All Achievements</a></div><div id="badges" class="grid"></div></section>
+<section class="panel"><h2>Recent Catches</h2><div id="catches" class="muted">Loading catches...</div></section>
+</main><script>const SUPABASE_URL="https://ubnmhqxitiigsctbsmqy.supabase.co";
+const SUPABASE_KEY="sb_publishable_g-6tScB0HFIVcVkAhCN5Ug_fpm-jFrq";
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const safePhoto=v=>{try{const u=new URL(v);return ["https:","http:"].includes(u.protocol)?u.href:"";}catch(e){return "";}};
+const dateText=v=>v?new Date(v+"T12:00:00").toLocaleDateString():"Date not provided";
+const qs=new URLSearchParams(location.search);
+const userId=qs.get("user");const profileBox=document.getElementById("profile");
+const badgeDefs=[
+ ["🐟","First Catch","Record your first catch",n=>n>=1],
+ ["🎣","Getting Started","Record 5 catches",n=>n>=5],
+ ["🏅","Dedicated Angler","Record 10 catches",n=>n>=10],
+ ["🏆","Catch Collector","Record 25 catches",n=>n>=25],
+ ["🌊","Species Explorer","Catch 5 different species",(_,s)=>s>=5],
+ ["🧭","Species Expert","Catch 10 different species",(_,s)=>s>=10],
+ ["📸","Picture Perfect","Share a catch photo",(_,__,photos)=>photos>=1],
+ ["📝","Storyteller","Add notes to a catch",(_,__,___,notes)=>notes>=1]
+];
+(async()=>{
+ if(!userId){profileBox.innerHTML="<h1>Angler not found</h1><p class='muted'>Open a profile from the Community page.</p>";return;}
+ const [{data:p,error:pe},{data:c,error:ce}]=await Promise.all([
+  db.from("profiles").select("user_id,display_name,bio,avatar_url").eq("user_id",userId).maybeSingle(),
+  db.from("catch_reports").select("id,species,caught_at,notes,image_url,display_name,waterbody_name,created_at,user_id").eq("user_id",userId).order("created_at",{ascending:false}).limit(200)
+ ]);
+ if(pe){profileBox.innerHTML="<h1>Could not load profile</h1><p class='muted'>"+esc(pe.message)+"</p>";return;}
+ if(ce){document.getElementById("catches").textContent="Could not load catches: "+ce.message;return;}
+ const catches=c||[],name=p?.display_name||catches[0]?.display_name||"FishBound Angler";
+ const avatar=safePhoto(p?.avatar_url),species=new Set(catches.map(x=>x.species).filter(Boolean)).size;
+ const [{count:followers},{count:following}]=await Promise.all([
+  db.from("user_follows").select("*",{count:"exact",head:true}).eq("followed_id",userId),
+  db.from("user_follows").select("*",{count:"exact",head:true}).eq("follower_id",userId)
+ ]);
+ profileBox.innerHTML="<div class='profile-head'>"+(avatar?"<img class='avatar' src='"+esc(avatar)+"' alt='Profile picture'>":"<div class='avatar-placeholder'>🎣</div>")+"<div><p class='muted'>FISHBOUND ANGLER</p><h1>"+esc(name)+"</h1><p>"+esc(p?.bio||"This angler hasn't added a bio yet.")+"</p><button id='followBtn' class='secondary' style='display:none'>Follow</button><div id='followMsg' class='message'></div></div></div><div class='stats'><div class='stat'><strong>"+catches.length+"</strong><span>Total catches</span></div><div class='stat'><strong>"+species+"</strong><span>Species caught</span></div><div class='stat'><strong>"+(followers??"—")+"</strong><span>Followers</span></div><div class='stat'><strong>"+(following??"—")+"</strong><span>Following</span></div></div>";
+ const btn=document.getElementById("followBtn"),msg=document.getElementById("followMsg");
+ const {data:sessionData}=await db.auth.getSession(),me=sessionData.session?.user;
+ if(me&&me.id!==userId){
+  btn.style.display="inline-block";
+  const {data:existing}=await db.from("user_follows").select("followed_id").eq("follower_id",me.id).eq("followed_id",userId).maybeSingle();
+  btn.textContent=existing?"Following · Unfollow":"Follow";
+  btn.onclick=async()=>{btn.disabled=true;const res=existing?await db.from("user_follows").delete().eq("follower_id",me.id).eq("followed_id",userId):await db.from("user_follows").insert({follower_id:me.id,followed_id:userId});if(res.error){msg.textContent="Could not update follow: "+res.error.message;btn.disabled=false;return;}location.reload();};
+ }
+ document.getElementById("allAchievements").href="achievements.html?user="+encodeURIComponent(userId);
+ document.getElementById("badges").innerHTML=badgeDefs.map(([icon,title,desc,fn])=>{const earned=fn(catches.length,species,catches.filter(x=>x.image_url).length,catches.filter(x=>x.notes?.trim()).length);return "<div class='badge-card "+(earned?"":"locked")+"'><div class='badge-icon'>"+icon+"</div><strong>"+title+"</strong><span class='muted'>"+desc+"</span><p class='muted'>"+(earned?"Earned":"Not yet earned")+"</p></div>";}).join("");
+ document.getElementById("catches").innerHTML=catches.length?catches.slice(0,12).map(x=>"<article class='catch-card'><strong>"+esc(x.species)+"</strong><div class='catch-meta'>"+esc(dateText(x.caught_at))+(x.waterbody_name?" · "+esc(x.waterbody_name):"")+"</div>"+(x.notes?"<p>"+esc(x.notes)+"</p>":"")+(safePhoto(x.image_url)?"<img src='"+esc(safePhoto(x.image_url))+"' alt='Catch photo' loading='lazy'>":"")+"</article>").join(""):"No catches have been shared by this angler yet.";
+})().catch(e=>{profileBox.innerHTML="<h1>Something went wrong</h1><p class='muted'>"+esc(e.message)+"</p>";});
+</script></body></html>
