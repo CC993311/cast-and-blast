@@ -926,8 +926,6 @@ document.getElementById("catchList").addEventListener("click",async function(eve
   return;
  }
  if(!currentUser)return;
-
- const likeButton=event.target.closest(".toggle-catch-like");
  if(likeButton){
   const catchId=Number(likeButton.dataset.id);
   if(!Number.isSafeInteger(catchId)||catchId<=0)return;
