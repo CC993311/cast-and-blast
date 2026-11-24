@@ -854,6 +854,8 @@ async function loadCatchReports(){
    (currentUser&&currentUser.id===c.user_id?
     "<div class='button-row' style='margin-top:8px'>"+
     "<button class='edit-catch btn-secondary' data-id='"+Number(c.id)+"'>Edit</button>"+
+    "<button class='change-catch-photo btn-secondary' data-id='"+Number(c.id)+"'>Change Photo</button>"+
+    (photo?"<button class='remove-catch-photo btn-secondary' data-id='"+Number(c.id)+"'>Remove Photo</button>":"")+
     "<button class='delete-catch' data-id='"+Number(c.id)+"' style='background:#8b4242'>Delete</button>"+
     "</div>":"")+
    "</div>";
@@ -874,7 +876,66 @@ document.getElementById("catchList").addEventListener("click",async function(eve
  if(!currentUser)return;
 
  const editButton=event.target.closest(".edit-catch");
+ const changePhotoButton=event.target.closest(".change-catch-photo");
+ const removePhotoButton=event.target.closest(".remove-catch-photo");
  const deleteButton=event.target.closest(".delete-catch");
+
+ if(changePhotoButton){
+  const id=Number(changePhotoButton.dataset.id);
+  if(!Number.isSafeInteger(id)||id<=0)return;
+  const picker=document.createElement("input");
+  picker.type="file";
+  picker.accept="image/jpeg,image/png,image/webp";
+  picker.addEventListener("change",async()=>{
+   const file=picker.files?.[0];
+   if(!file)return;
+   changePhotoButton.disabled=true;
+   setCatchMessage("Uploading replacement photo...");
+   let uploaded=null;
+   try{
+    uploaded=await uploadCatchPhoto(file);
+    const {data:oldReport}=await supabaseClient.from("catch_reports")
+     .select("image_url").eq("id",id).eq("user_id",currentUser.id).maybeSingle();
+    const {data:updated,error}=await supabaseClient.from("catch_reports")
+     .update({image_url:uploaded.url}).eq("id",id).eq("user_id",currentUser.id).select("id");
+    if(error||!updated||updated.length===0){
+     await supabaseClient.storage.from("catch-photos").remove([uploaded.path]);
+     throw new Error(error?.message||"No catch report was updated.");
+    }
+    const oldPath=getCatchStoragePathFromPublicUrl(oldReport?.image_url);
+    if(oldPath)await supabaseClient.storage.from("catch-photos").remove([oldPath]);
+    setCatchMessage("Catch photo updated!");
+    await loadCatchReports();
+   }catch(error){
+    console.error("Catch photo update error:",error);
+    setCatchMessage(error.message||"Could not update the catch photo.");
+    changePhotoButton.disabled=false;
+   }
+  });
+  picker.click();
+  return;
+ }
+
+ if(removePhotoButton){
+  const id=Number(removePhotoButton.dataset.id);
+  if(!Number.isSafeInteger(id)||id<=0)return;
+  if(!confirm("Remove the photo from this catch?"))return;
+  removePhotoButton.disabled=true;
+  const {data:report}=await supabaseClient.from("catch_reports")
+   .select("image_url").eq("id",id).eq("user_id",currentUser.id).maybeSingle();
+  const {data:updated,error}=await supabaseClient.from("catch_reports")
+   .update({image_url:null}).eq("id",id).eq("user_id",currentUser.id).select("id");
+  if(error||!updated||updated.length===0){
+   setCatchMessage("Could not remove photo: "+(error?.message||"No report was updated."));
+   removePhotoButton.disabled=false;
+   return;
+  }
+  const oldPath=getCatchStoragePathFromPublicUrl(report?.image_url);
+  if(oldPath)await supabaseClient.storage.from("catch-photos").remove([oldPath]);
+  setCatchMessage("Catch photo removed.");
+  await loadCatchReports();
+  return;
+ }
 
  if(editButton){
   const id=Number(editButton.dataset.id);
