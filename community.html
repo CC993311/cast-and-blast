@@ -29,7 +29,7 @@ button:hover,.button:hover{background:#176b3a}button:disabled{opacity:.5;cursor:
 </style>
 </head>
 <body>
-<header><div class="logo">FISH<span>BOUND</span></div><nav><a href="index.html">Home</a><a href="map.html">Fishing Locations</a><a href="guides.html">Guides</a><a href="conditions.html">Weather</a><a href="community.html">Community</a></nav></header>
+<header><div class="logo">FISH<span>BOUND</span></div><nav><a href="index.html">Home</a><a href="map.html">Fishing Locations</a><a href="guides.html">Guides</a><a href="conditions.html">Weather</a><a href="community.html">Community</a><a href="journal.html">My Journal</a><a href="achievements.html">Achievements</a><a href="leaderboard.html">Leaderboard</a></nav></header>
 <main>
 <div class="intro"><small>CONNECT & SHARE</small><h1>FishBound Community</h1><p>See catches shared by anglers, leave comments, give catches a like, and find other anglers to follow.</p></div>
 <div class="columns">
@@ -37,7 +37,7 @@ button:hover,.button:hover{background:#176b3a}button:disabled{opacity:.5;cursor:
 <section class="panel"><h2>Community Catch Feed</h2><p class="help">Recent catches from FishBound anglers.</p><div id="feed" class="empty">Loading catches...</div><button id="refreshFeed" class="secondary">Refresh Feed</button><div id="feedMessage" class="message"></div></section>
 </div>
 <aside>
-<section class="panel"><h2>Angler Account</h2><div id="signedOut"><p class="help">Sign in or create an account to like catches, comment, and follow anglers.</p><label>Email</label><input id="email" type="email" autocomplete="email" placeholder="Email address"><label>Password</label><input id="password" type="password" autocomplete="current-password" placeholder="Password"><button id="signIn">Sign In</button> <button id="signUp" class="secondary">Create Account</button></div><div id="signedIn" style="display:none"><p id="accountName" class="help"></p><button id="signOut" class="secondary">Sign Out</button></div><div id="authMessage" class="message"></div></section>
+<section class="panel"><h2>Angler Account</h2><div id="signedOut"><p class="help">Sign in or create an account to like catches, comment, and follow anglers.</p><label>Email</label><input id="email" type="email" autocomplete="email" placeholder="Email address"><label>Password</label><input id="password" type="password" autocomplete="current-password" placeholder="Password"><button id="signIn">Sign In</button> <button id="signUp" class="secondary">Create Account</button></div><div id="signedIn" style="display:none"><p id="accountName" class="help"></p><p><a class="button secondary" href="angler.html" id="myProfileLink">My Profile</a> <a class="button secondary" href="journal.html">My Journal</a></p><p><a class="button secondary" href="achievements.html">Achievements</a> <a class="button secondary" href="leaderboard.html">Leaderboard</a></p><button id="signOut" class="secondary">Sign Out</button></div><div id="authMessage" class="message"></div></section>
 <section class="panel"><h3>Find Anglers</h3><p class="help">Search for anglers by their profile display name.</p><input id="anglerSearch" maxlength="40" placeholder="Search angler names"><button id="searchButton">Search Anglers</button><div id="searchMessage" class="message"></div><div id="searchResults"></div><h3 style="margin-top:20px">Anglers You Follow</h3><div id="following" class="help">Sign in to see who you follow.</div></section>
 <section class="panel"><h3>Share a Catch</h3><p class="help">To post a catch, open Fishing Locations, choose the waterbody where you caught it, and use the Post a Fish Catch form.</p><a class="button" href="map.html">Go to Fishing Locations</a></section>
 </aside>
@@ -69,7 +69,7 @@ async function loadFeed(){
   const ownComments=(comments||[]).filter(x=>String(x.catch_id)===String(c.id));
   const date=c.caught_at?new Date(c.caught_at+"T12:00:00").toLocaleDateString():"Date not provided";
   const photo=photoURL(c.image_url);
-  return "<article class='catch-card'><div class='species'>"+esc(c.species)+"</div><div class='meta'>Posted by "+esc(c.display_name||"Member")+" · "+esc(date)+"</div>"+(c.notes?"<p>"+esc(c.notes)+"</p>":"")+(photo?"<img class='catch-photo' src='"+esc(photo)+"' alt='Catch photo' loading='lazy'>":"")+"<div class='actions'><button class='likeButton secondary' data-id='"+Number(c.id)+"' "+(!currentUser?"disabled":"")+">"+(liked?"♥ Liked":"♡ Like")+"</button><span class='count'>"+(likes||[]).filter(x=>String(x.catch_id)===String(c.id)).length+" likes</span><span class='count'>"+ownComments.length+" comments</span></div><div class='comments'>"+ownComments.map(x=>"<div class='comment'>"+esc(x.comment_text)+"</div>").join("")+"</div>"+(currentUser?"<form class='comment-form' data-id='"+Number(c.id)+"'><input name='comment' maxlength='500' placeholder='Write a comment...' required><button>Send</button></form>":"<p class='help'>Sign in to like or comment.</p>")+"</article>";
+  return "<article class='catch-card'><div class='species'>"+esc(c.species)+"</div><div class='meta'>Posted by "+(c.user_id?"<a style='color:#a9c77b' href='angler.html?user="+encodeURIComponent(c.user_id)+"'>"+esc(c.display_name||"Member")+"</a>":esc(c.display_name||"Member"))+" · "+esc(date)+"</div>"+(c.notes?"<p>"+esc(c.notes)+"</p>":"")+(photo?"<img class='catch-photo' src='"+esc(photo)+"' alt='Catch photo' loading='lazy'>":"")+"<div class='actions'><button class='likeButton secondary' data-id='"+Number(c.id)+"' "+(!currentUser?"disabled":"")+">"+(liked?"♥ Liked":"♡ Like")+"</button><span class='count'>"+(likes||[]).filter(x=>String(x.catch_id)===String(c.id)).length+" likes</span><span class='count'>"+ownComments.length+" comments</span></div><div class='comments'>"+ownComments.map(x=>"<div class='comment'>"+esc(x.comment_text)+"</div>").join("")+"</div>"+(currentUser?"<form class='comment-form' data-id='"+Number(c.id)+"'><input name='comment' maxlength='500' placeholder='Write a comment...' required><button>Send</button></form>":"<p class='help'>Sign in to like or comment.</p>")+"</article>";
  }).join("");
 }
 el("feed").addEventListener("click",async e=>{
@@ -96,7 +96,7 @@ async function loadFollowing(){
  const ids=(links||[]).map(x=>x.followed_id);if(!ids.length){box.textContent="You are not following anyone yet.";return;}
  const {data:profiles,error:pe}=await db.from("profiles").select("user_id,display_name,bio").in("user_id",ids);
  if(pe){box.textContent="Could not load followed anglers: "+pe.message;return;}
- box.innerHTML=(profiles||[]).map(p=>"<div class='angler-card'><strong>"+esc(p.display_name||"FishBound Angler")+"</strong><p class='help'>"+esc(p.bio||"")+"</p><button class='unfollow secondary' data-id='"+esc(p.user_id)+"'>Unfollow</button></div>").join("")||"No profile details are available yet.";
+ box.innerHTML=(profiles||[]).map(p=>"<div class='angler-card'><a style='color:#a9c77b' href='angler.html?user="+encodeURIComponent(p.user_id)+"'><strong>"+esc(p.display_name||"FishBound Angler")+"</strong></a><p class='help'>"+esc(p.bio||"")+"</p><button class='unfollow secondary' data-id='"+esc(p.user_id)+"'>Unfollow</button></div>").join("")||"No profile details are available yet.";
 }
 async function searchAnglers(){
  if(!currentUser){el("searchMessage").textContent="Sign in to find and follow anglers.";return;}
@@ -107,7 +107,7 @@ async function searchAnglers(){
  if(!data?.length){el("searchMessage").textContent="No anglers found with that name.";el("searchResults").innerHTML="";return;}
  const {data:links,error:fe}=await db.from("user_follows").select("followed_id").eq("follower_id",currentUser.id);if(fe){el("searchMessage").textContent=fe.message;return;}
  const followed=new Set((links||[]).map(x=>x.followed_id));
- el("searchResults").innerHTML=data.map(p=>"<div class='angler-card'><strong>"+esc(p.display_name||"FishBound Angler")+"</strong><p class='help'>"+esc(p.bio||"")+"</p><button class='followButton secondary' data-id='"+esc(p.user_id)+"' data-following='"+followed.has(p.user_id)+"'>"+(followed.has(p.user_id)?"Following · Unfollow":"Follow")+"</button></div>").join("");
+ el("searchResults").innerHTML=data.map(p=>"<div class='angler-card'><a style='color:#a9c77b' href='angler.html?user="+encodeURIComponent(p.user_id)+"'><strong>"+esc(p.display_name||"FishBound Angler")+"</strong></a><p class='help'>"+esc(p.bio||"")+"</p><button class='followButton secondary' data-id='"+esc(p.user_id)+"' data-following='"+followed.has(p.user_id)+"'>"+(followed.has(p.user_id)?"Following · Unfollow":"Follow")+"</button></div>").join("");
  el("searchMessage").textContent=data.length+" angler(s) found.";
 }
 el("searchButton").addEventListener("click",searchAnglers);
