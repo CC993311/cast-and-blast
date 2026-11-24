@@ -778,6 +778,7 @@ function updateAuthUI(){
  if(signedIn){
   const name=currentUser.user_metadata?.display_name||currentUser.email||"Member";
   document.getElementById("signedInName").textContent="Signed in as "+name;
+  document.getElementById("myPublicProfile").href="angler.html?user="+encodeURIComponent(currentUser.id);
   document.getElementById("profileSection").style.display="block";
   loadAnglerProfile();
  }else{
