@@ -21,6 +21,9 @@ button,.button{border:0;border-radius:7px;padding:10px 13px;background:#23864b;c
 .notification{padding:16px 12px;border-top:1px solid var(--border);display:flex;gap:12px;align-items:flex-start}.notification.unread{background:#243529;border-radius:8px}.dot{width:9px;height:9px;border-radius:50%;background:#72df9b;flex:0 0 9px;margin-top:6px}.dot.read{background:transparent;border:1px solid #657565}.notification-text{flex:1;line-height:1.5}.notification small{display:block;color:var(--muted);margin-top:5px}.empty{padding:18px 0;color:var(--muted)}
 @media(max-width:650px){header{justify-content:center}nav{justify-content:center}main{padding-top:24px}}
 </style>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="app-icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="app-icon.svg">
 </head>
 <body>
 <header><div class="logo">FISH<span>BOUND</span></div><nav><a href="index.html">Home</a><a href="map.html">Fishing Map</a><a href="community.html">Community</a><a href="journal.html">My Journal</a></nav></header>
@@ -87,6 +90,14 @@ async function showSession(session){
 }
 (async()=>{const {data}=await db.auth.getSession();await showSession(data.session);})();
 db.auth.onAuthStateChange((event,session)=>{showSession(session);});
+</script>
+
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/fishbound/service-worker.js").catch(error => console.error("FishBound offline setup failed:", error));
+  });
+}
 </script>
 </body>
 </html>
