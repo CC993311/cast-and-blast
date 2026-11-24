@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101710">
+<title>Fish Identification | FishBound</title>
+<style>
+:root{--bg:#101710;--panel:#1b281e;--panel2:#243529;--green:#a9c77b;--white:#f1f4ec;--muted:#aab6a7;--border:#354735}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--white);font-family:Arial,sans-serif;line-height:1.6}
+header{background:#172319;border-bottom:1px solid var(--border);padding:17px 7%;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.logo{font-weight:800;font-size:22px;letter-spacing:1px}.logo span{color:var(--green)}nav{display:flex;gap:18px;flex-wrap:wrap}nav a{color:var(--muted);text-decoration:none;font-size:14px;font-weight:bold}nav a:hover{color:var(--green)}
+.hero{text-align:center;padding:55px 6%;background:radial-gradient(ellipse at center,#2c4930,#17271b 55%,#101710)}.eyebrow{color:var(--green);font-size:11px;letter-spacing:3px;font-weight:bold}.hero h1{font-size:clamp(34px,6vw,58px);line-height:1.1;margin:12px 0}.hero h1 span{color:var(--green)}.hero p{max-width:680px;margin:auto;color:#c2cdbf}
+main{max-width:1100px;margin:auto;padding:35px 5% 65px}.tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px}.tab{background:var(--panel2);color:var(--white);border:1px solid var(--border);border-radius:7px;padding:12px 17px;font-weight:bold;cursor:pointer}.tab.active,.tab:hover{border-color:var(--green);color:var(--green)}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:clamp(18px,4vw,30px);margin-bottom:22px}.panel h2{margin:0 0 8px}.muted{color:var(--muted)}.notice{background:#263529;border-left:3px solid var(--green);padding:13px 15px;border-radius:0 7px 7px 0;color:#d6dfd1;font-size:14px;margin:17px 0}
+.upload{display:block;border:2px dashed #60765b;border-radius:10px;padding:28px;text-align:center;cursor:pointer;background:#172319}.upload input{display:block;margin:14px auto 0;max-width:100%;color:var(--muted)}.preview{display:none;margin-top:18px;text-align:center}.preview img{max-width:100%;max-height:380px;object-fit:contain;border-radius:8px}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}.btn{border:1px solid var(--green);background:var(--green);color:#142016;border-radius:6px;padding:11px 16px;font-weight:bold;cursor:pointer}.btn.secondary{background:transparent;color:var(--green)}.btn:disabled{opacity:.45;cursor:not-allowed}
+.question{font-size:18px;font-weight:bold;margin:20px 0 12px}.choices{display:flex;gap:9px;flex-wrap:wrap}.choice{background:#172319;color:var(--white);border:1px solid var(--border);padding:10px 13px;border-radius:7px;cursor:pointer}.choice.selected{border-color:var(--green);background:#30442f;color:#fff}.step{display:none}.step.active{display:block}.progress{height:7px;background:#101710;border-radius:10px;overflow:hidden;margin:15px 0 22px}.progress span{display:block;height:100%;width:0;background:var(--green);transition:width .2s}.results{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-top:18px}.result{background:#172319;border:1px solid var(--border);border-radius:8px;padding:15px}.result h3{color:var(--green);margin:0 0 5px;font-size:17px}.tag{font-size:11px;color:var(--green);font-weight:bold;letter-spacing:1px}.small{font-size:13px;color:var(--muted)}.hidden{display:none!important}
+footer{text-align:center;color:#899687;padding:25px;font-size:12px;border-top:1px solid var(--border)}
+@media(max-width:600px){header{justify-content:center}nav{justify-content:center}}
+</style>
+</head>
+<body>
+<header><div class="logo">FISH<span>BOUND</span></div><nav><a href="index.html">Home</a><a href="map.html">Fishing Map</a><a href="guides.html">Species & Guides</a><a href="community.html">Community</a></nav></header>
+<div class="hero"><div class="eyebrow">KNOW WHAT YOU CAUGHT</div><h1>FISH <span>IDENTIFICATION</span></h1><p>Upload a fish photo or answer a few questions to explore possible species matches.</p></div>
+<main>
+<div class="tabs"><button class="tab active" id="photoTab" type="button">Identify from a Photo</button><button class="tab" id="guidedTab" type="button">Guided Identification</button></div>
+<section class="panel" id="photoPanel">
+<h2>Upload a Fish Photo</h2><p class="muted">Choose a clear photo showing the fish's side, fins, head, and markings when possible.</p>
+<label class="upload" for="fishPhoto"><strong>Choose a photo from your device</strong><br><span class="small">JPG, PNG, WEBP · Maximum 10 MB</span><input id="fishPhoto" type="file" accept="image/jpeg,image/png,image/webp"></label>
+<div class="preview" id="photoPreview"><img id="previewImage" alt="Your uploaded fish photo"><p class="small" id="photoName"></p><div class="actions" style="justify-content:center"><button class="btn secondary" id="clearPhoto" type="button">Remove photo</button><button class="btn" id="usePhoto" type="button">Continue with guided identification</button></div></div>
+<div class="notice"><strong>Photo recognition status:</strong> Photo upload and preview are ready. Automatic species recognition still needs a secure AI service connection, so FishBound will not pretend to identify a fish from the image yet. You can use the guided tool with your photo as a reference.</div>
+</section>
+<section class="panel hidden" id="guidedPanel">
+<h2>Guided Fish Identification</h2><p class="muted">Choose the closest answer. If you aren't sure, choose “Not sure” and continue.</p>
+<div class="progress"><span id="progressBar"></span></div>
+<div id="quiz">
+<div class="step active" data-step="0"><div class="question">1. What kind of water was the fish caught in?</div><div class="choices" data-key="water"><button class="choice" data-value="fresh">Freshwater</button><button class="choice" data-value="salt">Saltwater or brackish</button><button class="choice" data-value="unknown">Not sure</button></div></div>
+<div class="step" data-step="1"><div class="question">2. What was the general body shape?</div><div class="choices" data-key="shape"><button class="choice" data-value="streamlined">Long and streamlined</button><button class="choice" data-value="deep">Deep or oval-shaped</button><button class="choice" data-value="flat">Flat, like a flounder</button><button class="choice" data-value="catfish">Long with whiskers</button><button class="choice" data-value="unknown">Not sure</button></div></div>
+<div class="step" data-step="2"><div class="question">3. What stood out about its coloring or markings?</div><div class="choices" data-key="mark"><button class="choice" data-value="spots">Spots</button><button class="choice" data-value="bars">Vertical bars</button><button class="choice" data-value="stripe">Horizontal stripe(s)</button><button class="choice" data-value="silver">Mostly silver</button><button class="choice" data-value="gold">Gold, bronze, or green</button><button class="choice" data-value="unknown">Not sure</button></div></div>
+<div class="step" data-step="3"><div class="question">4. What did the head or mouth look like?</div><div class="choices" data-key="head"><button class="choice" data-value="large">Large mouth</button><button class="choice" data-value="pointed">Long or pointed snout</button><button class="choice" data-value="whiskers">Whiskers around the mouth</button><button class="choice" data-value="eyes">Both eyes on one side</button><button class="choice" data-value="small">Small or ordinary mouth</button><button class="choice" data-value="unknown">Not sure</button></div></div>
+<div class="step" data-step="4"><div class="question">5. Where was it caught?</div><div class="choices" data-key="place"><button class="choice" data-value="lake">Lake, pond, or reservoir</button><button class="choice" data-value="river">River or stream</button><button class="choice" data-value="bay">Bay, harbor, or estuary</button><button class="choice" data-value="ocean">Ocean or beach</button><button class="choice" data-value="unknown">Not sure</button></div></div>
+<div class="actions"><button class="btn secondary" id="backBtn" type="button" disabled>Back</button><button class="btn" id="nextBtn" type="button">Next</button><button class="btn secondary hidden" id="restartBtn" type="button">Start over</button></div>
+</div>
+<div id="resultsPanel" class="hidden"><h3>Possible matches</h3><p class="muted">These are suggestions based on your answers, not a guaranteed identification. Compare the details and consult a local fish guide if needed.</p><div class="results" id="results"></div><div class="actions"><button class="btn" id="againBtn" type="button">Identify another fish</button></div></div>
+</section>
+<p class="small">Identification can be uncertain, especially for young fish and similar-looking species. Follow local fishing rules and ask a local fisheries expert when an exact identification matters.</p>
+</main>
+<footer>FISHBOUND · EXPLORE. DISCOVER. RESPECT THE WATER.</footer>
+<script>
+const photoTab=document.getElementById('photoTab'),guidedTab=document.getElementById('guidedTab'),photoPanel=document.getElementById('photoPanel'),guidedPanel=document.getElementById('guidedPanel');
+function showPanel(which){const photo=which==='photo';photoPanel.classList.toggle('hidden',!photo);guidedPanel.classList.toggle('hidden',photo);photoTab.classList.toggle('active',photo);guidedTab.classList.toggle('active',!photo)}
+photoTab.onclick=()=>showPanel('photo');guidedTab.onclick=()=>showPanel('guided');
+const fileInput=document.getElementById('fishPhoto'),preview=document.getElementById('photoPreview'),previewImage=document.getElementById('previewImage');let imageUrl='';
+fileInput.addEventListener('change',()=>{const f=fileInput.files[0];if(!f)return;if(!/^image\/(jpeg|png|webp)$/.test(f.type)||f.size>10*1024*1024){alert('Please choose a JPG, PNG, or WEBP image under 10 MB.');fileInput.value='';return}if(imageUrl)URL.revokeObjectURL(imageUrl);imageUrl=URL.createObjectURL(f);previewImage.src=imageUrl;document.getElementById('photoName').textContent=f.name;preview.style.display='block'});
+document.getElementById('clearPhoto').onclick=()=>{fileInput.value='';preview.style.display='none';previewImage.removeAttribute('src');if(imageUrl)URL.revokeObjectURL(imageUrl);imageUrl=''};
+document.getElementById('usePhoto').onclick=()=>showPanel('guided');
+const answers={};let current=0;const steps=[...document.querySelectorAll('.step')];const progress=document.getElementById('progressBar');
+document.querySelectorAll('.choices').forEach(group=>group.addEventListener('click',e=>{const b=e.target.closest('button.choice');if(!b)return;group.querySelectorAll('.choice').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');answers[group.dataset.key]=b.dataset.value}));
+function displayStep(){steps.forEach((s,i)=>s.classList.toggle('active',i===current));document.getElementById('backBtn').disabled=current===0;document.getElementById('nextBtn').textContent=current===steps.length-1?'See possible matches':'Next';progress.style.width=((current+1)/steps.length*100)+'%'}
+document.getElementById('backBtn').onclick=()=>{if(current>0){current--;displayStep()}};
+document.getElementById('nextBtn').onclick=()=>{const group=steps[current].querySelector('.choices');if(!answers[group.dataset.key]){alert('Please choose an answer or select “Not sure.”');return}if(current<steps.length-1){current++;displayStep()}else showResults()};
+const fish=[
+{name:'Largemouth Bass',water:'fresh',shape:'deep',mark:['stripe','gold'],head:'large',place:['lake','river'],info:'Greenish body, dark horizontal side stripe, and a large mouth that usually extends past the eye.'},
+{name:'Smallmouth Bass',water:'fresh',shape:'deep',mark:['bars','gold'],head:'large',place:['lake','river'],info:'Bronze or brown body with vertical bars; mouth usually does not extend past the eye.'},
+{name:'Rainbow Trout',water:'fresh',shape:'streamlined',mark:['spots','stripe'],head:'small',place:['lake','river'],info:'Silvery body, dark spots, and often a pink or reddish stripe along the side.'},
+{name:'Brown Trout',water:'fresh',shape:'streamlined',mark:['spots','gold'],head:'small',place:['lake','river'],info:'Brown or golden body with dark spots and sometimes reddish spots.'},
+{name:'Channel Catfish',water:'fresh',shape:'catfish',mark:['spots','silver'],head:'whiskers',place:['lake','river'],info:'Barbels around the mouth, smooth skin, and a deeply forked tail.'},
+{name:'Bluegill',water:'fresh',shape:'deep',mark:['bars','gold'],head:'small',place:['lake'],info:'Deep, rounded body with dark vertical bars and a blue area near the gill cover.'},
+{name:'Yellow Perch',water:'fresh',shape:'deep',mark:['bars','gold'],head:'small',place:['lake','river'],info:'Golden-yellow body with several dark vertical bars.'},
+{name:'Northern Pike',water:'fresh',shape:'streamlined',mark:['spots','gold'],head:'pointed',place:['lake','river'],info:'Long olive body, light spots, and a flattened, duckbill-like snout.'},
+{name:'Walleye',water:'fresh',shape:'streamlined',mark:['bars','gold'],head:'small',place:['lake','river'],info:'Olive-gold body, dark saddle markings, and notably reflective eyes.'},
+{name:'Striped Bass',water:'unknown',shape:'streamlined',mark:['stripe','silver'],head:'small',place:['lake','river','bay','ocean'],info:'Silvery body with several dark horizontal stripes; some populations live in freshwater.'},
+{name:'Bluefish',water:'salt',shape:'streamlined',mark:['silver'],head:'large',place:['bay','ocean'],info:'Strong streamlined body, blue-green back, silver sides, and a large mouth.'},
+{name:'California Halibut',water:'salt',shape:'flat',mark:['spots','gold'],head:'eyes',place:['bay','ocean'],info:'Flat body with both eyes on the upper side; often mottled to blend with the bottom.'},
+{name:'Red Drum',water:'salt',shape:'streamlined',mark:['spots','silver'],head:'small',place:['bay','ocean'],info:'Copper or reddish body, commonly with one or more dark spots near the tail.'},
+{name:'Black Sea Bass',water:'salt',shape:'deep',mark:['bars','gold'],head:'large',place:['bay','ocean'],info:'Deep body, dark coloring, and a strong spiny dorsal fin.'},
+{name:'Sheepshead',water:'salt',shape:'deep',mark:['bars','silver'],head:'small',place:['bay','ocean'],info:'Silver-gray deep body with bold dark vertical bars and distinct human-like teeth.'},
+{name:'White Sturgeon',water:'unknown',shape:'streamlined',mark:['spots','silver'],head:'pointed',place:['river','bay'],info:'Long body, pointed snout, barbels, and rows of bony plates along the body.'}
+];
+function score(f,a){let s=0;if(a.water==='unknown'||f.water==='unknown'||a.water===f.water)s+=2;else s-=4;if(a.shape==='unknown'||a.shape===f.shape)s+=3;else s-=2;if(a.mark==='unknown'||f.mark.includes(a.mark))s+=2;else s-=1;if(a.head==='unknown'||a.head===f.head)s+=3;else s-=2;if(a.place==='unknown'||f.place.includes(a.place))s+=2;else s-=1;return s}
+function showResults(){document.getElementById('quiz').classList.add('hidden');document.getElementById('resultsPanel').classList.remove('hidden');document.getElementById('restartBtn').classList.remove('hidden');const matches=fish.map(f=>({...f,score:score(f,answers)})).sort((a,b)=>b.score-a.score).slice(0,5);const root=document.getElementById('results');root.innerHTML='';matches.forEach((f,i)=>{const el=document.createElement('article');el.className='result';const h=document.createElement('h3');h.textContent=(i+1)+'. '+f.name;const p=document.createElement('p');p.textContent=f.info;const tag=document.createElement('div');tag.className='tag';tag.textContent=f.water==='fresh'?'FRESHWATER':f.water==='salt'?'SALTWATER':'FRESHWATER / COASTAL';el.append(tag,h,p);root.append(el)})}
+function resetQuiz(){Object.keys(answers).forEach(k=>delete answers[k]);document.querySelectorAll('.choice').forEach(b=>b.classList.remove('selected'));current=0;document.getElementById('quiz').classList.remove('hidden');document.getElementById('resultsPanel').classList.add('hidden');document.getElementById('restartBtn').classList.add('hidden');displayStep()}
+document.getElementById('againBtn').onclick=resetQuiz;document.getElementById('restartBtn').onclick=resetQuiz;displayStep();
+</script>
+</body>
+</html>
