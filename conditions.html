@@ -96,6 +96,9 @@ a{color:var(--green)}
   .search-row button{width:100%}
 }
 </style>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="app-icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="app-icon.svg">
 </head>
 
 <body>
@@ -655,5 +658,13 @@ $("placeSearch").addEventListener("keydown",event=>{
 });
 </script>
 
+
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/fishbound/service-worker.js").catch(error => console.error("FishBound offline setup failed:", error));
+  });
+}
+</script>
 </body>
 </html>
