@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -232,7 +233,7 @@ const street=L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZo
 const satellite=L.tileLayer("https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:19,attribution:"Tiles © Esri"});
 const terrain=L.tileLayer("https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",{maxZoom:18,attribution:"Tiles © Esri"});
 satellite.addTo(map);
- L.control.layers({"Street Map":street,"Satellite":satellite,"Terrain":terrain},null,{collapsed:false,position:"topright"}).addTo(map);
+L.control.layers({"Street Map":street,"Satellite":satellite,"Terrain":terrain},null,{collapsed:false,position:"topright"}).addTo(map);
 L.control.scale().addTo(map);
 
 const USGS_URL="https://3dhp.nationalmap.gov/arcgis/rest/services/usgs_3dhp_all/FeatureServer/60";
@@ -465,7 +466,6 @@ document.getElementById("blmToggle").addEventListener("change",function(){
  else map.removeLayer(blmLayer);
 });
 
-
 // FAVORITES
 function updateFavoriteButton(){
  const button=document.getElementById("favoriteCurrentButton");
@@ -478,7 +478,8 @@ function updateFavoriteButton(){
  );
  button.textContent=exists?"★ Remove from Favorites":"☆ Add Selected Spot to Favorites";
 }
- async function loadFavorites(){
+
+async function loadFavorites(){
  const request=++favoritesRequestNumber;
  const list=document.getElementById("favoritesList");
  if(!currentUser){
@@ -512,6 +513,7 @@ function updateFavoriteButton(){
  }
  updateFavoriteButton();
 }
+
 async function toggleCurrentFavorite(){
  if(!currentUser){setFavoriteMessage("Please sign in to save favorites.");return;}
  if(!selectedWaterbody){setFavoriteMessage("Select a lake, pond, river, or stream first.");return;}
@@ -543,7 +545,9 @@ async function toggleCurrentFavorite(){
  }
  await loadFavorites();
 }
+
 document.getElementById("favoriteCurrentButton").addEventListener("click",toggleCurrentFavorite);
+
 document.getElementById("favoritesList").addEventListener("click",async function(event){
  const openButton=event.target.closest(".open-favorite");
  const removeButton=event.target.closest(".remove-favorite");
@@ -588,6 +592,7 @@ function updateAuthUI(){
  updateFavoriteButton();
  loadFavorites();
 }
+
 function updateReviewForm(){
  document.getElementById("reviewSection").style.display=selectedLake?"block":"none";
  document.getElementById("submitReview").disabled=!currentUser||!selectedLakeDatabaseId;
@@ -595,6 +600,7 @@ function updateReviewForm(){
  else if(currentUser&&selectedLake&&!selectedLakeDatabaseId)setReviewMessage("Lake review information is still loading.");
  else setReviewMessage("");
 }
+
 function updateCatchForm(){
  document.getElementById("catchSection").style.display=selectedWaterbody?"block":"none";
  document.getElementById("submitCatch").disabled=!currentUser||!selectedWaterbody;
@@ -602,12 +608,14 @@ function updateCatchForm(){
  else if(!currentUser)setCatchMessage("Sign in to post a catch.");
  else setCatchMessage("");
 }
+
 async function checkSession(){
  const {data,error}=await supabaseClient.auth.getSession();
  if(error)console.error(error);
  currentUser=data.session?.user||null;
  updateAuthUI();
 }
+
 supabaseClient.auth.onAuthStateChange((event,session)=>{
  currentUser=session?.user||null;
  updateAuthUI();
@@ -628,6 +636,7 @@ document.getElementById("signUpButton").addEventListener("click",async function(
  if(data.session){currentUser=data.session.user;updateAuthUI();setAuthMessage("Account created and signed in.");}
  else setAuthMessage("Account created. Check your email to confirm your account.");
 });
+
 document.getElementById("signInButton").addEventListener("click",async function(){
  const email=document.getElementById("email").value.trim();
  const password=document.getElementById("password").value;
@@ -637,6 +646,7 @@ document.getElementById("signInButton").addEventListener("click",async function(
  if(error){setAuthMessage(error.message);return;}
  currentUser=data.user;updateAuthUI();setAuthMessage("Signed in successfully.");
 });
+
 document.getElementById("signOutButton").addEventListener("click",async function(){
  const {error}=await supabaseClient.auth.signOut();
  if(error){setAuthMessage(error.message);return;}
@@ -809,7 +819,11 @@ async function loadCatchReports(){
    "<div class='catch-meta'>Posted by "+escapeHTML(c.display_name||"Member")+" · "+escapeHTML(date)+"</div>"+
    (c.notes?"<p>"+escapeHTML(c.notes)+"</p>":"")+
    (photo?"<img class='catch-photo' src='"+escapeHTML(photo)+"' alt='Community catch photo' loading='lazy' referrerpolicy='no-referrer'>":"")+
-   (currentUser&&currentUser.id===c.user_id?"<button class='delete-catch' data-id='"+Number(c.id)+"' style='margin-top:8px;background:#8b4242'>Delete my post</button>":"")+
+   (currentUser&&currentUser.id===c.user_id?
+    "<div class='button-row' style='margin-top:8px'>"+
+    "<button class='edit-catch btn-secondary' data-id='"+Number(c.id)+"'>Edit</button>"+
+    "<button class='delete-catch' data-id='"+Number(c.id)+"' style='background:#8b4242'>Delete</button>"+
+    "</div>":"")+
    "</div>";
  }).join("");
  addWaterbodyDetailsButton();
@@ -823,17 +837,106 @@ function validPhotoURL(value){
  }catch(e){return "";}
 }
 
+// EDIT AND DELETE CATCH REPORTS
 document.getElementById("catchList").addEventListener("click",async function(event){
- const button=event.target.closest(".delete-catch");
- if(!button||!currentUser)return;
- const id=Number(button.dataset.id);
- if(!Number.isSafeInteger(id)||id<=0)return;
- if(!confirm("Delete your catch post?"))return;
- button.disabled=true;
- const {error}=await supabaseClient.from("catch_reports").delete().eq("id",id).eq("user_id",currentUser.id);
- if(error){setCatchMessage("Could not delete post: "+error.message);button.disabled=false;return;}
- setCatchMessage("Your catch post was deleted.");
- await loadCatchReports();
+ if(!currentUser)return;
+
+ const editButton=event.target.closest(".edit-catch");
+ const deleteButton=event.target.closest(".delete-catch");
+
+ // EDIT CATCH
+ if(editButton){
+  const id=Number(editButton.dataset.id);
+  if(!Number.isSafeInteger(id)||id<=0)return;
+
+  const {data:report,error:loadError}=await supabaseClient
+   .from("catch_reports")
+   .select("id,species,caught_at,notes,image_url")
+   .eq("id",id)
+   .eq("user_id",currentUser.id)
+   .maybeSingle();
+
+  if(loadError||!report){
+   setCatchMessage("Could not load your catch for editing.");
+   return;
+  }
+
+  const species=prompt("Edit fish species:",report.species);
+  if(species===null)return;
+  if(!species.trim()){
+   setCatchMessage("Species cannot be empty.");
+   return;
+  }
+
+  const date=prompt("Edit date caught (YYYY-MM-DD):",report.caught_at||"");
+  if(date===null)return;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){
+   setCatchMessage("Enter the date as YYYY-MM-DD.");
+   return;
+  }
+
+  const notes=prompt("Edit notes:",report.notes||"");
+  if(notes===null)return;
+
+  const photo=prompt("Edit photo URL (leave blank for none):",report.image_url||"");
+  if(photo===null)return;
+
+  const imageURL=photo.trim()?validPhotoURL(photo.trim()):null;
+  if(photo.trim()&&!imageURL){
+   setCatchMessage("Enter a valid photo URL beginning with http:// or https://.");
+   return;
+  }
+
+  editButton.disabled=true;
+  setCatchMessage("Updating your catch...");
+
+  const {data:updated,error}=await supabaseClient
+   .from("catch_reports")
+   .update({
+    species:species.trim(),
+    caught_at:date,
+    notes:notes.trim()||null,
+    image_url:imageURL
+   })
+   .eq("id",id)
+   .eq("user_id",currentUser.id)
+   .select("id");
+
+  if(error||!updated||updated.length===0){
+   setCatchMessage("Could not update catch: "+(error?.message||"No report was updated. Check your permissions."));
+   editButton.disabled=false;
+   return;
+  }
+
+  setCatchMessage("Your catch was updated!");
+  await loadCatchReports();
+  return;
+ }
+
+ // DELETE CATCH
+ if(deleteButton){
+  const id=Number(deleteButton.dataset.id);
+  if(!Number.isSafeInteger(id)||id<=0)return;
+
+  if(!confirm("Delete your catch post?"))return;
+
+  deleteButton.disabled=true;
+
+  const {error}=await supabaseClient
+   .from("catch_reports")
+   .delete()
+   .eq("id",id)
+   .eq("user_id",currentUser.id);
+
+  if(error){
+   setCatchMessage("Could not delete post: "+error.message);
+   deleteButton.disabled=false;
+   return;
+  }
+
+  setCatchMessage("Your catch post was deleted.");
+  await loadCatchReports();
+ }
 });
 
 // SUBMIT A CATCH
