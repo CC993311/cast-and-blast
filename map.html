@@ -74,6 +74,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <header>
  <h1>FishBound</h1>
  <small>Lakes & Ponds | Rivers & Streams | Fish Catches | Lake Reviews</small>
+ <nav style="display:flex;gap:12px;flex-wrap:wrap"><a style="color:#c1d7c6;text-decoration:none;font-size:13px" href="index.html">Home</a><a style="color:#c1d7c6;text-decoration:none;font-size:13px" href="community.html">Community</a><a style="color:#c1d7c6;text-decoration:none;font-size:13px" href="journal.html">My Journal</a><a style="color:#c1d7c6;text-decoration:none;font-size:13px" href="achievements.html">Achievements</a><a style="color:#c1d7c6;text-decoration:none;font-size:13px" href="leaderboard.html">Leaderboard</a></nav>
 </header>
 
 <div id="layout">
@@ -108,6 +109,8 @@ button:disabled{opacity:.5;cursor:not-allowed}
   </div>
   <div id="signedIn" style="display:none">
    <p id="signedInName" class="help"></p>
+   <p><a id="myPublicProfile" class="help" href="angler.html" style="color:#a9c77b">View My Public Profile</a></p>
+   <p><a class="help" href="journal.html" style="color:#a9c77b">My Fishing Journal</a> · <a class="help" href="achievements.html" style="color:#a9c77b">Achievements</a></p>
    <button id="signOutButton" class="btn-secondary" style="width:100%">Sign Out</button>
   </div>
  </div>
@@ -735,7 +738,7 @@ async function loadFollowing(){
  if(!ids.length){list.textContent="You are not following anyone yet.";return;}
  const {data:profiles,error:profileError}=await supabaseClient.from("profiles").select("user_id,display_name,bio,avatar_url").in("user_id",ids);
  if(profileError){list.textContent="Could not load followed anglers: "+profileError.message;return;}
- list.innerHTML=(profiles||[]).map(p=>"<div class='favorite-card'><strong>"+escapeHTML(p.display_name||"FishBound Angler")+"</strong>"+(p.bio?"<div>"+escapeHTML(p.bio)+"</div>":"")+"<button class='toggle-follow btn-secondary' data-user-id='"+escapeHTML(p.user_id)+"' data-following='true'>Unfollow</button></div>").join("")||"No profile details are available yet.";
+ list.innerHTML=(profiles||[]).map(p=>"<div class='favorite-card'><a style='color:#c7f0d2' href='angler.html?user="+encodeURIComponent(p.user_id)+"'><strong>"+escapeHTML(p.display_name||"FishBound Angler")+"</strong></a>+(p.bio?"<div>"+escapeHTML(p.bio)+"</div>":"")+"<button class='toggle-follow btn-secondary' data-user-id='"+escapeHTML(p.user_id)+"' data-following='true'>Unfollow</button></div>").join("")||"No profile details are available yet.";
 }
 async function searchAnglers(){
  if(!currentUser){setAnglerSearchMessage("Sign in to find and follow anglers.");return;}
@@ -748,7 +751,7 @@ async function searchAnglers(){
  const {data:links,error:followError}=await supabaseClient.from("user_follows").select("followed_id").eq("follower_id",currentUser.id);
  if(followError){setAnglerSearchMessage("Could not check follows: "+followError.message);return;}
  const followed=new Set((links||[]).map(row=>row.followed_id));
- results.innerHTML=profiles.map(p=>"<div class='favorite-card'><strong>"+escapeHTML(p.display_name||"FishBound Angler")+"</strong>"+(p.bio?"<div>"+escapeHTML(p.bio)+"</div>":"")+"<button class='toggle-follow btn-secondary' data-user-id='"+escapeHTML(p.user_id)+"' data-following='"+(followed.has(p.user_id)?"true":"false")+"'>"+(followed.has(p.user_id)?"Following · Unfollow":"Follow")+"</button></div>").join("");
+ results.innerHTML=profiles.map(p=>"<div class='favorite-card'><a style='color:#c7f0d2' href='angler.html?user="+encodeURIComponent(p.user_id)+"'><strong>"+escapeHTML(p.display_name||"FishBound Angler")+"</strong></a>+(p.bio?"<div>"+escapeHTML(p.bio)+"</div>":"")+"<button class='toggle-follow btn-secondary' data-user-id='"+escapeHTML(p.user_id)+"' data-following='"+(followed.has(p.user_id)?"true":"false")+"'>"+(followed.has(p.user_id)?"Following · Unfollow":"Follow")+"</button></div>").join("");
  setAnglerSearchMessage(profiles.length+" angler(s) found.");
 }
 document.getElementById("anglerSearchButton").addEventListener("click",searchAnglers);
@@ -1023,7 +1026,7 @@ async function loadCatchReports(){
   const date=c.caught_at?new Date(c.caught_at+"T12:00:00").toLocaleDateString():"Date not provided";
   const photo=validPhotoURL(c.image_url);
   return "<div class='catch-card'><div class='catch-species'>"+escapeHTML(c.species)+"</div>"+
-   "<div class='catch-meta'>Posted by "+escapeHTML(c.display_name||"Member")+" · "+escapeHTML(date)+"</div>"+
+   "<div class='catch-meta'>Posted by "+(c.user_id?"<a style='color:#a9c77b' href='angler.html?user="+encodeURIComponent(c.user_id)+"'>"+escapeHTML(c.display_name||"Member")+"</a>":escapeHTML(c.display_name||"Member"))+" · "+escapeHTML(date)+"</div>"+
    (c.notes?"<p>"+escapeHTML(c.notes)+"</p>":"")+
    (photo?"<img class='catch-photo' src='"+escapeHTML(photo)+"' alt='Community catch photo' loading='lazy' referrerpolicy='no-referrer'>":"")+
    "<div class='social-actions'>"+
