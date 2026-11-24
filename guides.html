@@ -727,9 +727,9 @@ function renderSpecies(list) {
       const picture = document.createElement("div");
       picture.className = "fish-picture chart";
       picture.style.backgroundImage = `url("fish-chart-${chart}.png")`;
-      picture.style.backgroundSize = "400% 300%";
+      picture.style.backgroundSize = "300% 400%";
       picture.style.backgroundPosition =
-        `${column * 100 / 3}% ${row * 50}%`;
+        `${column * 50}% ${row * 100 / 3}%`;
       picture.style.backgroundRepeat = "no-repeat";
       picture.setAttribute("role", "img");
       picture.setAttribute("aria-label", fish[0]);
