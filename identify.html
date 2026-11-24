@@ -63,8 +63,34 @@ async function saveIdentification(species,scientificName,certainty,button){
   const {data:sessionData}=await db.auth.getSession();
   const user=sessionData.session?.user;
   if(!user){alert('Please sign in to save an identification.');return;}
+
+  const locationName=prompt('Where did you catch this fish? Enter the lake, river, pond, or fishing spot name:');
+  if(locationName===null)return;
+  if(!locationName.trim()){alert('Please enter the fishing location name.');return;}
+
+  const waterbodyType=prompt('What type of water was it? Enter lake, pond, river, stream, or other:','lake');
+  if(waterbodyType===null)return;
+  const allowedTypes=['lake','pond','river','stream','other'];
+  const normalizedType=waterbodyType.trim().toLowerCase();
+  if(!allowedTypes.includes(normalizedType)){
+    alert('Please enter lake, pond, river, stream, or other.');
+    return;
+  }
+
+  const today=new Date();
+  const localToday=new Date(today.getTime()-today.getTimezoneOffset()*60000).toISOString().slice(0,10);
+  const caughtAt=prompt('What date did you catch it? Use YYYY-MM-DD:',localToday);
+  if(caughtAt===null)return;
+  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(caughtAt)||Number.isNaN(Date.parse(caughtAt+'T12:00:00'))){
+    alert('Please enter the date as YYYY-MM-DD.');
+    return;
+  }
+
+  const notes=prompt('Any notes about this catch? (Optional)','');
+  if(notes===null)return;
+
   const photo=fileInput.files?.[0];
-  button.disabled=true;button.textContent='Saving…';
+  button.disabled=true;button.textContent='Saving catch…';
   let uploadedPath=null,imageURL=null;
   try{
     if(photo){
@@ -76,17 +102,38 @@ async function saveIdentification(species,scientificName,certainty,button){
       const {data:publicData}=db.storage.from('catch-photos').getPublicUrl(uploadData.path);
       imageURL=publicData?.publicUrl||null;
     }
-    const {error}=await db.from('fish_identifications').insert({
+
+    const displayName=user.user_metadata?.display_name||user.email?.split('@')[0]||'Member';
+    const uniqueWaterbodyId='manual-'+(crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random().toString(36).slice(2));
+    const {error:catchError}=await db.from('catch_reports').insert({
+      waterbody_type:normalizedType,
+      waterbody_id:uniqueWaterbodyId,
+      waterbody_name:locationName.trim(),
+      species:species,
+      caught_at:caughtAt,
+      notes:notes.trim()||null,
+      image_url:imageURL,
+      user_id:user.id,
+      display_name:displayName
+    });
+    if(catchError)throw new Error('Could not add this to your catch log: '+catchError.message);
+
+    const {error:identificationError}=await db.from('fish_identifications').insert({
       user_id:user.id,species,scientific_name:scientificName||null,
       confidence:typeof certainty==='number'?Math.round(certainty*100):null,
       image_url:imageURL
     });
-    if(error)throw new Error('Could not save identification: '+error.message);
-    button.textContent='Saved to Journal ✓';
+    if(identificationError){
+      console.error('Catch saved, but identification history could not be saved:',identificationError);
+      button.textContent='Catch saved ✓';
+      alert('Your fish was added to your regular catches, but its AI identification history could not be saved: '+identificationError.message);
+      return;
+    }
+    button.textContent='Saved as Catch ✓';
   }catch(error){
     if(uploadedPath)await db.storage.from('catch-photos').remove([uploadedPath]);
-    console.error('Save identification failed:',error);
-    alert(error.message||'Could not save this identification.');
+    console.error('Save catch failed:',error);
+    alert(error.message||'Could not save this catch.');
     button.disabled=false;button.textContent='Save to Journal';
   }
 }
