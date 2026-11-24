@@ -13,7 +13,7 @@ header{background:#172319;border-bottom:1px solid var(--border);padding:17px 7%;
 .hero{text-align:center;padding:55px 6%;background:radial-gradient(ellipse at center,#2c4930,#17271b 55%,#101710)}.eyebrow{color:var(--green);font-size:11px;letter-spacing:3px;font-weight:bold}.hero h1{font-size:clamp(34px,6vw,58px);line-height:1.1;margin:12px 0}.hero h1 span{color:var(--green)}.hero p{max-width:680px;margin:auto;color:#c2cdbf}
 main{max-width:1100px;margin:auto;padding:35px 5% 65px}.tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px}.tab{background:var(--panel2);color:var(--white);border:1px solid var(--border);border-radius:7px;padding:12px 17px;font-weight:bold;cursor:pointer}.tab.active,.tab:hover{border-color:var(--green);color:var(--green)}
 .panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:clamp(18px,4vw,30px);margin-bottom:22px}.panel h2{margin:0 0 8px}.muted{color:var(--muted)}.notice{background:#263529;border-left:3px solid var(--green);padding:13px 15px;border-radius:0 7px 7px 0;color:#d6dfd1;font-size:14px;margin:17px 0}
-.upload{display:block;border:2px dashed #60765b;border-radius:10px;padding:28px;text-align:center;cursor:pointer;background:#172319}.upload input{display:block;margin:14px auto 0;max-width:100%;color:var(--muted)}.preview{display:none;margin-top:18px;text-align:center}.preview img{max-width:100%;max-height:380px;object-fit:contain;border-radius:8px}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}.btn{border:1px solid var(--green);background:var(--green);color:#142016;border-radius:6px;padding:11px 16px;font-weight:bold;cursor:pointer}.btn.secondary{background:transparent;color:var(--green)}.btn:disabled{opacity:.45;cursor:not-allowed}
+.upload{display:block;border:2px dashed #60765b;border-radius:10px;padding:28px;text-align:center;cursor:pointer;background:#172319}.upload input{display:block;margin:14px auto 0;max-width:100%;color:var(--muted)}.preview{display:none;margin-top:18px;text-align:center}.preview img{max-width:100%;max-height:380px;object-fit:contain;border-radius:8px}.ai-results{margin-top:18px;padding:16px;background:#172319;border:1px solid var(--border);border-radius:9px}.ai-results h3{margin:0 0 10px;color:var(--green)}.ai-object{padding:12px 0;border-top:1px solid var(--border)}.ai-object:first-of-type{border-top:0}.ai-match{margin:7px 0;color:var(--white)}.ai-match small{color:var(--muted)}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}.btn{border:1px solid var(--green);background:var(--green);color:#142016;border-radius:6px;padding:11px 16px;font-weight:bold;cursor:pointer}.btn.secondary{background:transparent;color:var(--green)}.btn:disabled{opacity:.45;cursor:not-allowed}
 .question{font-size:18px;font-weight:bold;margin:20px 0 12px}.choices{display:flex;gap:9px;flex-wrap:wrap}.choice{background:#172319;color:var(--white);border:1px solid var(--border);padding:10px 13px;border-radius:7px;cursor:pointer}.choice.selected{border-color:var(--green);background:#30442f;color:#fff}.step{display:none}.step.active{display:block}.progress{height:7px;background:#101710;border-radius:10px;overflow:hidden;margin:15px 0 22px}.progress span{display:block;height:100%;width:0;background:var(--green);transition:width .2s}.results{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-top:18px}.result{background:#172319;border:1px solid var(--border);border-radius:8px;padding:15px}.result h3{color:var(--green);margin:0 0 5px;font-size:17px}.tag{font-size:11px;color:var(--green);font-weight:bold;letter-spacing:1px}.small{font-size:13px;color:var(--muted)}.hidden{display:none!important}
 footer{text-align:center;color:#899687;padding:25px;font-size:12px;border-top:1px solid var(--border)}
 @media(max-width:600px){header{justify-content:center}nav{justify-content:center}}
@@ -27,8 +27,9 @@ footer{text-align:center;color:#899687;padding:25px;font-size:12px;border-top:1p
 <section class="panel" id="photoPanel">
 <h2>Upload a Fish Photo</h2><p class="muted">Choose a clear photo showing the fish's side, fins, head, and markings when possible.</p>
 <label class="upload" for="fishPhoto"><strong>Choose a photo from your device</strong><br><span class="small">JPG, PNG, WEBP · Maximum 10 MB</span><input id="fishPhoto" type="file" accept="image/jpeg,image/png,image/webp"></label>
-<div class="preview" id="photoPreview"><img id="previewImage" alt="Your uploaded fish photo"><p class="small" id="photoName"></p><div class="actions" style="justify-content:center"><button class="btn secondary" id="clearPhoto" type="button">Remove photo</button><button class="btn" id="usePhoto" type="button">Continue with guided identification</button></div></div>
-<div class="notice"><strong>Photo recognition status:</strong> Photo upload and preview are ready. Automatic species recognition still needs a secure AI service connection, so FishBound will not pretend to identify a fish from the image yet. You can use the guided tool with your photo as a reference.</div>
+<div class="preview" id="photoPreview"><img id="previewImage" alt="Your uploaded fish photo"><p class="small" id="photoName"></p><div class="actions" style="justify-content:center"><button class="btn secondary" id="clearPhoto" type="button">Remove photo</button><button class="btn" id="usePhoto" type="button">Identify fish with AI</button><button class="btn secondary" id="guidedFromPhoto" type="button">Use guided identification instead</button></div></div>
+<div id="aiResults" class="ai-results hidden" aria-live="polite"></div>
+<div class="notice"><strong>Photo recognition:</strong> FishBound sends your photo to Fishial for possible species matches. Results are suggestions, not guaranteed identifications.</div>
 </section>
 <section class="panel hidden" id="guidedPanel">
 <h2>Guided Fish Identification</h2><p class="muted">Choose the closest answer. If you aren't sure, choose “Not sure” and continue.</p>
@@ -46,14 +47,69 @@ footer{text-align:center;color:#899687;padding:25px;font-size:12px;border-top:1p
 <p class="small">Identification can be uncertain, especially for young fish and similar-looking species. Follow local fishing rules and ask a local fisheries expert when an exact identification matters.</p>
 </main>
 <footer>FISHBOUND · EXPLORE. DISCOVER. RESPECT THE WATER.</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const SUPABASE_URL="https://ubnmhqxitiigsctbsmqy.supabase.co";
+const SUPABASE_KEY="sb_publishable_g-6tScB0HFIVcVkAhCN5Ug_fpm-jFrq";
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const photoTab=document.getElementById('photoTab'),guidedTab=document.getElementById('guidedTab'),photoPanel=document.getElementById('photoPanel'),guidedPanel=document.getElementById('guidedPanel');
 function showPanel(which){const photo=which==='photo';photoPanel.classList.toggle('hidden',!photo);guidedPanel.classList.toggle('hidden',photo);photoTab.classList.toggle('active',photo);guidedTab.classList.toggle('active',!photo)}
 photoTab.onclick=()=>showPanel('photo');guidedTab.onclick=()=>showPanel('guided');
 const fileInput=document.getElementById('fishPhoto'),preview=document.getElementById('photoPreview'),previewImage=document.getElementById('previewImage');let imageUrl='';
 fileInput.addEventListener('change',()=>{const f=fileInput.files[0];if(!f)return;if(!/^image\/(jpeg|png|webp)$/.test(f.type)||f.size>10*1024*1024){alert('Please choose a JPG, PNG, or WEBP image under 10 MB.');fileInput.value='';return}if(imageUrl)URL.revokeObjectURL(imageUrl);imageUrl=URL.createObjectURL(f);previewImage.src=imageUrl;document.getElementById('photoName').textContent=f.name;preview.style.display='block'});
 document.getElementById('clearPhoto').onclick=()=>{fileInput.value='';preview.style.display='none';previewImage.removeAttribute('src');if(imageUrl)URL.revokeObjectURL(imageUrl);imageUrl=''};
-document.getElementById('usePhoto').onclick=()=>showPanel('guided');
+const aiResults=document.getElementById('aiResults');
+function renderAiResults(data){
+  aiResults.innerHTML='';
+  const heading=document.createElement('h3');
+  heading.textContent='Fish identification results';
+  aiResults.append(heading);
+  if(!data || !Array.isArray(data.objects) || data.objects.length===0){
+    const p=document.createElement('p');p.textContent='No fish were detected in this photo. Try a clear side view with the whole fish visible.';aiResults.append(p);aiResults.classList.remove('hidden');return;
+  }
+  data.objects.forEach((obj,index)=>{
+    const section=document.createElement('div');section.className='ai-object';
+    const title=document.createElement('strong');title.textContent='Fish '+(index+1);section.append(title);
+    const matches=Array.isArray(obj.species)?obj.species.slice(0,3):[];
+    if(!matches.length){const p=document.createElement('p');p.textContent='No species matches were returned.';section.append(p);}
+    matches.forEach(match=>{
+      const definition=data.definitions?.[match.id]||{};
+      const line=document.createElement('p');line.className='ai-match';
+      const common=definition.commonName||'Unknown species';
+      const scientific=definition.scientificName||'';
+      const percent=typeof match.certainty==='number'?Math.round(match.certainty*100)+'%':'Confidence unavailable';
+      line.textContent=common+(scientific?' ('+scientific+')':'')+' — '+percent;
+      section.append(line);
+    });
+    aiResults.append(section);
+  });
+  aiResults.classList.remove('hidden');
+}
+document.getElementById('guidedFromPhoto').onclick=()=>showPanel('guided');
+document.getElementById('usePhoto').onclick=async()=>{
+  const file=fileInput.files?.[0];
+  if(!file){alert('Choose a fish photo first.');return;}
+  const button=document.getElementById('usePhoto');
+  button.disabled=true;button.textContent='Identifying…';
+  aiResults.classList.remove('hidden');aiResults.textContent='Sending your photo for identification…';
+  try{
+    const {data:sessionData}=await db.auth.getSession();
+    if(!sessionData.session){
+      aiResults.textContent='Please sign in to FishBound before using photo identification.';
+      return;
+    }
+    const formData=new FormData();formData.append('image',file);
+    const {data,error}=await db.functions.invoke('fish-identify',{body:formData});
+    if(error) throw error;
+    if(data?.error) throw new Error(data.error+(data.details?': '+data.details:''));
+    renderAiResults(data);
+  }catch(error){
+    console.error('Fish identification failed:',error);
+    aiResults.textContent='Identification failed: '+(error.message||'Please try again.');
+  }finally{
+    button.disabled=false;button.textContent='Identify fish with AI';
+  }
+};
 const answers={};let current=0;const steps=[...document.querySelectorAll('.step')];const progress=document.getElementById('progressBar');
 document.querySelectorAll('.choices').forEach(group=>group.addEventListener('click',e=>{const b=e.target.closest('button.choice');if(!b)return;group.querySelectorAll('.choice').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');answers[group.dataset.key]=b.dataset.value}));
 function displayStep(){steps.forEach((s,i)=>s.classList.toggle('active',i===current));document.getElementById('backBtn').disabled=current===0;document.getElementById('nextBtn').textContent=current===steps.length-1?'See possible matches':'Next';progress.style.width=((current+1)/steps.length*100)+'%'}
