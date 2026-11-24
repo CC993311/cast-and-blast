@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#101710">
+<title>FishBound | Community</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#101710;--panel:#1b281e;--panel2:#243529;--green:#a9c77b;--white:#f1f4ec;--muted:#aab6a7;--border:#354735}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--white);font-family:Arial,sans-serif}
+header{padding:17px 7%;background:#172319;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
+.logo{font-size:23px;font-weight:800;letter-spacing:1px}.logo span{color:var(--green)}
+nav{display:flex;gap:20px;flex-wrap:wrap}nav a,header a{color:var(--muted);text-decoration:none;font-weight:bold;font-size:14px}nav a:hover,header a:hover{color:var(--green)}
+main{max-width:1100px;margin:auto;padding:35px 20px 70px}.intro{text-align:center;padding:30px 10px 38px}.intro small{color:var(--green);letter-spacing:3px;font-weight:bold}.intro h1{font-size:clamp(34px,6vw,54px);margin:12px 0}.intro p{color:var(--muted);line-height:1.7;max-width:650px;margin:auto}
+.columns{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(260px,1fr);gap:22px;align-items:start}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:11px;padding:20px;margin-bottom:18px}.panel h2,.panel h3{margin:0 0 13px}.panel h2{font-size:20px}.panel h3{font-size:15px;color:var(--green);letter-spacing:.5px}
+input,textarea{width:100%;padding:11px;border:1px solid #527b61;border-radius:7px;background:#fff;color:#183b2a;font:14px Arial;margin:5px 0 10px}
+button,.button{border:0;border-radius:7px;padding:10px 13px;background:#23864b;color:white;font-weight:bold;cursor:pointer;text-decoration:none;display:inline-block}
+button:hover,.button:hover{background:#176b3a}button:disabled{opacity:.5;cursor:not-allowed}.secondary{background:#456b50}
+.help,.message{font-size:12px;color:#c1d7c6;line-height:1.6}.message{min-height:17px;color:#b8e8c7}
+.catch-card,.angler-card{border-top:1px solid #456b50;padding:15px 0}.catch-card:first-child{border-top:0}
+.species{font-size:18px;font-weight:bold;color:#72df9b}.meta{font-size:12px;color:#a9c6ae;margin:6px 0 10px}
+.catch-photo{width:100%;max-height:420px;object-fit:contain;background:#0c140e;border-radius:8px;margin-top:10px}
+.actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin:12px 0}.count{font-size:12px;color:#c1d7c6}
+.comments{border-left:2px solid #456b50;padding-left:10px;margin:10px 0}.comment{font-size:13px;color:#d6e9db;margin:7px 0;overflow-wrap:anywhere}
+.comment-form{display:flex;gap:7px}.comment-form input{flex:1;min-width:0;margin:0}.empty{color:var(--muted);font-size:14px;padding:15px 0}
+@media(max-width:760px){.columns{grid-template-columns:1fr}header{justify-content:center}nav{justify-content:center}}
+</style>
+</head>
+<body>
+<header><div class="logo">FISH<span>BOUND</span></div><nav><a href="index.html">Home</a><a href="map.html">Fishing Locations</a><a href="guides.html">Guides</a><a href="conditions.html">Weather</a><a href="community.html">Community</a></nav></header>
+<main>
+<div class="intro"><small>CONNECT & SHARE</small><h1>FishBound Community</h1><p>See catches shared by anglers, leave comments, give catches a like, and find other anglers to follow.</p></div>
+<div class="columns">
+<div>
+<section class="panel"><h2>Community Catch Feed</h2><p class="help">Recent catches from FishBound anglers.</p><div id="feed" class="empty">Loading catches...</div><button id="refreshFeed" class="secondary">Refresh Feed</button><div id="feedMessage" class="message"></div></section>
+</div>
+<aside>
+<section class="panel"><h2>Angler Account</h2><div id="signedOut"><p class="help">Sign in or create an account to like catches, comment, and follow anglers.</p><label>Email</label><input id="email" type="email" autocomplete="email" placeholder="Email address"><label>Password</label><input id="password" type="password" autocomplete="current-password" placeholder="Password"><button id="signIn">Sign In</button> <button id="signUp" class="secondary">Create Account</button></div><div id="signedIn" style="display:none"><p id="accountName" class="help"></p><button id="signOut" class="secondary">Sign Out</button></div><div id="authMessage" class="message"></div></section>
+<section class="panel"><h3>Find Anglers</h3><p class="help">Search for anglers by their profile display name.</p><input id="anglerSearch" maxlength="40" placeholder="Search angler names"><button id="searchButton">Search Anglers</button><div id="searchMessage" class="message"></div><div id="searchResults"></div><h3 style="margin-top:20px">Anglers You Follow</h3><div id="following" class="help">Sign in to see who you follow.</div></section>
+<section class="panel"><h3>Share a Catch</h3><p class="help">To post a catch, open Fishing Locations, choose the waterbody where you caught it, and use the Post a Fish Catch form.</p><a class="button" href="map.html">Go to Fishing Locations</a></section>
+</aside>
+</div>
+</main>
+<script>
+const SUPABASE_URL="https://ubnmhqxitiigsctbsmqy.supabase.co";
+const SUPABASE_KEY="sb_publishable_g-6tScB0HFIVcVkAhCN5Ug_fpm-jFrq";
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let currentUser=null;
+const el=id=>document.getElementById(id);
+function esc(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function photoURL(value){try{const u=new URL(value);return u.protocol==="https:"||u.protocol==="http:"?u.href:"";}catch(e){return "";}}
+function authMessage(v){el("authMessage").textContent=v;}
+function updateAuth(){const yes=!!currentUser;el("signedOut").style.display=yes?"none":"block";el("signedIn").style.display=yes?"block":"none";if(yes)el("accountName").textContent="Signed in as "+(currentUser.user_metadata?.display_name||currentUser.email||"Member");loadFollowing();}
+async function loadFeed(){
+ el("feed").textContent="Loading catches...";
+ const {data:catches,error}=await db.from("catch_reports").select("id,species,caught_at,notes,image_url,display_name,created_at,user_id").order("created_at",{ascending:false}).limit(50);
+ if(error){el("feed").textContent="Could not load catches: "+error.message;return;}
+ if(!catches?.length){el("feed").innerHTML="<div class='empty'>No catches have been shared yet. Be the first to post one from Fishing Locations!</div>";return;}
+ const ids=catches.map(c=>c.id);
+ const [{data:likes,error:le},{data:comments,error:ce}]=await Promise.all([
+  db.from("catch_likes").select("catch_id,user_id").in("catch_id",ids),
+  db.from("catch_comments").select("id,catch_id,user_id,comment_text,created_at").in("catch_id",ids).order("created_at",{ascending:true})
+ ]);
+ if(le)console.warn(le);if(ce)console.warn(ce);
+ el("feed").innerHTML=catches.map(c=>{
+  const liked=(likes||[]).some(x=>String(x.catch_id)===String(c.id)&&x.user_id===currentUser?.id);
+  const ownComments=(comments||[]).filter(x=>String(x.catch_id)===String(c.id));
+  const date=c.caught_at?new Date(c.caught_at+"T12:00:00").toLocaleDateString():"Date not provided";
+  const photo=photoURL(c.image_url);
+  return "<article class='catch-card'><div class='species'>"+esc(c.species)+"</div><div class='meta'>Posted by "+esc(c.display_name||"Member")+" · "+esc(date)+"</div>"+(c.notes?"<p>"+esc(c.notes)+"</p>":"")+(photo?"<img class='catch-photo' src='"+esc(photo)+"' alt='Catch photo' loading='lazy'>":"")+"<div class='actions'><button class='likeButton secondary' data-id='"+Number(c.id)+"' "+(!currentUser?"disabled":"")+">"+(liked?"♥ Liked":"♡ Like")+"</button><span class='count'>"+(likes||[]).filter(x=>String(x.catch_id)===String(c.id)).length+" likes</span><span class='count'>"+ownComments.length+" comments</span></div><div class='comments'>"+ownComments.map(x=>"<div class='comment'>"+esc(x.comment_text)+"</div>").join("")+"</div>"+(currentUser?"<form class='comment-form' data-id='"+Number(c.id)+"'><input name='comment' maxlength='500' placeholder='Write a comment...' required><button>Send</button></form>":"<p class='help'>Sign in to like or comment.</p>")+"</article>";
+ }).join("");
+}
+el("feed").addEventListener("click",async e=>{
+ const b=e.target.closest(".likeButton");if(!b||!currentUser)return;
+ const id=Number(b.dataset.id);b.disabled=true;
+ const {data:existing,error:checkError}=await db.from("catch_likes").select("catch_id").eq("catch_id",id).eq("user_id",currentUser.id).maybeSingle();
+ if(checkError){el("feedMessage").textContent="Could not check like: "+checkError.message;b.disabled=false;return;}
+ const result=existing?await db.from("catch_likes").delete().eq("catch_id",id).eq("user_id",currentUser.id):await db.from("catch_likes").insert({catch_id:id,user_id:currentUser.id});
+ if(result.error)el("feedMessage").textContent="Could not update like: "+result.error.message;else el("feedMessage").textContent="";
+ await loadFeed();
+});
+el("feed").addEventListener("submit",async e=>{
+ const f=e.target.closest(".comment-form");if(!f)return;e.preventDefault();if(!currentUser)return;
+ const id=Number(f.dataset.id),input=f.querySelector("input[name=comment]"),comment=input.value.trim();if(!comment)return;
+ const b=f.querySelector("button");b.disabled=true;
+ const {error}=await db.from("catch_comments").insert({catch_id:id,user_id:currentUser.id,comment_text:comment});
+ if(error){el("feedMessage").textContent="Could not post comment: "+error.message;b.disabled=false;return;}
+ el("feedMessage").textContent="Comment posted!";await loadFeed();
+});
+async function loadFollowing(){
+ const box=el("following");if(!currentUser){box.textContent="Sign in to see who you follow.";return;}
+ const {data:links,error}=await db.from("user_follows").select("followed_id").eq("follower_id",currentUser.id);
+ if(error){box.textContent="Could not load following list: "+error.message;return;}
+ const ids=(links||[]).map(x=>x.followed_id);if(!ids.length){box.textContent="You are not following anyone yet.";return;}
+ const {data:profiles,error:pe}=await db.from("profiles").select("user_id,display_name,bio").in("user_id",ids);
+ if(pe){box.textContent="Could not load followed anglers: "+pe.message;return;}
+ box.innerHTML=(profiles||[]).map(p=>"<div class='angler-card'><strong>"+esc(p.display_name||"FishBound Angler")+"</strong><p class='help'>"+esc(p.bio||"")+"</p><button class='unfollow secondary' data-id='"+esc(p.user_id)+"'>Unfollow</button></div>").join("")||"No profile details are available yet.";
+}
+async function searchAnglers(){
+ if(!currentUser){el("searchMessage").textContent="Sign in to find and follow anglers.";return;}
+ const term=el("anglerSearch").value.trim();if(term.length<2){el("searchMessage").textContent="Enter at least 2 letters.";return;}
+ el("searchMessage").textContent="Searching...";
+ const {data,error}=await db.from("profiles").select("user_id,display_name,bio").ilike("display_name","%"+term+"%").neq("user_id",currentUser.id).order("display_name").limit(20);
+ if(error){el("searchMessage").textContent="Could not search anglers: "+error.message;return;}
+ if(!data?.length){el("searchMessage").textContent="No anglers found with that name.";el("searchResults").innerHTML="";return;}
+ const {data:links,error:fe}=await db.from("user_follows").select("followed_id").eq("follower_id",currentUser.id);if(fe){el("searchMessage").textContent=fe.message;return;}
+ const followed=new Set((links||[]).map(x=>x.followed_id));
+ el("searchResults").innerHTML=data.map(p=>"<div class='angler-card'><strong>"+esc(p.display_name||"FishBound Angler")+"</strong><p class='help'>"+esc(p.bio||"")+"</p><button class='followButton secondary' data-id='"+esc(p.user_id)+"' data-following='"+followed.has(p.user_id)+"'>"+(followed.has(p.user_id)?"Following · Unfollow":"Follow")+"</button></div>").join("");
+ el("searchMessage").textContent=data.length+" angler(s) found.";
+}
+el("searchButton").addEventListener("click",searchAnglers);
+el("anglerSearch").addEventListener("keydown",e=>{if(e.key==="Enter")searchAnglers();});
+document.querySelector("aside").addEventListener("click",async e=>{
+ const b=e.target.closest(".followButton,.unfollow");if(!b||!currentUser)return;
+ const id=b.dataset.id,following=b.classList.contains("unfollow")||b.dataset.following==="true";b.disabled=true;
+ const result=following?await db.from("user_follows").delete().eq("follower_id",currentUser.id).eq("followed_id",id):await db.from("user_follows").insert({follower_id:currentUser.id,followed_id:id});
+ if(result.error){el("searchMessage").textContent="Could not update follow: "+result.error.message;b.disabled=false;return;}
+ await searchAnglers();await loadFollowing();
+});
+el("signIn").addEventListener("click",async()=>{authMessage("Signing in...");const {data,error}=await db.auth.signInWithPassword({email:el("email").value.trim(),password:el("password").value});if(error){authMessage(error.message);return;}currentUser=data.user;updateAuth();authMessage("Signed in!");await loadFeed();});
+el("signUp").addEventListener("click",async()=>{authMessage("Creating account...");const {data,error}=await db.auth.signUp({email:el("email").value.trim(),password:el("password").value});if(error){authMessage(error.message);return;}if(data.session){currentUser=data.user;updateAuth();authMessage("Account created and signed in.");}else authMessage("Account created. Check your email to confirm, then sign in.");});
+el("signOut").addEventListener("click",async()=>{const {error}=await db.auth.signOut();if(error){authMessage(error.message);return;}currentUser=null;updateAuth();authMessage("Signed out.");await loadFeed();});
+el("refreshFeed").addEventListener("click",loadFeed);
+(async()=>{const {data}=await db.auth.getSession();currentUser=data.session?.user||null;updateAuth();await loadFeed();})();
+db.auth.onAuthStateChange((event,session)=>{currentUser=session?.user||null;updateAuth();loadFeed();});
+</script>
+</body>
+</html>
