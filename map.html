@@ -126,6 +126,17 @@ button:disabled{opacity:.5;cursor:not-allowed}
   <div id="profileMessage"></div>
  </div>
 
+ <div class="section" id="anglerSearchSection">
+  <h3>Find Anglers</h3>
+  <p class="help">Search for FishBound anglers by display name and follow them.</p>
+  <input id="anglerSearchInput" maxlength="40" placeholder="Search angler names">
+  <button id="anglerSearchButton" style="width:100%">Search Anglers</button>
+  <div id="anglerSearchMessage" class="help"></div>
+  <div id="anglerSearchResults"></div>
+  <h3 style="margin-top:14px">Anglers You Follow</h3>
+  <div id="followingList" class="help">Sign in to see who you follow.</div>
+ </div>
+
  <div class="section">
   <h3>Selected Waterbody</h3>
   <div id="selectedLake">
@@ -712,6 +723,49 @@ document.getElementById("saveProfileButton").addEventListener("click",async func
  }
 });
 
+// FIND AND FOLLOW ANGLERS
+function setAnglerSearchMessage(message){document.getElementById("anglerSearchMessage").textContent=message;}
+async function loadFollowing(){
+ const list=document.getElementById("followingList");
+ if(!currentUser){list.textContent="Sign in to see who you follow.";return;}
+ list.textContent="Loading...";
+ const {data:links,error}=await supabaseClient.from("user_follows").select("followed_id").eq("follower_id",currentUser.id);
+ if(error){list.textContent="Could not load following list: "+error.message;return;}
+ const ids=(links||[]).map(row=>row.followed_id);
+ if(!ids.length){list.textContent="You are not following anyone yet.";return;}
+ const {data:profiles,error:profileError}=await supabaseClient.from("profiles").select("user_id,display_name,bio,avatar_url").in("user_id",ids);
+ if(profileError){list.textContent="Could not load followed anglers: "+profileError.message;return;}
+ list.innerHTML=(profiles||[]).map(p=>"<div class='favorite-card'><strong>"+escapeHTML(p.display_name||"FishBound Angler")+"</strong>"+(p.bio?"<div>"+escapeHTML(p.bio)+"</div>":"")+"<button class='toggle-follow btn-secondary' data-user-id='"+escapeHTML(p.user_id)+"' data-following='true'>Unfollow</button></div>").join("")||"No profile details are available yet.";
+}
+async function searchAnglers(){
+ if(!currentUser){setAnglerSearchMessage("Sign in to find and follow anglers.");return;}
+ const term=document.getElementById("anglerSearchInput").value.trim(),results=document.getElementById("anglerSearchResults");
+ if(term.length<2){setAnglerSearchMessage("Enter at least 2 letters to search.");results.innerHTML="";return;}
+ setAnglerSearchMessage("Searching...");
+ const {data:profiles,error}=await supabaseClient.from("profiles").select("user_id,display_name,bio,avatar_url").ilike("display_name","%"+term+"%").neq("user_id",currentUser.id).order("display_name",{ascending:true}).limit(20);
+ if(error){setAnglerSearchMessage("Could not search anglers: "+error.message);results.innerHTML="";return;}
+ if(!profiles?.length){setAnglerSearchMessage("No anglers found with that name.");results.innerHTML="";return;}
+ const {data:links,error:followError}=await supabaseClient.from("user_follows").select("followed_id").eq("follower_id",currentUser.id);
+ if(followError){setAnglerSearchMessage("Could not check follows: "+followError.message);return;}
+ const followed=new Set((links||[]).map(row=>row.followed_id));
+ results.innerHTML=profiles.map(p=>"<div class='favorite-card'><strong>"+escapeHTML(p.display_name||"FishBound Angler")+"</strong>"+(p.bio?"<div>"+escapeHTML(p.bio)+"</div>":"")+"<button class='toggle-follow btn-secondary' data-user-id='"+escapeHTML(p.user_id)+"' data-following='"+(followed.has(p.user_id)?"true":"false")+"'>"+(followed.has(p.user_id)?"Following · Unfollow":"Follow")+"</button></div>").join("");
+ setAnglerSearchMessage(profiles.length+" angler(s) found.");
+}
+document.getElementById("anglerSearchButton").addEventListener("click",searchAnglers);
+document.getElementById("anglerSearchInput").addEventListener("keydown",event=>{if(event.key==="Enter")searchAnglers();});
+document.getElementById("anglerSearchSection").addEventListener("click",async event=>{
+ const button=event.target.closest(".toggle-follow");
+ if(!button||!currentUser)return;
+ const followedId=button.dataset.userId;
+ if(!followedId||followedId===currentUser.id)return;
+ button.disabled=true;
+ const isFollowing=button.dataset.following==="true";
+ const result=isFollowing?await supabaseClient.from("user_follows").delete().eq("follower_id",currentUser.id).eq("followed_id",followedId):await supabaseClient.from("user_follows").insert({follower_id:currentUser.id,followed_id:followedId});
+ if(result.error){setAnglerSearchMessage("Could not "+(isFollowing?"unfollow":"follow")+" angler: "+result.error.message);button.disabled=false;return;}
+ setAnglerSearchMessage(isFollowing?"You unfollowed this angler.":"You are now following this angler!");
+ await searchAnglers();await loadFollowing();
+});
+
 // AUTHENTICATION
 function updateAuthUI(){
  const signedIn=!!currentUser;
@@ -730,6 +784,12 @@ function updateAuthUI(){
  updateCatchForm();
  updateFavoriteButton();
  loadFavorites();
+ if(signedIn){loadFollowing();}
+ else{
+  document.getElementById("followingList").textContent="Sign in to see who you follow.";
+  document.getElementById("anglerSearchResults").innerHTML="";
+  setAnglerSearchMessage("");
+ }
 }
 
 function updateReviewForm(){
