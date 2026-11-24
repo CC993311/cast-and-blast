@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cast & Blast | Lakes, Rivers & BLM Recreation</title>
+<title>FishBound | Fishing Map</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
 *{box-sizing:border-box}
@@ -46,7 +46,6 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .catch-species{font-size:15px;font-weight:bold;color:#72df9b}
 .catch-meta{font-size:11px;color:#a9c6ae;margin:5px 0}
 .catch-photo{display:block;width:100%;max-height:190px;object-fit:cover;border-radius:7px;margin-top:8px}
-.catch-summary{background:#28543b;padding:10px;border-radius:7px;margin:9px 0;font-size:13px;line-height:1.6}
 .species-tag{display:inline-block;background:#326b47;color:#e1f5e5;padding:4px 7px;border-radius:12px;margin:3px;font-size:11px}
 #mapStatusNote{font-size:11px;color:#a9c6ae;margin-top:5px}
 .leaflet-popup-content{color:#1b3040;line-height:1.5}
@@ -61,8 +60,8 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <body>
 
 <header>
- <h1>Cast & Blast</h1>
- <small>Lakes & Ponds | Rivers & Streams | Fish Catches | Lake Reviews | BLM Recreation</small>
+ <h1>FishBound</h1>
+ <small>Lakes & Ponds | Rivers & Streams | Fish Catches | Lake Reviews</small>
 </header>
 
 <div id="layout">
@@ -72,8 +71,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
   <h3>Map Layers</h3>
   <label class="layer-option"><input type="checkbox" id="lakesToggle" checked><span>Lakes & Ponds</span></label>
   <label class="layer-option"><input type="checkbox" id="riversToggle"><span>Rivers & Streams</span></label>
-  <label class="layer-option"><input type="checkbox" id="blmToggle" checked><span>BLM Recreation</span></label>
-  <p class="help">All three layers appear at zoom level 10 and higher. Turn on Rivers & Streams to display waterways.</p>
+  <p class="help">Both layers appear at zoom level 10 and higher. Turn on Rivers & Streams to display waterways.</p>
  </div>
 
  <div class="section">
@@ -205,10 +203,10 @@ button:disabled{opacity:.5;cursor:not-allowed}
  <div class="section">
   <h3>Map Status</h3>
   <div id="status">Preparing map...</div>
-  <div id="mapStatusNote">Lakes, rivers, and BLM Recreation appear at zoom level 10 and higher and load as you move around.</div>
+  <div id="mapStatusNote">Lakes and rivers appear at zoom level 10 and higher and load as you move around.</div>
  </div>
 
- <p class="help">Lake outlines and river data: USGS 3D Hydrography Program. Recreation locations: Bureau of Land Management. Catch reports and reviews are community-submitted and are not official evaluations.</p>
+ <p class="help">Lake outlines and river data: USGS 3D Hydrography Program. Catch reports and reviews are community-submitted and are not official evaluations.</p>
 </aside>
 <div id="map"></div>
 </div>
@@ -238,7 +236,6 @@ L.control.scale().addTo(map);
 
 const USGS_URL="https://3dhp.nationalmap.gov/arcgis/rest/services/usgs_3dhp_all/FeatureServer/60";
 const RIVER_URL="https://3dhp.nationalmap.gov/arcgis/rest/services/usgs_3dhp_all/FeatureServer/50";
-const BLM_URL="https://gis.blm.gov/natl/rest/services/recreation/BLM_Natl_Recs_pts/MapServer/23/query";
 
 function escapeHTML(value){
  return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
@@ -290,19 +287,6 @@ const riverLayer=L.geoJSON(null,{
   layer.on("click",()=>selectRiver(feature));
   layer.on("mouseover",function(){this.setStyle({weight:5,opacity:1});});
   layer.on("mouseout",function(){riverLayer.resetStyle(this);});
- }
-});
-
-const blmLayer=L.geoJSON(null,{
- pointToLayer:function(feature,latlng){
-  return L.circleMarker(latlng,{radius:6,color:"#176b3a",weight:1.5,fillColor:"#45bd72",fillOpacity:.9});
- },
- onEachFeature:function(feature,layer){
-  const p=feature.properties||{};
-  const name=p.FET_NAME||"BLM Recreation Location";
-  const type=p.FET_SUBTYPE||"Recreation site";
-  const unit=p.UNIT_NAME||"";
-  layer.bindPopup("<strong>"+escapeHTML(name)+"</strong><br>"+escapeHTML(type)+(unit?"<br><small>BLM Unit: "+escapeHTML(unit)+"</small>":"")+(p.DESCRIPTION?"<p>"+escapeHTML(p.DESCRIPTION)+"</p>":""));
  }
 });
 
@@ -396,58 +380,12 @@ async function loadRivers(){
  }
 }
 
-const loadedBlmAreas=new Set(),blmFeatureIds=new Set();
-let blmCount=0,blmLoading=false;
-
-async function loadBlm(){
- if(!document.getElementById("blmToggle").checked)return;
- if(map.getZoom()<10){
-  if(map.hasLayer(blmLayer))map.removeLayer(blmLayer);
-  setStatus("Zoom in to level 10 or closer to see BLM Recreation locations.");
-  return;
- }
- if(!map.hasLayer(blmLayer))map.addLayer(blmLayer);
- const area=getRequestBounds(),key=boundsKey(area);
- if(loadedBlmAreas.has(key)||blmLoading)return;
- blmLoading=true;
- const params=new URLSearchParams({
-  where:"1=1",geometry:[area.west,area.south,area.east,area.north].join(","),
-  geometryType:"esriGeometryEnvelope",inSR:"4326",spatialRel:"esriSpatialRelIntersects",
-  outFields:"OBJECTID,FET_NAME,FET_SUBTYPE,UNIT_NAME,DESCRIPTION,WEB_LINK",
-  returnGeometry:"true",outSR:"4326",f:"geojson",resultRecordCount:"1500"
- });
- try{
-  const response=await fetch(BLM_URL+"?"+params);
-  if(!response.ok)throw new Error("BLM server returned HTTP "+response.status);
-  const data=await response.json();
-  if(data.error)throw new Error(data.error.message||"BLM query failed");
-  if(!Array.isArray(data.features))throw new Error("BLM did not return a feature list.");
-  const fresh=[];
-  for(const feature of data.features){
-   const id=String(feature.properties?.OBJECTID||"");
-   if(!id||blmFeatureIds.has(id))continue;
-   blmFeatureIds.add(id);fresh.push(feature);
-  }
-  if(fresh.length){blmLayer.addData({type:"FeatureCollection",features:fresh});blmCount+=fresh.length;}
-  if(!data.exceededTransferLimit)loadedBlmAreas.add(key);
-  setStatus("Lakes: "+lakeCount+" | Rivers: "+riverCount+" | BLM Recreation: "+blmCount);
- }catch(error){console.error(error);setStatus("BLM loading failed: "+error.message);}
- finally{
-  blmLoading=false;
-  if(document.getElementById("blmToggle").checked&&map.getZoom()>=10){
-   const current=boundsKey(getRequestBounds());
-   if(current!==key&&!loadedBlmAreas.has(current))setTimeout(loadBlm,350);
-  }
- }
-}
-
 let loadTimer=null;
 function loadMapData(){
  clearTimeout(loadTimer);
  loadTimer=setTimeout(()=>{
   if(document.getElementById("lakesToggle").checked)loadLakes();
   if(document.getElementById("riversToggle").checked)loadRivers();
-  if(document.getElementById("blmToggle").checked)loadBlm();
  },500);
 }
 map.on("moveend",loadMapData);
@@ -460,10 +398,6 @@ document.getElementById("lakesToggle").addEventListener("change",function(){
 document.getElementById("riversToggle").addEventListener("change",function(){
  if(this.checked)loadRivers();
  else map.removeLayer(riverLayer);
-});
-document.getElementById("blmToggle").addEventListener("change",function(){
- if(this.checked)loadBlm();
- else map.removeLayer(blmLayer);
 });
 
 // FAVORITES
@@ -630,7 +564,7 @@ document.getElementById("signUpButton").addEventListener("click",async function(
  setAuthMessage("Creating your account...");
  const {data,error}=await supabaseClient.auth.signUp({
   email,password,
-  options:{emailRedirectTo:window.location.href,data:{display_name:displayName||"Cast & Blast Member"}}
+  options:{emailRedirectTo:window.location.href,data:{display_name:displayName||"FishBound Member"}}
  });
  if(error){setAuthMessage(error.message);return;}
  if(data.session){currentUser=data.session.user;updateAuthUI();setAuthMessage("Account created and signed in.");}
@@ -844,7 +778,6 @@ document.getElementById("catchList").addEventListener("click",async function(eve
  const editButton=event.target.closest(".edit-catch");
  const deleteButton=event.target.closest(".delete-catch");
 
- // EDIT CATCH
  if(editButton){
   const id=Number(editButton.dataset.id);
   if(!Number.isSafeInteger(id)||id<=0)return;
@@ -913,7 +846,6 @@ document.getElementById("catchList").addEventListener("click",async function(eve
   return;
  }
 
- // DELETE CATCH
  if(deleteButton){
   const id=Number(deleteButton.dataset.id);
   if(!Number.isSafeInteger(id)||id<=0)return;
