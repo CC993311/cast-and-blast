@@ -406,42 +406,25 @@ const fishData = [
 "White seabass are members of the croaker family."
 ]);
 
-// Each uploaded fish chart is a 3-column by 4-row image grid.
+// The freshwater chart is arranged 4 columns across by 3 rows down.
 // Values are [chart, column, row].
 const chartFishPositions = {
-  "Atlantic Salmon": ["freshwater",0,0],
-  "Brown Trout": ["freshwater",1,0],
+  "Largemouth Bass": ["freshwater",0,0],
+  "Smallmouth Bass": ["freshwater",1,0],
   "Rainbow Trout": ["freshwater",2,0],
-  "Brook Trout": ["freshwater",3,0],
-  "Lake Trout": ["freshwater",0,1],
-  "Northern Pike": ["freshwater",1,1],
-  "Walleye": ["freshwater",2,1],
-  "Smallmouth Bass": ["freshwater",3,1],
-  "Largemouth Bass": ["freshwater",0,2],
-  "Bluegill": ["freshwater",1,2],
-  "Yellow Perch": ["freshwater",2,2],
-  "Perch": ["freshwater",2,2],
+  "Brown Trout": ["freshwater",3,0],
 
-  "Channel Catfish": ["freshwater",3,2],
-  "Blue Catfish": ["freshwater",3,2],
-  "Black Bullhead": ["freshwater",3,2],
-  "Brown Bullhead": ["freshwater",3,2],
-  "Flathead Catfish": ["freshwater",3,2],
-  "Yellow Bullhead": ["freshwater",3,2],
-  "Catfish": ["freshwater",3,2],
+  "Channel Catfish": ["freshwater",0,1],
+  "Blue Catfish": ["freshwater",1,1],
+  "Black Crappie": ["freshwater",2,1],
+  "Bluegill": ["freshwater",3,1],
 
-  "Striped Bass": ["coastal",0,0],
-  "Bluefish": ["coastal",1,0],
-  "Tautog": ["coastal",2,0],
-  "Summer Flounder": ["coastal",3,0],
-  "Black Sea Bass": ["coastal",0,1],
-  "Weakfish": ["coastal",1,1],
-  "Scup": ["coastal",2,1],
-  "Sheepshead": ["coastal",3,1],
-  "Red Drum": ["coastal",0,2],
-  "Hogfish": ["coastal",1,2],
-  "Speckled Trout": ["coastal",2,2],
-  "Cobia": ["coastal",3,2]
+  "Striped Bass": ["freshwater",0,2],
+  "Halibut": ["freshwater",1,2],
+  "Red Drum": ["freshwater",2,2],
+  "Surfperch": ["freshwater",3,2],
+
+  "Barred Surfperch": ["freshwater",3,2]
 };
 
 function getChartPosition(speciesName) {
@@ -809,3 +792,6 @@ renderSpecies(fishData);
 </script>
 </body>
 </html>
+
+
+
