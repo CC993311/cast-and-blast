@@ -1,0 +1,20 @@
+{
+  "id": "/fishbound/",
+  "name": "FishBound",
+  "short_name": "FishBound",
+  "description": "Your fishing companion. Find your next adventure.",
+  "start_url": "/fishbound/",
+  "scope": "/fishbound/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#101710",
+  "theme_color": "#101710",
+  "icons": [
+    {
+      "src": "app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
