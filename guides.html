@@ -52,6 +52,8 @@ section{padding:50px 7%}
 .species-card{background:var(--panel);border:1px solid var(--border);border-radius:10px;overflow:hidden;min-width:0}
 .fish-picture{height:145px;background-color:#263d30;display:flex;align-items:center;justify-content:center;color:#dce9d4;font-size:13px;font-weight:bold;letter-spacing:2px;text-align:center;padding:12px}
 .fish-picture.original{background-image:url("fish-illustrations.png");background-size:400% 300%;background-repeat:no-repeat;background-color:#e8e6d9}
+.fish-picture.generated{background:#e8e6d9;padding:0;overflow:hidden}
+.fish-picture.generated svg{display:block;width:100%;height:100%}
 .species-content{padding:17px}
 .species-number{color:var(--green);font-size:11px;font-weight:bold;letter-spacing:1px}
 .species-content h3{font-size:18px;margin:3px 0}
@@ -246,11 +248,6 @@ footer{background:#172319;border-top:1px solid var(--border);text-align:center;p
 <footer>FISHBOUND | EXPLORE. DISCOVER. RESPECT THE WATER.<br><br>© 2026 FishBound</footer>
 
 <script>
-/*
-Each species entry contains:
-name | category | summary | identification | habitat |
-diet | behavior | fishing information | interesting fact
-*/
 const fishData = [
 ["Largemouth Bass","FRESHWATER · BASS","A popular predator recognized by its large mouth and dark side stripe.","Greenish body, dark horizontal stripe, and a mouth extending beyond the eye.","Lakes, ponds, reservoirs, and slow rivers with vegetation or structure.","Small fish, insects, crayfish, and other aquatic animals.","Often associated with vegetation, submerged branches, and other cover.","Anglers use many artificial lures and natural baits. Local rules vary.","Largemouth bass belong to the sunfish family."],
 ["Smallmouth Bass","FRESHWATER · BASS","A bronze-colored bass often found around rocky areas and clear water.","Bronze or brown body, vertical bars, and a mouth usually not extending past the eye.","Clear lakes, rocky shorelines, and rivers with moderate current.","Crayfish, insects, and smaller fish.","Often associated with rocky structure and current breaks.","Spinning and baitcasting equipment are commonly used.","Smallmouth bass often favor cooler water than largemouth bass."],
@@ -371,7 +368,6 @@ const fishData = [
 ["American Shad","MIGRATORY · HERRING","A silvery fish that migrates into rivers to spawn.","Deep silvery body with a row of dark shoulder spots.","Atlantic coastal waters and connected rivers.","Plankton and small aquatic organisms.","Migrates from the ocean into freshwater.","Seasonal regulations vary by river.","American shad have established introduced populations on the Pacific coast."]
 ];
 
-/* Add a final distinct species if a repeated entry was removed. */
 fishData.push([
 "Pacific White Seabass","SALTWATER · CROAKER",
 "A large Pacific coastal croaker with a silvery body.",
@@ -392,12 +388,249 @@ const originalPositions = [
 const speciesGrid = document.getElementById("speciesGrid");
 const speciesCount = document.getElementById("speciesCount");
 
+/* Generate a unique stylized SVG fish for each species. */
+function makeFishIllustration(fish, index) {
+  const name = fish[0];
+  const category = fish[1].toLowerCase();
+
+  let hash = index * 7919;
+  for (let i = 0; i < name.length; i++) {
+    hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+  }
+
+  const palettes = [
+    ["#438b69","#24583e","#d9e5a4"],
+    ["#b58b43","#76512c","#f0d28a"],
+    ["#668cae","#304f75","#c5d9e9"],
+    ["#bd7655","#754435","#f1c18a"],
+    ["#7d9a58","#405a35","#dce3a1"],
+    ["#9b83ad","#57466d","#e0c9e8"],
+    ["#b9a05d","#74602e","#f1df9c"],
+    ["#559c9a","#286467","#c4e5d8"],
+    ["#a5a5a5","#555e65","#e3e3d9"],
+    ["#c77962","#783e3a","#f0c0a0"]
+  ];
+
+  const palette = palettes[hash % palettes.length];
+  const main = palette[0];
+  const dark = palette[1];
+  const light = palette[2];
+
+  const isFlat = category.includes("flatfish") ||
+    /halibut|sanddab|sole/i.test(name);
+
+  const isLong = category.includes("pike") ||
+    category.includes("eel") ||
+    category.includes("gar") ||
+    category.includes("barracuda") ||
+    /muskellunge|pickerel|wahoo/i.test(name);
+
+  const isCatfish = category.includes("catfish") ||
+    /bullhead/i.test(name);
+
+  const isShark = category.includes("shark");
+  const isSturgeon = category.includes("sturgeon");
+
+  const isTuna = category.includes("tuna") ||
+    /albacore|yellowfin|bluefin|bonito/i.test(name);
+
+  const isBillfish = category.includes("billfish") ||
+    /swordfish|marlin|sailfish/i.test(name);
+
+  const isSunfish = category.includes("sunfish") ||
+    category.includes("panfish");
+
+  const isSalmon = category.includes("salmon") ||
+    /steelhead|trout/i.test(name);
+
+  const bodyWidth = isLong ? 170 : isFlat ? 170 : isShark ? 175 : 155;
+  const bodyHeight = isLong ? 43 : isFlat ? 65 : isShark ? 52 : isSunfish ? 78 : 62;
+  const bodyX = 155;
+  const bodyY = 75;
+
+  let bodyShape;
+
+  if (isLong) {
+    bodyShape = `
+      <path d="M ${bodyX-bodyWidth/2} ${bodyY}
+      Q ${bodyX-45} ${bodyY-48} ${bodyX+45} ${bodyY-31}
+      Q ${bodyX+bodyWidth/2} ${bodyY-18} ${bodyX+bodyWidth/2} ${bodyY}
+      Q ${bodyX+bodyWidth/2} ${bodyY+18} ${bodyX+45} ${bodyY+31}
+      Q ${bodyX-45} ${bodyY+48} ${bodyX-bodyWidth/2} ${bodyY} Z"
+      fill="url(#bodyGradient${index})"/>`;
+  } else {
+    bodyShape = `
+      <ellipse cx="${bodyX}" cy="${bodyY}"
+      rx="${bodyWidth/2}" ry="${bodyHeight/2}"
+      fill="url(#bodyGradient${index})"/>`;
+  }
+
+  const tail = `
+    <path d="M 82 75 L 35 43 L 47 75 L 35 107 Z"
+    fill="${dark}" stroke="#26352b" stroke-width="2"/>`;
+
+  const topFin = `
+    <path d="M 105 48 Q 145 ${18 + (hash % 15)} 195 45
+    Q 155 40 105 48 Z"
+    fill="${dark}" stroke="#26352b" stroke-width="2"/>`;
+
+  const bottomFin = `
+    <path d="M 120 103 Q 160 132 195 104
+    Q 157 115 120 103 Z"
+    fill="${dark}" stroke="#26352b" stroke-width="2"/>`;
+
+  let extraFins = `
+    <path d="M 174 83 L 204 112 L 155 100 Z"
+    fill="${light}" stroke="#26352b" stroke-width="2"/>
+    <path d="M 174 66 L 204 40 L 155 51 Z"
+    fill="${light}" stroke="#26352b" stroke-width="2"/>`;
+
+  if (isBillfish) {
+    extraFins += `
+      <path d="M 215 70 L 310 60 L 215 80 Z"
+      fill="${dark}" stroke="#26352b" stroke-width="2"/>
+      <path d="M 115 45 Q 160 2 205 44"
+      fill="${dark}" stroke="#26352b" stroke-width="2"/>`;
+  }
+
+  if (isCatfish) {
+    extraFins += `
+      <path d="M 222 77 Q 255 82 274 96"
+      fill="none" stroke="${dark}" stroke-width="3"/>
+      <path d="M 222 81 Q 250 100 269 111"
+      fill="none" stroke="${dark}" stroke-width="2"/>`;
+  }
+
+  if (isShark) {
+    extraFins += `
+      <path d="M 153 34 L 178 4 L 188 42 Z"
+      fill="${dark}" stroke="#26352b" stroke-width="2"/>
+      <path d="M 135 111 L 160 137 L 172 109 Z"
+      fill="${dark}" stroke="#26352b" stroke-width="2"/>`;
+  }
+
+  if (isSturgeon) {
+    extraFins += `
+      <path d="M 95 96 L 120 119 L 130 99 Z"
+      fill="${dark}" stroke="#26352b" stroke-width="2"/>
+      <path d="M 130 45 L 155 25 L 167 46 Z"
+      fill="${dark}" stroke="#26352b" stroke-width="2"/>`;
+  }
+
+  let markings = "";
+  const pattern = hash % 4;
+
+  if (pattern === 0) {
+    for (let i = 0; i < 5; i++) {
+      const x = 110 + i * 22;
+      markings += `
+        <path d="M ${x} 48 Q ${x-12} 75 ${x} 101"
+        fill="none" stroke="${light}" stroke-width="5" opacity=".85"/>`;
+    }
+  } else if (pattern === 1) {
+    for (let i = 0; i < 9; i++) {
+      const x = 105 + (i % 3) * 42;
+      const y = 58 + Math.floor(i / 3) * 16;
+      markings += `
+        <circle cx="${x}" cy="${y}" r="${4 + (i % 3)}"
+        fill="${light}" opacity=".9"/>`;
+    }
+  } else if (pattern === 2) {
+    markings = `
+      <path d="M 90 68 Q 155 48 220 68"
+      fill="none" stroke="${light}" stroke-width="5" opacity=".9"/>
+      <path d="M 90 83 Q 155 63 220 83"
+      fill="none" stroke="${dark}" stroke-width="3" opacity=".7"/>`;
+  } else {
+    for (let i = 0; i < 6; i++) {
+      const x = 110 + i * 20;
+      markings += `
+        <path d="M ${x} 55 L ${x+12} 94"
+        stroke="${light}" stroke-width="4" opacity=".85"/>`;
+    }
+  }
+
+  if (isFlat) {
+    markings += `
+      <circle cx="175" cy="59" r="4" fill="${dark}"/>
+      <circle cx="190" cy="59" r="4" fill="${dark}"/>`;
+  }
+
+  if (isSalmon) {
+    for (let i = 0; i < 12; i++) {
+      markings += `
+        <circle cx="${105+(i%6)*19}"
+        cy="${54+Math.floor(i/6)*27}"
+        r="2.8" fill="${dark}"/>`;
+    }
+  }
+
+  if (isTuna) {
+    markings += `
+      <path d="M 110 55 Q 150 43 195 54"
+      fill="none" stroke="${light}" stroke-width="3"/>`;
+  }
+
+  const barbels = isCatfish
+    ? `<path d="M 220 77 Q 250 65 264 76 M 220 81 Q 250 95 264 91"
+       fill="none" stroke="#26352b" stroke-width="2.5"/>`
+    : "";
+
+  const eyeX = isFlat ? 208 : 218;
+  const eyeY = isFlat ? 59 : 67;
+
+  return `
+  <svg viewBox="0 0 320 145" role="img"
+       aria-label="${name} stylized fish illustration"
+       xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="bodyGradient${index}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="${light}"/>
+        <stop offset="48%" stop-color="${main}"/>
+        <stop offset="100%" stop-color="${dark}"/>
+      </linearGradient>
+    </defs>
+
+    <rect width="320" height="145" fill="#e8e6d9"/>
+
+    <path d="M 25 120 Q 155 133 295 118"
+      fill="none" stroke="#d2d0c2" stroke-width="2" opacity=".6"/>
+
+    ${tail}
+    ${topFin}
+    ${bottomFin}
+    ${extraFins}
+    ${bodyShape}
+
+    <path d="M 80 75 Q 155 12 230 75 Q 155 138 80 75 Z"
+      fill="none" stroke="#26352b" stroke-width="2"/>
+
+    <g>${markings}</g>
+
+    <path d="M 197 53 Q 188 75 197 97"
+      fill="none" stroke="${dark}" stroke-width="3" opacity=".8"/>
+
+    <circle cx="${eyeX}" cy="${eyeY}" r="7" fill="#f7f4e9"/>
+    <circle cx="${eyeX+1}" cy="${eyeY}" r="3.5" fill="#172319"/>
+    <circle cx="${eyeX+2}" cy="${eyeY-1}" r="1.2" fill="#ffffff"/>
+
+    <path d="M 220 87 Q 229 92 236 86"
+      fill="none" stroke="#26352b" stroke-width="2"/>
+
+    ${barbels}
+
+    <path d="M 110 108 Q 155 120 198 105"
+      fill="none" stroke="${light}" stroke-width="2" opacity=".7"/>
+  </svg>`;
+}
+
 function renderSpecies(list) {
   speciesGrid.innerHTML = "";
 
   list.forEach((fish) => {
     const originalIndex = fishData.indexOf(fish);
     const number = String(originalIndex + 1).padStart(3,"0");
+
     const card = document.createElement("article");
     card.className = "species-card search-item";
     card.dataset.search = fish.join(" ").toLowerCase();
@@ -408,9 +641,11 @@ function renderSpecies(list) {
     if (originalIndex < 12) {
       picture.classList.add("original");
       picture.style.backgroundPosition = originalPositions[originalIndex];
+      picture.setAttribute("role", "img");
       picture.setAttribute("aria-label", fish[0] + " illustration");
     } else {
-      picture.textContent = fish[0].toUpperCase();
+      picture.classList.add("generated");
+      picture.innerHTML = makeFishIllustration(fish, originalIndex);
     }
 
     const content = document.createElement("div");
@@ -433,7 +668,6 @@ function renderSpecies(list) {
     const details = document.createElement("details");
     const summary = document.createElement("summary");
     summary.textContent = "View full species guide";
-
     details.appendChild(summary);
 
     const labels = [
@@ -459,7 +693,9 @@ function renderSpecies(list) {
     speciesGrid.appendChild(card);
   });
 
-  speciesCount.textContent = list.length + " OF " + fishData.length + " SPECIES SHOWN";
+  speciesCount.textContent =
+    list.length + " OF " + fishData.length + " SPECIES SHOWN";
+
   document.getElementById("emptyMessage").style.display =
     list.length === 0 ? "block" : "none";
 }
