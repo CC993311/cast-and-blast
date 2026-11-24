@@ -158,17 +158,13 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
   <label for="catchDate">Date caught</label>
   <input type="date" id="catchDate">
-
   <label for="otherSpecies">Other species (if selected)</label>
   <input id="otherSpecies" maxlength="80" placeholder="Enter species name">
-
   <label for="catchNotes">Notes (optional)</label>
   <textarea id="catchNotes" maxlength="500" placeholder="Optional catch notes..."></textarea>
-
   <label for="catchImage">Photo URL (optional)</label>
   <input type="url" id="catchImage" placeholder="https://example.com/photo.jpg">
   <p class="help">Paste a link to an image hosted online. Direct photo uploads are not enabled yet.</p>
-
   <button id="submitCatch" style="width:100%">Post Catch</button>
   <div id="catchMessage"></div>
  </div>
@@ -232,13 +228,11 @@ let favoritesCache=[];
 let favoritesRequestNumber=0;
 
 const map=L.map("map",{center:[39.5,-98.35],zoom:5,minZoom:3,preferCanvas:true});
-
 const street=L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap contributors"});
 const satellite=L.tileLayer("https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:19,attribution:"Tiles © Esri"});
 const terrain=L.tileLayer("https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",{maxZoom:18,attribution:"Tiles © Esri"});
 satellite.addTo(map);
-
-L.control.layers({"Street Map":street,"Satellite":satellite,"Terrain":terrain},null,{collapsed:false,position:"topright"}).addTo(map);
+ L.control.layers({"Street Map":street,"Satellite":satellite,"Terrain":terrain},null,{collapsed:false,position:"topright"}).addTo(map);
 L.control.scale().addTo(map);
 
 const USGS_URL="https://3dhp.nationalmap.gov/arcgis/rest/services/usgs_3dhp_all/FeatureServer/60";
@@ -471,6 +465,7 @@ document.getElementById("blmToggle").addEventListener("change",function(){
  else map.removeLayer(blmLayer);
 });
 
+
 // FAVORITES
 function updateFavoriteButton(){
  const button=document.getElementById("favoriteCurrentButton");
@@ -483,7 +478,7 @@ function updateFavoriteButton(){
  );
  button.textContent=exists?"★ Remove from Favorites":"☆ Add Selected Spot to Favorites";
 }
-async function loadFavorites(){
+ async function loadFavorites(){
  const request=++favoritesRequestNumber;
  const list=document.getElementById("favoritesList");
  if(!currentUser){
@@ -649,6 +644,27 @@ document.getElementById("signOutButton").addEventListener("click",async function
 });
 
 // FEATURE CENTER
+function addWaterbodyDetailsButton(){
+ if(!selectedWaterbody)return;
+ const center=getFeatureCenter(selectedWaterbody.feature);
+ const params=new URLSearchParams({
+  type:selectedWaterbody.type,
+  id:selectedWaterbody.id,
+  name:selectedWaterbody.name,
+  lat:center?String(center[0]):String(map.getCenter().lat),
+  lon:center?String(center[1]):String(map.getCenter().lng)
+ });
+ const old=document.getElementById("openWaterbodyDetails");
+ if(old)old.remove();
+ const button=document.createElement("button");
+ button.id="openWaterbodyDetails";
+ button.type="button";
+ button.style="width:100%;margin-top:9px;background:#a6c77b;color:#142016";
+ button.textContent="OPEN FULL WATERBODY DETAILS";
+ button.addEventListener("click",()=>{window.location.href="waterbody.html?"+params.toString();});
+ document.getElementById("selectedLake").appendChild(button);
+}
+
 function getFeatureCenter(feature){
  const points=[];
  function walk(coords){
@@ -682,6 +698,7 @@ async function selectLake(feature){
   console.error(lookupError);
   document.getElementById("selectedLake").innerHTML="<h2>"+escapeHTML(selectedLake.name)+"</h2><p class='help'>Could not look up this lake in the review database.</p>";
   document.getElementById("reviewsList").textContent="Could not load reviews.";
+  addWaterbodyDetailsButton();
   return;
  }
  if(existingLake){
@@ -689,12 +706,14 @@ async function selectLake(feature){
   document.getElementById("selectedLake").innerHTML="<h2>"+escapeHTML(existingLake.name)+"</h2><p class='help'>Lake or pond</p><div id='lakeRatingSummary' class='rating-summary'>Loading rating...</div>";
   updateReviewForm();
   await loadReviews(selectedLakeDatabaseId);
+  addWaterbodyDetailsButton();
   return;
  }
  if(!currentUser){
   document.getElementById("selectedLake").innerHTML="<h2>"+escapeHTML(selectedLake.name)+"</h2><p class='help'>No reviews have been added to this lake yet. Sign in and select it again to start its review page.</p>";
   document.getElementById("reviewsList").textContent="No reviews yet. Sign in to start the first review.";
   updateReviewForm();
+  addWaterbodyDetailsButton();
   return;
  }
  const center=getFeatureCenter(feature);
@@ -708,12 +727,14 @@ async function selectLake(feature){
   console.error(error);
   document.getElementById("selectedLake").innerHTML="<h2>"+escapeHTML(selectedLake.name)+"</h2><p class='help'>Could not create this lake's review page.</p>";
   document.getElementById("reviewsList").textContent="Database error: "+error.message;
+  addWaterbodyDetailsButton();
   return;
  }
  selectedLakeDatabaseId=data.id;
  document.getElementById("selectedLake").innerHTML="<h2>"+escapeHTML(data.name)+"</h2><p class='help'>Lake or pond</p><div id='lakeRatingSummary' class='rating-summary'>No ratings yet</div>";
  updateReviewForm();
  await loadReviews(selectedLakeDatabaseId);
+ addWaterbodyDetailsButton();
 }
 
 // SELECT A RIVER OR STREAM
@@ -762,6 +783,7 @@ async function loadCatchReports(){
   console.error("Catch loading error:",error);
   list.textContent="Could not load catch reports: "+error.message;
   summary.textContent="Could not load species.";
+  addWaterbodyDetailsButton();
   return;
  }
  const catches=data||[];
@@ -771,6 +793,7 @@ async function loadCatchReports(){
  if(!catches.length){
   summary.textContent="No fish species have been reported here yet.";
   list.textContent="No catches posted yet. Be the first to share a catch!";
+  addWaterbodyDetailsButton();
   return;
  }
  const counts={};
@@ -789,6 +812,7 @@ async function loadCatchReports(){
    (currentUser&&currentUser.id===c.user_id?"<button class='delete-catch' data-id='"+Number(c.id)+"' style='margin-top:8px;background:#8b4242'>Delete my post</button>":"")+
    "</div>";
  }).join("");
+ addWaterbodyDetailsButton();
 }
 
 function validPhotoURL(value){
