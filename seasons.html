@@ -1,0 +1,437 @@
+x
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seasons & Regulations | Cast & Blast</title>
+
+<style>
+:root {
+  --bg:#101710;
+  --panel:#1b281e;
+  --panel2:#243529;
+  --green:#a9c77b;
+  --white:#f1f4ec;
+  --muted:#aab6a7;
+  --border:#354735;
+}
+
+* {box-sizing:border-box;margin:0;padding:0}
+
+body {
+  background:var(--bg);
+  color:var(--white);
+  font-family:Arial,sans-serif;
+}
+
+header {
+  padding:18px 7%;
+  background:#172319;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  flex-wrap:wrap;
+}
+
+.logo {
+  font-size:22px;
+  font-weight:800;
+  letter-spacing:1px;
+}
+
+.logo span {color:var(--green)}
+
+nav {display:flex;gap:20px;flex-wrap:wrap}
+
+nav a {
+  color:var(--muted);
+  text-decoration:none;
+  font-size:14px;
+}
+
+nav a:hover {color:var(--green)}
+
+main {
+  max-width:1100px;
+  margin:auto;
+  padding:65px 22px;
+}
+
+.heading {margin-bottom:35px}
+
+.heading small {
+  color:var(--green);
+  letter-spacing:2px;
+  font-weight:bold;
+}
+
+.heading h1 {
+  font-size:clamp(30px,5vw,46px);
+  margin:12px 0;
+}
+
+.heading p {
+  color:var(--muted);
+  line-height:1.7;
+  max-width:700px;
+}
+
+.panel {
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:25px;
+  margin-bottom:22px;
+}
+
+label {
+  display:block;
+  font-weight:bold;
+  margin-bottom:12px;
+}
+
+select {
+  width:100%;
+  max-width:500px;
+  padding:14px;
+  background:var(--panel2);
+  color:var(--white);
+  border:1px solid var(--border);
+  border-radius:7px;
+  font-size:15px;
+}
+
+.toggle-row {
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:15px;
+}
+
+.toggle {
+  padding:12px 17px;
+  background:var(--panel2);
+  border:1px solid var(--border);
+  color:var(--muted);
+  border-radius:7px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.toggle.active {
+  background:var(--green);
+  color:#142016;
+  border-color:var(--green);
+}
+
+.toggle:hover {border-color:var(--green)}
+
+.species-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(145px,1fr));
+  gap:12px;
+  margin-top:18px;
+}
+
+.species-button {
+  padding:16px 12px;
+  background:var(--panel2);
+  border:1px solid var(--border);
+  color:var(--white);
+  border-radius:8px;
+  cursor:pointer;
+  font-size:14px;
+  font-weight:bold;
+}
+
+.species-button:hover,
+.species-button.active {
+  border-color:var(--green);
+  color:var(--green);
+}
+
+.result {
+  margin-top:22px;
+  padding:25px;
+  background:#172319;
+  border:1px solid var(--border);
+  border-radius:10px;
+  display:none;
+}
+
+.result h2 {
+  color:var(--green);
+  margin-bottom:12px;
+}
+
+.result p {
+  color:var(--muted);
+  line-height:1.7;
+  margin-bottom:15px;
+}
+
+.source-link {
+  display:inline-block;
+  margin-top:8px;
+  padding:13px 18px;
+  background:var(--green);
+  color:#142016;
+  text-decoration:none;
+  border-radius:6px;
+  font-weight:bold;
+  font-size:13px;
+}
+
+.notice {
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.7;
+  margin-top:15px;
+}
+
+.back {
+  display:inline-block;
+  color:var(--green);
+  text-decoration:none;
+  margin-top:30px;
+}
+
+footer {
+  text-align:center;
+  padding:30px;
+  color:#899687;
+  font-size:12px;
+  border-top:1px solid var(--border);
+}
+
+@media(max-width:600px) {
+  header {justify-content:center}
+  nav {justify-content:center}
+  main {padding:45px 16px}
+  .panel {padding:19px}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">CAST <span>&</span> BLAST</div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="map.html">Maps</a>
+    <a href="guides.html">Fishing Guides</a>
+    <a href="conditions.html">Water & Weather</a>
+  </nav>
+</header>
+
+<main>
+
+  <div class="heading">
+    <small>KNOW BEFORE YOU GO</small>
+    <h1>Seasons & Regulations</h1>
+    <p>
+      Choose a state and a species to find official fishing
+      regulations, season information, and wildlife conservation
+      resources from state agencies.
+    </p>
+  </div>
+
+  <div class="panel">
+    <label for="stateSelect">Choose a State</label>
+    <select id="stateSelect">
+      <option value="">Select a state</option>
+    </select>
+  </div>
+
+  <div class="panel">
+    <label>Choose a Category</label>
+    <div class="toggle-row">
+      <button class="toggle active" id="fishingTab" type="button">
+        Fishing Species
+      </button>
+      <button class="toggle" id="wildlifeTab" type="button">
+        Wildlife & Conservation
+      </button>
+    </div>
+
+    <div id="speciesGrid" class="species-grid"></div>
+
+    <div id="result" class="result">
+      <h2 id="resultTitle"></h2>
+      <p id="resultDescription"></p>
+      <a id="sourceLink" class="source-link"
+         href="#" target="_blank" rel="noopener">
+        FIND OFFICIAL STATE INFORMATION
+      </a>
+      <p class="notice" id="resultNotice"></p>
+    </div>
+  </div>
+
+  <p class="notice">
+    Regulations vary by state and may change throughout the year.
+    Always check the current information published by the official
+    state agency before making plans. Cast & Blast is not a
+    government agency and does not issue licenses or permits.
+  </p>
+
+  <a class="back" href="index.html">← Back to Homepage</a>
+
+</main>
+
+<footer>
+  CAST & BLAST | EXPLORE. DISCOVER. RESPECT THE OUTDOORS.
+  <br><br>© 2026 Cast & Blast
+</footer>
+
+<script>
+const states = [
+"Alabama","Alaska","Arizona","Arkansas","California",
+"Colorado","Connecticut","Delaware","Florida","Georgia",
+"Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas",
+"Kentucky","Louisiana","Maine","Maryland","Massachusetts",
+"Michigan","Minnesota","Mississippi","Missouri","Montana",
+"Nebraska","Nevada","New Hampshire","New Jersey",
+"New Mexico","New York","North Carolina","North Dakota",
+"Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island",
+"South Carolina","South Dakota","Tennessee","Texas","Utah",
+"Vermont","Virginia","Washington","West Virginia",
+"Wisconsin","Wyoming"
+];
+
+const fishingSpecies = [
+"Trout","Bass","Salmon","Catfish","Crappie",
+"Bluegill","Walleye","Pike","Perch","Carp",
+"Striped Bass","Sturgeon","Redfish","Snook",
+"Flounder","Other Fish"
+];
+
+const wildlifeSpecies = [
+"Deer","Elk","Moose","Black Bear","Turkey",
+"Waterfowl","Rabbit","Squirrel","Fox",
+"Mountain Lion","Bighorn Sheep","Other Wildlife"
+];
+
+const stateSelect = document.getElementById("stateSelect");
+const speciesGrid = document.getElementById("speciesGrid");
+const fishingTab = document.getElementById("fishingTab");
+const wildlifeTab = document.getElementById("wildlifeTab");
+const result = document.getElementById("result");
+
+let category = "fishing";
+let selectedSpecies = "";
+
+states.forEach(state => {
+  const option = document.createElement("option");
+  option.value = state;
+  option.textContent = state;
+  stateSelect.appendChild(option);
+});
+
+function renderSpecies() {
+  speciesGrid.innerHTML = "";
+  result.style.display = "none";
+  selectedSpecies = "";
+
+  const list = category === "fishing"
+    ? fishingSpecies
+    : wildlifeSpecies;
+
+  list.forEach(species => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "species-button";
+    button.textContent = species;
+
+    button.addEventListener("click", () => {
+      document.querySelectorAll(".species-button")
+        .forEach(item => item.classList.remove("active"));
+
+      button.classList.add("active");
+      selectedSpecies = species;
+      showInformation();
+    });
+
+    speciesGrid.appendChild(button);
+  });
+}
+
+function showInformation() {
+  const state = stateSelect.value;
+
+  if (!state) {
+    result.style.display = "block";
+    document.getElementById("resultTitle").textContent =
+      "Choose a state first";
+    document.getElementById("resultDescription").textContent =
+      "Select a state above to find information for " + selectedSpecies + ".";
+    document.getElementById("sourceLink").style.display = "none";
+    document.getElementById("resultNotice").textContent = "";
+    return;
+  }
+
+  const title = document.getElementById("resultTitle");
+  const description = document.getElementById("resultDescription");
+  const link = document.getElementById("sourceLink");
+  const notice = document.getElementById("resultNotice");
+
+  title.textContent = state + " — " + selectedSpecies;
+  link.style.display = "inline-block";
+
+  let searchText;
+
+  if (category === "fishing") {
+    description.textContent =
+      "Find the official " + state +
+      " fishing regulations and season information for " +
+      selectedSpecies + ". Check the state agency's current rules, " +
+      "license information, protected waters, and species restrictions.";
+
+    searchText = state + " official " + selectedSpecies +
+      " fishing regulations season site:gov OR site:us";
+    notice.textContent =
+      "Use the official state agency publication to verify current dates, limits, and restrictions.";
+  } else {
+    description.textContent =
+      "Find official " + state + " wildlife conservation information for " +
+      selectedSpecies + ", including conservation status, habitat, " +
+      "protected-species information, and state wildlife resources.";
+
+    searchText = state + " official " + selectedSpecies +
+      " wildlife conservation protected species site:gov";
+    notice.textContent =
+      "This section focuses on wildlife conservation and protected-species information.";
+  }
+
+  link.href = "https://www.google.com/search?q=" +
+    encodeURIComponent(searchText);
+
+  result.style.display = "block";
+}
+
+fishingTab.addEventListener("click", () => {
+  category = "fishing";
+  fishingTab.classList.add("active");
+  wildlifeTab.classList.remove("active");
+  renderSpecies();
+});
+
+wildlifeTab.addEventListener("click", () => {
+  category = "wildlife";
+  wildlifeTab.classList.add("active");
+  fishingTab.classList.remove("active");
+  renderSpecies();
+});
+
+stateSelect.addEventListener("change", () => {
+  if (selectedSpecies) showInformation();
+});
+
+renderSpecies();
+</script>
+
+</body>
+</html>
