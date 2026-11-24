@@ -738,7 +738,7 @@ async function loadFollowing(){
  if(!ids.length){list.textContent="You are not following anyone yet.";return;}
  const {data:profiles,error:profileError}=await supabaseClient.from("profiles").select("user_id,display_name,bio,avatar_url").in("user_id",ids);
  if(profileError){list.textContent="Could not load followed anglers: "+profileError.message;return;}
- list.innerHTML=(profiles||[]).map(p=>"<div class='favorite-card'><a style='color:#c7f0d2' href='angler.html?user="+encodeURIComponent(p.user_id)+"'><strong>"+escapeHTML(p.display_name||"FishBound Angler")+"</strong></a>+(p.bio?"<div>"+escapeHTML(p.bio)+"</div>":"")+"<button class='toggle-follow btn-secondary' data-user-id='"+escapeHTML(p.user_id)+"' data-following='true'>Unfollow</button></div>").join("")||"No profile details are available yet.";
+ list.innerHTML=(profiles||[]).map(p=>"<div class='favorite-card'><a style='color:#c7f0d2' href='angler.html?user="+encodeURIComponent(p.user_id)+"'><strong>"+escapeHTML(p.display_name||"FishBound Angler")+"</strong></a>"+(p.bio?"<div>"+escapeHTML(p.bio)+"</div>":"")+"<button class='toggle-follow btn-secondary' data-user-id='"+escapeHTML(p.user_id)+"' data-following='true'>Unfollow</button></div>").join("")||"No profile details are available yet.";
 }
 async function searchAnglers(){
  if(!currentUser){setAnglerSearchMessage("Sign in to find and follow anglers.");return;}
