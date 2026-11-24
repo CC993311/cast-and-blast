@@ -73,6 +73,35 @@ footer{background:#172319;border-top:1px solid var(--border);text-align:center;p
  nav{justify-content:center;gap:13px}
  section{padding:40px 6%}
  .hero{padding:55px 6%}
+.fish-picture.chart {
+  background-color: #f3ead5;
+  border: none;
+  overflow: hidden;
+}
+
+.fish-picture.no-picture {
+  display: none;
+}
+
+.species-number {
+  display: none !important;
+}
+  .fish-picture.chart {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+  overflow: hidden;
+}
+
+.fish-picture.chart::before,
+.fish-picture.chart::after {
+  display: none !important;
+  content: none !important;
+}
+
+.species-number {
+  display: none !important;
 }
 </style>
 </head>
@@ -383,29 +412,36 @@ const chartFishPositions = {
   "Atlantic Salmon": ["freshwater",0,0],
   "Brown Trout": ["freshwater",1,0],
   "Rainbow Trout": ["freshwater",2,0],
-  "Brook Trout": ["freshwater",0,1],
-  "Lake Trout": ["freshwater",1,1],
-  "Northern Pike": ["freshwater",2,1],
-  "Walleye": ["freshwater",0,2],
-  "Smallmouth Bass": ["freshwater",1,2],
-  "Largemouth Bass": ["freshwater",2,2],
-  "Bluegill": ["freshwater",0,3],
-  "Yellow Perch": ["freshwater",1,3],
-  "Perch": ["freshwater",1,3],
-  "Channel Catfish": ["freshwater",2,3],
-  "Catfish": ["freshwater",2,3],
+  "Brook Trout": ["freshwater",3,0],
+  "Lake Trout": ["freshwater",0,1],
+  "Northern Pike": ["freshwater",1,1],
+  "Walleye": ["freshwater",2,1],
+  "Smallmouth Bass": ["freshwater",3,1],
+  "Largemouth Bass": ["freshwater",0,2],
+  "Bluegill": ["freshwater",1,2],
+  "Yellow Perch": ["freshwater",2,2],
+  "Perch": ["freshwater",2,2],
+
+  "Channel Catfish": ["freshwater",3,2],
+  "Blue Catfish": ["freshwater",3,2],
+  "Black Bullhead": ["freshwater",3,2],
+  "Brown Bullhead": ["freshwater",3,2],
+  "Flathead Catfish": ["freshwater",3,2],
+  "Yellow Bullhead": ["freshwater",3,2],
+  "Catfish": ["freshwater",3,2],
+
   "Striped Bass": ["coastal",0,0],
   "Bluefish": ["coastal",1,0],
-  "Black Sea Bass": ["coastal",2,0],
-  "Summer Flounder": ["coastal",0,1],
-  "Tautog": ["coastal",1,1],
-  "Weakfish": ["coastal",2,1],
-  "Scup": ["coastal",0,2],
-  "Sheepshead": ["coastal",1,2],
-  "Red Drum": ["coastal",2,2],
-  "Hogfish": ["coastal",0,3],
-  "Speckled Trout": ["coastal",1,3],
-  "Cobia": ["coastal",2,3]
+  "Tautog": ["coastal",2,0],
+  "Summer Flounder": ["coastal",3,0],
+  "Black Sea Bass": ["coastal",0,1],
+  "Weakfish": ["coastal",1,1],
+  "Scup": ["coastal",2,1],
+  "Sheepshead": ["coastal",3,1],
+  "Red Drum": ["coastal",0,2],
+  "Hogfish": ["coastal",1,2],
+  "Speckled Trout": ["coastal",2,2],
+  "Cobia": ["coastal",3,2]
 };
 
 function getChartPosition(speciesName) {
@@ -654,36 +690,34 @@ function renderSpecies(list) {
   speciesGrid.innerHTML = "";
 
   list.forEach((fish) => {
-    const originalIndex = fishData.indexOf(fish);
-    const number = String(originalIndex + 1).padStart(3,"0");
-
     const card = document.createElement("article");
     card.className = "species-card search-item";
     card.dataset.search = fish.join(" ").toLowerCase();
-
-    const picture = document.createElement("div");
-    picture.className = "fish-picture";
 
     const chartPosition = getChartPosition(fish[0]);
 
     if (chartPosition) {
       const [chart, column, row] = chartPosition;
-      picture.classList.add("chart");
-      picture.style.backgroundImage = `url("fish-chart-${chart}.png")`;
-      picture.style.backgroundPosition = `${column * 50}% ${row * (100 / 3)}%`;
+
+      const picture = document.createElement("div");
+      picture.className = "fish-picture chart";
+
+      picture.style.backgroundImage =
+        `url("fish-chart-${chart}.png")`;
+
+      picture.style.backgroundSize = "400% 300%";
+      picture.style.backgroundPosition =
+        `${column * 100 / 3}% ${row * 50}%`;
+
+      picture.style.backgroundRepeat = "no-repeat";
       picture.setAttribute("role", "img");
-      picture.setAttribute("aria-label", fish[0] + " illustration");
-    } else {
-      picture.classList.add("generated");
-      picture.innerHTML = makeFishIllustration(fish, originalIndex);
+      picture.setAttribute("aria-label", fish[0]);
+
+      card.appendChild(picture);
     }
 
     const content = document.createElement("div");
     content.className = "species-content";
-
-    const numberLabel = document.createElement("div");
-    numberLabel.className = "species-number";
-    numberLabel.textContent = "SPECIES " + number;
 
     const heading = document.createElement("h3");
     heading.textContent = fish[0];
@@ -712,14 +746,19 @@ function renderSpecies(list) {
     for (let i = 0; i < labels.length; i++) {
       const paragraph = document.createElement("p");
       const strong = document.createElement("strong");
+
       strong.textContent = labels[i] + ": ";
+
       paragraph.appendChild(strong);
-      paragraph.appendChild(document.createTextNode(fish[i + 3]));
+      paragraph.appendChild(
+        document.createTextNode(fish[i + 3])
+      );
+
       details.appendChild(paragraph);
     }
 
-    content.append(numberLabel,heading,category,description,details);
-    card.append(picture,content);
+    content.append(heading, category, description, details);
+    card.appendChild(content);
     speciesGrid.appendChild(card);
   });
 
@@ -729,7 +768,6 @@ function renderSpecies(list) {
   document.getElementById("emptyMessage").style.display =
     list.length === 0 ? "block" : "none";
 }
-
 const searchInput = document.getElementById("guideSearch");
 const searchStatus = document.getElementById("searchStatus");
 
