@@ -46,6 +46,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .catch-species{font-size:15px;font-weight:bold;color:#72df9b}
 .catch-meta{font-size:11px;color:#a9c6ae;margin:5px 0}
 .catch-photo{display:block;width:100%;max-height:190px;object-fit:cover;border-radius:7px;margin-top:8px}
+#catchImagePreview{display:none;width:100%;max-height:190px;object-fit:contain;background:#10271a;border-radius:7px;margin:5px 0 10px}
 .species-tag{display:inline-block;background:#326b47;color:#e1f5e5;padding:4px 7px;border-radius:12px;margin:3px;font-size:11px}
 #mapStatusNote{font-size:11px;color:#a9c6ae;margin-top:5px}
 .leaflet-popup-content{color:#1b3040;line-height:1.5}
@@ -161,9 +162,12 @@ button:disabled{opacity:.5;cursor:not-allowed}
   <input id="otherSpecies" maxlength="80" placeholder="Enter species name">
   <label for="catchNotes">Notes (optional)</label>
   <textarea id="catchNotes" maxlength="500" placeholder="Optional catch notes..."></textarea>
-  <label for="catchImage">Photo URL (optional)</label>
-  <input type="url" id="catchImage" placeholder="https://example.com/photo.jpg">
-  <p class="help">Paste a link to an image hosted online. Direct photo uploads are not enabled yet.</p>
+
+  <label for="catchImage">Upload a catch photo (optional)</label>
+  <input type="file" id="catchImage" accept="image/jpeg,image/png,image/webp">
+  <img id="catchImagePreview" alt="Selected catch photo preview">
+  <p class="help">Choose a photo from your device. Accepted formats: JPG, PNG, and WebP. Maximum file size: 10 MB.</p>
+
   <button id="submitCatch" style="width:100%">Post Catch</button>
   <div id="catchMessage"></div>
  </div>
@@ -225,6 +229,7 @@ let selectedWaterbody=null;
 let catchRequestNumber=0;
 let favoritesCache=[];
 let favoritesRequestNumber=0;
+let catchPreviewURL=null;
 
 const map=L.map("map",{center:[39.5,-98.35],zoom:5,minZoom:3,preferCanvas:true});
 const street=L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap contributors"});
@@ -245,6 +250,99 @@ function setAuthMessage(message){document.getElementById("authMessage").textCont
 function setReviewMessage(message){document.getElementById("reviewMessage").textContent=message;}
 function setCatchMessage(message){document.getElementById("catchMessage").textContent=message;}
 function setFavoriteMessage(message){document.getElementById("favoriteMessage").textContent=message;}
+
+function localDateString(){
+ const now=new Date();
+ const offset=now.getTimezoneOffset()*60000;
+ return new Date(now.getTime()-offset).toISOString().slice(0,10);
+}
+
+function clearCatchPhotoPreview(){
+ const preview=document.getElementById("catchImagePreview");
+ preview.removeAttribute("src");
+ preview.style.display="none";
+ if(catchPreviewURL){
+  URL.revokeObjectURL(catchPreviewURL);
+  catchPreviewURL=null;
+ }
+}
+
+document.getElementById("catchImage").addEventListener("change",function(){
+ clearCatchPhotoPreview();
+ const file=this.files?.[0];
+ if(!file)return;
+
+ const allowedTypes=["image/jpeg","image/png","image/webp"];
+ if(!allowedTypes.includes(file.type)){
+  this.value="";
+  setCatchMessage("Please choose a JPG, PNG, or WebP image.");
+  return;
+ }
+ if(file.size>10*1024*1024){
+  this.value="";
+  setCatchMessage("That photo is too large. The maximum file size is 10 MB.");
+  return;
+ }
+
+ catchPreviewURL=URL.createObjectURL(file);
+ const preview=document.getElementById("catchImagePreview");
+ preview.src=catchPreviewURL;
+ preview.style.display="block";
+ setCatchMessage("Photo ready to upload.");
+});
+
+async function uploadCatchPhoto(file){
+ if(!file)return null;
+
+ const allowedTypes=["image/jpeg","image/png","image/webp"];
+ if(!allowedTypes.includes(file.type)){
+  throw new Error("Please choose a JPG, PNG, or WebP image.");
+ }
+ if(file.size>10*1024*1024){
+  throw new Error("The photo must be 10 MB or smaller.");
+ }
+
+ const ext=file.type==="image/jpeg"?"jpg":file.type==="image/png"?"png":"webp";
+ const uniqueId=window.crypto?.randomUUID
+  ?window.crypto.randomUUID()
+  :Date.now()+"-"+Math.random().toString(36).slice(2);
+
+ const path=currentUser.id+"/"+Date.now()+"-"+uniqueId+"."+ext;
+
+ const {data,error}=await supabaseClient.storage
+  .from("catch-photos")
+  .upload(path,file,{
+   cacheControl:"3600",
+   upsert:false,
+   contentType:file.type
+  });
+
+ if(error)throw new Error("Photo upload failed: "+error.message);
+
+ const {data:publicData}=supabaseClient.storage
+  .from("catch-photos")
+  .getPublicUrl(data.path);
+
+ if(!publicData?.publicUrl){
+  await supabaseClient.storage.from("catch-photos").remove([data.path]);
+  throw new Error("The photo uploaded, but its public URL could not be created.");
+ }
+
+ return {url:publicData.publicUrl,path:data.path};
+}
+
+function getCatchStoragePathFromPublicUrl(value){
+ if(!value)return null;
+ try{
+  const url=new URL(value);
+  const marker="/storage/v1/object/public/catch-photos/";
+  const index=url.pathname.indexOf(marker);
+  if(index===-1)return null;
+  return decodeURIComponent(url.pathname.slice(index+marker.length));
+ }catch(error){
+  return null;
+ }
+}
 
 function getLakeName(p){
  for(const value of [p.gnisidlabel,p.GNIS_NAME,p.GNIS_Name,p.name,p.NAME]){
@@ -854,16 +952,32 @@ document.getElementById("catchList").addEventListener("click",async function(eve
 
   deleteButton.disabled=true;
 
-  const {error}=await supabaseClient
+  const {data:report}=await supabaseClient
+   .from("catch_reports")
+   .select("image_url")
+   .eq("id",id)
+   .eq("user_id",currentUser.id)
+   .maybeSingle();
+
+  const {data:deleted,error}=await supabaseClient
    .from("catch_reports")
    .delete()
    .eq("id",id)
-   .eq("user_id",currentUser.id);
+   .eq("user_id",currentUser.id)
+   .select("id");
 
-  if(error){
-   setCatchMessage("Could not delete post: "+error.message);
+  if(error||!deleted||deleted.length===0){
+   setCatchMessage("Could not delete post: "+(error?.message||"No report was deleted. Check your permissions."));
    deleteButton.disabled=false;
    return;
+  }
+
+  const storagePath=getCatchStoragePathFromPublicUrl(report?.image_url);
+  if(storagePath){
+   const {error:photoError}=await supabaseClient.storage
+    .from("catch-photos")
+    .remove([storagePath]);
+   if(photoError)console.warn("Catch deleted, but its stored photo could not be removed:",photoError);
   }
 
   setCatchMessage("Your catch post was deleted.");
@@ -871,7 +985,7 @@ document.getElementById("catchList").addEventListener("click",async function(eve
  }
 });
 
-// SUBMIT A CATCH
+// SUBMIT A CATCH WITH DIRECT PHOTO UPLOAD
 document.getElementById("submitCatch").addEventListener("click",async function(){
  if(!currentUser){setCatchMessage("Please sign in before posting a catch.");return;}
  if(!selectedWaterbody){setCatchMessage("Select a lake, pond, river, or stream first.");return;}
@@ -884,40 +998,74 @@ document.getElementById("submitCatch").addEventListener("click",async function()
 
  const date=document.getElementById("catchDate").value;
  if(!date){setCatchMessage("Choose the date of your catch.");return;}
+
  const notes=document.getElementById("catchNotes").value.trim();
- const rawPhoto=document.getElementById("catchImage").value.trim();
- const imageURL=rawPhoto?validPhotoURL(rawPhoto):"";
- if(rawPhoto&&!imageURL){setCatchMessage("Enter a valid photo URL beginning with http:// or https://.");return;}
+ const photoFile=document.getElementById("catchImage").files?.[0]||null;
+
+ if(photoFile){
+  if(!["image/jpeg","image/png","image/webp"].includes(photoFile.type)){
+   setCatchMessage("Please choose a JPG, PNG, or WebP image.");
+   return;
+  }
+  if(photoFile.size>10*1024*1024){
+   setCatchMessage("The photo must be 10 MB or smaller.");
+   return;
+  }
+ }
 
  const displayName=currentUser.user_metadata?.display_name||currentUser.email?.split("@")[0]||"Member";
- this.disabled=true;
- setCatchMessage("Posting your catch...");
+ const button=this;
+ button.disabled=true;
 
- const waterbody={...selectedWaterbody};
- const {error}=await supabaseClient.from("catch_reports").insert({
-  waterbody_type:waterbody.type,
-  waterbody_id:waterbody.id,
-  waterbody_name:waterbody.name,
-  species:species,
-  caught_at:date,
-  notes:notes||null,
-  image_url:imageURL||null,
-  user_id:currentUser.id,
-  display_name:displayName
- });
- this.disabled=false;
- if(error){
+ let uploadedPhoto=null;
+
+ try{
+  let imageURL=null;
+
+  if(photoFile){
+   setCatchMessage("Uploading your photo...");
+   uploadedPhoto=await uploadCatchPhoto(photoFile);
+   imageURL=uploadedPhoto.url;
+  }
+
+  setCatchMessage("Saving your catch report...");
+
+  const waterbody={...selectedWaterbody};
+  const {error}=await supabaseClient.from("catch_reports").insert({
+   waterbody_type:waterbody.type,
+   waterbody_id:waterbody.id,
+   waterbody_name:waterbody.name,
+   species:species,
+   caught_at:date,
+   notes:notes||null,
+   image_url:imageURL,
+   user_id:currentUser.id,
+   display_name:displayName
+  });
+
+  if(error){
+   if(uploadedPhoto){
+    await supabaseClient.storage.from("catch-photos").remove([uploadedPhoto.path]);
+   }
+   throw new Error("Could not post catch: "+error.message);
+  }
+
+  document.getElementById("catchSpecies").value="";
+  document.getElementById("otherSpecies").value="";
+  document.getElementById("catchNotes").value="";
+  document.getElementById("catchImage").value="";
+  document.getElementById("catchDate").value=localDateString();
+  clearCatchPhotoPreview();
+
+  setCatchMessage("Your catch and photo were posted!");
+  await loadCatchReports();
+
+ }catch(error){
   console.error("Catch submission error:",error);
-  setCatchMessage("Could not post catch: "+error.message);
-  return;
+  setCatchMessage(error.message||"Something went wrong while posting your catch.");
+ }finally{
+  button.disabled=!currentUser||!selectedWaterbody;
  }
- document.getElementById("catchSpecies").value="";
- document.getElementById("otherSpecies").value="";
- document.getElementById("catchNotes").value="";
- document.getElementById("catchImage").value="";
- document.getElementById("catchDate").value=new Date().toISOString().slice(0,10);
- setCatchMessage("Your catch was posted!");
- await loadCatchReports();
 });
 
 // LOAD LAKE REVIEWS
@@ -999,7 +1147,7 @@ document.getElementById("locationButton").addEventListener("click",function(){
 });
 
 // INITIAL DATE AND STARTUP
-document.getElementById("catchDate").value=new Date().toISOString().slice(0,10);
+document.getElementById("catchDate").value=localDateString();
 checkSession();
 </script>
 </body>
