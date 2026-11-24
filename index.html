@@ -4,7 +4,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cast & Blast | Explore Outdoors</title>
+<meta name="theme-color" content="#101710">
+<meta name="description" content="Next Cast is your fishing companion. Discover fishing locations, explore fish species, check water and weather conditions, and share your catches.">
+<title>Next Cast | Your Fishing Companion</title>
 
 <style>
 :root {
@@ -244,17 +246,18 @@ footer {
   <div class="logo">
     <div class="logo-mark">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-        <path d="M3 19L10 7l4 6 3-4 4 10H3Z"/>
-        <path d="M8 19l4-6 4 6"/>
+        <path d="M3 12s4-6 11-6c3 0 5 2 7 6-2 4-4 6-7 6-7 0-11-6-11-6Z"/>
+        <path d="M3 12 1 8v8l2-4Zm11-2h.01"/>
       </svg>
     </div>
-    <div>CAST <span>&</span> BLAST</div>
+    <div>NEXT <span>CAST</span></div>
   </div>
 
   <nav>
     <a href="#fishing">Fishing</a>
-    <a href="#hunting">Hunting</a>
-    <a href="#maps">Maps</a>
+    <a href="map.html">Fishing Map</a>
+    <a href="guides.html">Species & Guides</a>
+    <a href="seasons.html">Regulations</a>
     <a href="conditions.html">Water & Weather</a>
     <a href="#community">Community</a>
   </nav>
@@ -263,20 +266,20 @@ footer {
 <main>
 
 <div class="hero">
-  <div class="eyebrow">YOUR OUTDOOR ADVENTURE STARTS HERE</div>
-  <h1>EXPLORE THE<br><span>OUTDOORS.</span></h1>
+  <div class="eyebrow">YOUR NEXT FISHING ADVENTURE STARTS HERE</div>
+  <h1>FIND YOUR<br><span>NEXT CAST.</span></h1>
   <p>
-    Discover new places, explore the outdoors,
-    share your experiences, and connect with
-    a community built around adventure.
+    Discover new fishing locations, learn about fish species,
+    check water and weather conditions, share your catches,
+    and connect with anglers.
   </p>
-  <a href="#maps" class="primary-button">EXPLORE THE MAP</a>
+  <a href="map.html" class="primary-button">EXPLORE FISHING LOCATIONS</a>
 </div>
 
 <section id="fishing">
   <div class="section-heading">
-    <small>ON THE WATER</small>
-    <h2>Fishing</h2>
+    <small>EXPLORE THE WATER</small>
+    <h2>Everything Fishing</h2>
   </div>
 
   <div class="cards">
@@ -302,7 +305,7 @@ footer {
         </svg>
       </div>
       <h3>Share Your Catches</h3>
-      <p>Share fishing photos, catches, species, and memorable experiences. Select a fishing location and post your catch for the community.</p>
+      <p>Share fishing photos, catches, species, and memorable experiences with the community.</p>
       <span class="card-action">SHARE YOUR CATCH →</span>
     </a>
 
@@ -313,8 +316,8 @@ footer {
           <circle cx="12" cy="12" r="9"/>
         </svg>
       </div>
-      <h3>Fishing Guides</h3>
-      <p>Learn about fishing techniques, equipment, fish species, and local regulations.</p>
+      <h3>Fish Species & Guides</h3>
+      <p>Learn about fish identification, habitats, behavior, fishing techniques, and equipment.</p>
       <span class="card-action">EXPLORE FISHING GUIDES →</span>
     </a>
 
@@ -332,27 +335,6 @@ footer {
       <span class="card-action">CHECK CONDITIONS →</span>
     </a>
 
-  </div>
-</section>
-
-<section id="hunting">
-  <div class="section-heading">
-    <small>IN THE FIELD</small>
-    <h2>Hunting</h2>
-  </div>
-
-  <div class="cards">
-    <div class="card">
-      <div class="card-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-          <path d="M3 20 9 8l4 6 3-5 5 11H3Z"/>
-          <path d="M8 20 12 14l4 6"/>
-        </svg>
-      </div>
-      <h3>Public Lands</h3>
-      <p>Explore public land information and official recreation access resources.</p>
-    </div>
-
     <a href="seasons.html" class="card card-link">
       <div class="card-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
@@ -360,27 +342,18 @@ footer {
           <path d="M16 2v4M8 2v4M3 10h18M8 14h3M8 17h6"/>
         </svg>
       </div>
-      <h3>Seasons & Regulations</h3>
-      <p>Explore state-specific fishing regulations, wildlife conservation, and protected-species information.</p>
-      <span class="card-action">EXPLORE SEASONS & REGULATIONS →</span>
+      <h3>Fishing Regulations</h3>
+      <p>Explore state-specific fishing regulations, fish species information, and official resources.</p>
+      <span class="card-action">VIEW FISHING REGULATIONS →</span>
     </a>
 
-    <div class="card">
-      <div class="card-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-          <path d="M12 3 14.5 9.5 21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3Z"/>
-        </svg>
-      </div>
-      <h3>Outdoor Community</h3>
-      <p>Connect with other outdoor enthusiasts and share experiences.</p>
-    </div>
   </div>
 </section>
 
 <section id="maps">
   <div class="section-heading">
-    <small>FIND YOUR NEXT ADVENTURE</small>
-    <h2>Explore Maps</h2>
+    <small>FIND YOUR NEXT FISHING SPOT</small>
+    <h2>Explore the Fishing Map</h2>
   </div>
 
   <div class="map-box">
@@ -388,35 +361,37 @@ footer {
       <path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3V6Z"/>
       <path d="M9 3v15m6-12v15"/>
     </svg>
-    <h3>CAST & BLAST MAP</h3>
+    <h3>YOUR FISHING MAP</h3>
     <p>
-      Explore fishing locations, BLM recreation areas,
-      wildlife-viewing locations, and outdoor destinations.
+      Explore lakes, rivers, reservoirs, fishing locations,
+      and community catch reports.
     </p>
-    <a href="map.html" class="primary-button">OPEN THE MAP</a>
+    <a href="map.html" class="primary-button">OPEN FISHING MAP</a>
   </div>
 </section>
 
 <section id="community" class="community">
   <div class="section-heading">
     <small>CONNECT & SHARE</small>
-    <h2>Outdoor Community</h2>
+    <h2>Fishing Community</h2>
   </div>
 
   <div class="card">
-    <h3>Built for the Outdoors</h3>
+    <h3>Built for Anglers</h3>
     <p>
-      A place for anglers and outdoor enthusiasts to
-      share experiences, learn, and explore responsibly.
+      Share your catches, discover new fishing locations,
+      learn about fish species, and connect with other anglers.
+      Your next fishing adventure starts here.
     </p>
+    <a href="map.html" class="card-action">EXPLORE THE COMMUNITY →</a>
   </div>
 </section>
 
 </main>
 
 <footer>
-  CAST & BLAST &nbsp; | &nbsp; EXPLORE. DISCOVER. RESPECT THE OUTDOORS.
-  <br><br>© 2026 Cast & Blast
+  NEXT CAST &nbsp; | &nbsp; FIND YOUR NEXT CAST.
+  <br><br>© 2026 Next Cast
 </footer>
 
 </body>
