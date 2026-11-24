@@ -68,6 +68,9 @@ button:disabled{opacity:.5;cursor:not-allowed}
  #map{height:60vh;min-height:400px}
 }
 </style>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="app-icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="app-icon.svg">
 </head>
 <body>
 
@@ -1438,6 +1441,14 @@ document.getElementById("locationButton").addEventListener("click",function(){
 // INITIAL DATE AND STARTUP
 document.getElementById("catchDate").value=localDateString();
 checkSession();
+</script>
+
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/fishbound/service-worker.js").catch(error => console.error("FishBound offline setup failed:", error));
+  });
+}
 </script>
 </body>
 </html>
