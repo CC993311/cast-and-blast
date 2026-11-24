@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cast & Blast | Water & Weather</title>
+<title>FishBound | Fishing Forecast</title>
 
 <style>
 :root {
@@ -101,14 +101,14 @@ a{color:var(--green)}
 <body>
 
 <header>
-  <h1>CAST & BLAST</h1>
+  <h1>FISHBOUND</h1>
   <a href="index.html">Home</a>
 </header>
 
 <main>
   <div class="hero">
     <small>ON THE WATER</small>
-    <h2>Water & Weather</h2>
+    <h2>Fishing Forecast</h2>
     <p>
       Search for a lake, pond, or river to check local weather
       and available water-monitoring information.
@@ -154,6 +154,9 @@ a{color:var(--green)}
         <div class="metric-note">Current conditions</div>
       </div>
     </div>
+
+    <h3 class="section-title">Fishing Outlook</h3>
+    <div class="panel"><div class="location-name" id="fishingRating">Calculating...</div><p class="notice" id="fishingReason">Suggested fishing windows are estimated from weather conditions, not live fish tracking.</p><div class="grid" id="bestTimes"></div></div>
 
     <h3 class="section-title">Five-Day Forecast</h3>
     <div class="grid" id="forecast"></div>
@@ -206,7 +209,7 @@ a{color:var(--green)}
 </main>
 
 <footer>
-  CAST & BLAST | EXPLORE. DISCOVER. RESPECT THE OUTDOORS.
+  FISHBOUND | EXPLORE. DISCOVER. RESPECT THE OUTDOORS.
 </footer>
 
 <script>
@@ -311,6 +314,7 @@ async function loadWeather(lat,lon){
     "https://api.open-meteo.com/v1/forecast?latitude="+lat+
     "&longitude="+lon+
     "&current=temperature_2m,apparent_temperature,precipitation,weather_code,cloud_cover,wind_speed_10m,wind_direction_10m"+
+    "&hourly=temperature_2m,precipitation_probability,wind_speed_10m,cloud_cover,weather_code"+
     "&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code"+
     "&temperature_unit=fahrenheit&wind_speed_unit=mph"+
     "&timezone=auto&forecast_days=5";
@@ -338,6 +342,34 @@ async function loadWeather(lat,lon){
 
   $("precipitation").textContent=
     safeNumber(current.precipitation)+" mm";
+
+  const hourly=data.hourly;
+  const nowIndex=hourly.time.findIndex(t=>new Date(t).getTime()>=Date.now());
+  const candidates=[];
+  for(let i=Math.max(0,nowIndex);i<Math.min(hourly.time.length,Math.max(0,nowIndex)+24);i++){
+    const wind=Number(hourly.wind_speed_10m[i]);
+    const rain=Number(hourly.precipitation_probability[i]);
+    const temp=Number(hourly.temperature_2m[i]);
+    const code=Number(hourly.weather_code[i]);
+    let score=100;
+    if(Number.isFinite(wind)) score-=Math.max(0,wind-5)*3;
+    if(Number.isFinite(rain)) score-=rain*.65;
+    if(Number.isFinite(temp)){if(temp<45||temp>90)score-=15;else if(temp>=55&&temp<=80)score+=5;}
+    if([45,48,51,53,55,61,63,65,71,73,75,80,81,82].includes(code))score-=12;
+    if([95,96,99].includes(code))score-=55;
+    score=Math.max(0,Math.min(100,Math.round(score)));
+    candidates.push({time:hourly.time[i],score,wind,rain,temp,code});
+  }
+  candidates.sort((a,b)=>b.score-a.score);
+  const best=candidates.slice(0,3).sort((a,b)=>new Date(a.time)-new Date(b.time));
+  const topScore=best.length?best.reduce((sum,x)=>sum+x.score,0)/best.length:0;
+  $("fishingRating").textContent=!best.length?"Forecast unavailable":topScore>=75?"Good weather outlook":topScore>=50?"Fair weather outlook":"Challenging weather outlook";
+  $("fishingReason").textContent="Weather-based estimate using wind, precipitation, temperature, and storm conditions. It does not measure fish activity or guarantee a catch. Always check local advisories.";
+  $("bestTimes").innerHTML=best.length?best.map(x=>{
+    const label=new Date(x.time).toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});
+    const rating=x.score>=75?"Good":x.score>=50?"Fair":"Low";
+    return "<div class='metric'><div class='metric-label'>Suggested time</div><div class='metric-value'>"+label+"</div><div class='metric-note'>"+rating+" outlook · "+Math.round(x.wind)+" mph wind · "+Math.round(x.rain)+"% rain chance</div></div>";
+  }).join(""):"No hourly forecast available for this location.";
 
   const daily=data.daily;
   $("forecast").innerHTML="";
