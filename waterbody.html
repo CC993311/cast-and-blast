@@ -5,127 +5,45 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Waterbody Details | Cast & Blast</title>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <style>
 :root {
-  --bg:#101710;
-  --panel:#1b281e;
-  --panel2:#243529;
-  --green:#a9c77b;
-  --white:#f1f4ec;
-  --muted:#aab6a7;
+  --bg:#101710;--panel:#1b281e;--panel2:#243529;
+  --green:#a9c77b;--white:#f1f4ec;--muted:#aab6a7;
   --border:#354735;
 }
-* {box-sizing:border-box;margin:0;padding:0}
-body {
-  background:var(--bg);
-  color:var(--white);
-  font-family:Arial,sans-serif;
-  line-height:1.6;
-}
-header {
-  padding:18px 6%;
-  background:#172319;
-  border-bottom:1px solid var(--border);
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:15px;
-  flex-wrap:wrap;
-}
-.logo {font-size:21px;font-weight:bold;letter-spacing:1px}
-.logo span {color:var(--green)}
-header a,.back {
-  color:var(--green);
-  text-decoration:none;
-  font-weight:bold;
-  font-size:13px;
-}
-main {max-width:1100px;margin:auto;padding:35px 20px 70px}
-.eyebrow {
-  color:var(--green);
-  font-size:11px;
-  letter-spacing:2px;
-  font-weight:bold;
-}
-h1 {font-size:clamp(30px,5vw,46px);margin:8px 0}
-.subtitle {color:var(--muted);margin-bottom:25px}
-.section-title {font-size:21px;margin-bottom:15px}
-.section {margin-top:35px}
-.grid {
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
-  gap:14px;
-}
-.card {
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:9px;
-  padding:20px;
-}
-.card h3 {font-size:14px;color:var(--muted);margin-bottom:8px}
-.value {font-size:25px;font-weight:bold;color:var(--green)}
-.note {font-size:12px;color:var(--muted);margin-top:7px}
-.forecast-day {
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:8px;
-  padding:15px;
-}
-.forecast-day strong {display:block;margin-bottom:8px}
-button {
-  background:var(--green);
-  color:#142016;
-  border:0;
-  border-radius:5px;
-  padding:11px 16px;
-  font-weight:bold;
-  cursor:pointer;
-}
-button.secondary {
-  background:var(--panel2);
-  color:var(--white);
-  border:1px solid var(--border);
-}
-button:disabled {opacity:.5;cursor:not-allowed}
-input,textarea,select {
-  width:100%;
-  background:#111b13;
-  color:var(--white);
-  border:1px solid var(--border);
-  border-radius:5px;
-  padding:12px;
-  margin:7px 0 13px;
-  font:inherit;
-}
-textarea {min-height:95px;resize:vertical}
-label {font-size:13px;color:var(--muted)}
-.form-card {max-width:650px}
-.item {
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:8px;
-  padding:16px;
-  margin-bottom:12px;
-}
-.item p {color:var(--muted);font-size:14px}
-.item strong {color:var(--green)}
-.status {color:var(--muted);font-size:13px;margin-top:10px}
-.empty {color:var(--muted);font-size:14px;padding:10px 0}
-hr {border:0;border-top:1px solid var(--border);margin:18px 0}
-a {color:var(--green)}
-footer {
-  border-top:1px solid var(--border);
-  padding:25px;
-  text-align:center;
-  color:var(--muted);
-  font-size:12px;
-}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--white);font-family:Arial,sans-serif;line-height:1.6}
+header{padding:18px 6%;background:#172319;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
+.logo{font-size:21px;font-weight:bold;letter-spacing:1px}
+.logo span{color:var(--green)}
+header a,.back{color:var(--green);text-decoration:none;font-weight:bold;font-size:13px}
+main{max-width:1100px;margin:auto;padding:35px 20px 70px}
+.eyebrow{color:var(--green);font-size:11px;letter-spacing:2px;font-weight:bold}
+h1{font-size:clamp(30px,5vw,46px);margin:8px 0}
+.subtitle{color:var(--muted);margin-bottom:25px}
+.section{margin-top:35px}
+.section-title{font-size:21px;margin-bottom:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:9px;padding:20px}
+.card h3{font-size:14px;color:var(--muted);margin-bottom:8px}
+.value{font-size:25px;font-weight:bold;color:var(--green)}
+.note,.status{font-size:12px;color:var(--muted);margin-top:7px}
+.forecast-day,.item{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:16px}
+.forecast-day strong,.item strong{color:var(--green)}
+.item{margin-bottom:12px}
+.item p{color:var(--muted);font-size:14px}
+button{background:var(--green);color:#142016;border:0;border-radius:5px;padding:11px 16px;font-weight:bold;cursor:pointer}
+button.secondary{background:var(--panel2);color:var(--white);border:1px solid var(--border)}
+button:disabled{opacity:.5;cursor:not-allowed}
+input,textarea,select{width:100%;background:#111b13;color:var(--white);border:1px solid var(--border);border-radius:5px;padding:12px;margin:7px 0 13px;font:inherit}
+textarea{min-height:95px;resize:vertical}
+label{font-size:13px;color:var(--muted)}
+.form-card{max-width:650px}
+.empty{color:var(--muted);font-size:14px;padding:10px 0}
+footer{border-top:1px solid var(--border);padding:25px;text-align:center;color:var(--muted);font-size:12px}
 </style>
 </head>
-
 <body>
 
 <header>
@@ -134,10 +52,9 @@ footer {
 </header>
 
 <main>
-
 <div class="eyebrow">WATERBODY INFORMATION</div>
 <h1 id="waterName">Waterbody Details</h1>
-<p class="subtitle" id="waterSubtitle">Loading waterbody information...</p>
+<p class="subtitle" id="waterSubtitle">Loading information...</p>
 
 <div class="grid">
   <div class="card">
@@ -150,63 +67,35 @@ footer {
   </div>
   <div class="card">
     <h3>Community Reports</h3>
-    <div class="value" id="catchCount">--</div>
+    <div class="value" id="catchCount">0 reports</div>
   </div>
 </div>
 
 <div class="section">
   <h2 class="section-title">Current Weather</h2>
   <div class="grid">
-    <div class="card">
-      <h3>Temperature</h3>
-      <div class="value" id="temperature">--</div>
-    </div>
-    <div class="card">
-      <h3>Conditions</h3>
-      <div class="value" id="conditions" style="font-size:19px">--</div>
-    </div>
-    <div class="card">
-      <h3>Wind Speed</h3>
-      <div class="value" id="wind">--</div>
-    </div>
-    <div class="card">
-      <h3>Wind Direction</h3>
-      <div class="value" id="windDirection">--</div>
-    </div>
+    <div class="card"><h3>Temperature</h3><div class="value" id="temperature">--</div></div>
+    <div class="card"><h3>Conditions</h3><div class="value" id="conditions" style="font-size:19px">--</div></div>
+    <div class="card"><h3>Wind Speed</h3><div class="value" id="wind">--</div></div>
+    <div class="card"><h3>Wind Direction</h3><div class="value" id="windDirection">--</div></div>
   </div>
   <p class="status" id="weatherStatus">Weather data loading...</p>
 </div>
 
 <div class="section">
   <h2 class="section-title">Five-Day Forecast</h2>
-  <div class="grid" id="forecast">
-    <p class="empty">Loading forecast...</p>
-  </div>
+  <div class="grid" id="forecast"><p class="empty">Loading forecast...</p></div>
 </div>
 
 <div class="section">
   <h2 class="section-title">Water Conditions</h2>
   <div class="grid">
-    <div class="card">
-      <h3>Water Temperature</h3>
-      <div class="value" id="waterTemperature">--</div>
-    </div>
-    <div class="card">
-      <h3>Water Level</h3>
-      <div class="value" id="waterLevel">--</div>
-    </div>
-    <div class="card">
-      <h3>River Flow</h3>
-      <div class="value" id="riverFlow">--</div>
-    </div>
-    <div class="card">
-      <h3>Water Clarity</h3>
-      <div class="value" id="clarity">--</div>
-    </div>
+    <div class="card"><h3>Water Temperature</h3><div class="value" id="waterTemperature">Checking...</div></div>
+    <div class="card"><h3>Water Level</h3><div class="value" id="waterLevel">Checking...</div></div>
+    <div class="card"><h3>River Flow</h3><div class="value" id="riverFlow">Checking...</div></div>
+    <div class="card"><h3>Water Clarity</h3><div class="value" id="clarity">Not reported</div></div>
   </div>
-  <p class="status" id="waterStatus">
-    Water measurements depend on nearby monitoring stations.
-  </p>
+  <p class="status" id="waterStatus">Checking nearby monitoring stations...</p>
 </div>
 
 <div class="section">
@@ -217,7 +106,7 @@ footer {
 <div class="section">
   <h2 class="section-title">Favorites</h2>
   <div class="card">
-    <p id="favoriteStatus" class="status">Sign in to save this waterbody to your Favorites.</p>
+    <p id="favoriteStatus" class="status">Sign in to save this waterbody.</p>
     <button id="favoriteButton" type="button">Save to Favorites</button>
   </div>
 </div>
@@ -227,12 +116,12 @@ footer {
   <div class="grid">
     <div class="card">
       <h3>Average Rating</h3>
-      <div class="value" id="averageRating">--</div>
-      <p class="note" id="ratingCount">No reviews yet</p>
+      <div class="value" id="averageRating">No ratings yet</div>
+      <p class="note" id="ratingCount">0 reviews</p>
     </div>
   </div>
   <div id="reviewList" style="margin-top:15px">
-    <p class="empty">Loading reviews...</p>
+    <p class="empty">Be the first to review this waterbody!</p>
   </div>
 </div>
 
@@ -240,18 +129,14 @@ footer {
   <h2 class="section-title">Account</h2>
   <div class="card form-card">
     <p id="authStatus" class="status">Checking sign-in status...</p>
-
     <div id="authForms">
       <label>Email</label>
       <input id="email" type="email" placeholder="Your email">
-
       <label>Password</label>
       <input id="password" type="password" placeholder="Your password">
-
       <button id="signInButton" type="button">Sign In</button>
       <button id="signUpButton" type="button" class="secondary">Create Account</button>
     </div>
-
     <button id="signOutButton" type="button" class="secondary" hidden>Sign Out</button>
   </div>
 </div>
@@ -267,95 +152,70 @@ footer {
       <option value="2">2 - Fair</option>
       <option value="1">1 - Poor</option>
     </select>
-
     <label>Your Review</label>
     <textarea id="reviewText" placeholder="Share your experience..."></textarea>
-
     <button id="submitReview" type="button">Submit Review</button>
     <p class="status" id="reviewMessage"></p>
   </div>
 </div>
-
 </main>
 
-<footer>
-  CAST & BLAST | EXPLORE. DISCOVER. RESPECT THE OUTDOORS.
-</footer>
+<footer>CAST & BLAST | EXPLORE. DISCOVER. RESPECT THE OUTDOORS.</footer>
 
 <script>
-const SUPABASE_URL = "https://ubnmhqxitiigsctbsmqy.supabase.co";
-const SUPABASE_KEY = "sb_publishable_g-6tScB0HFIVcVkAhCN5Ug_fpm-jFrq";
+const SUPABASE_URL="https://ubnmhqxitiigsctbsmqy.supabase.co";
+const SUPABASE_KEY="sb_publishable_g-6tScB0HFIVcVkAhCN5Ug_fpm-jFrq";
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const params=new URLSearchParams(location.search);
 
-const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const waterName=params.get("name")||params.get("waterbody_name")||"Selected Waterbody";
+const rawType=(params.get("type")||params.get("waterbody_type")||"lake").toLowerCase();
+const waterType=rawType.includes("river")||rawType.includes("stream")?"river":"lake";
+const waterId=params.get("id")||params.get("waterbody_id")||"";
+const lat=Number(params.get("lat")||params.get("latitude"));
+const lon=Number(params.get("lon")||params.get("longitude"));
 
-const params = new URLSearchParams(location.search);
+let currentUser=null;
+let currentLakeRecord=null;
+let isFavorite=false;
 
-const waterName = params.get("name") || params.get("waterbody_name") || "Selected Waterbody";
-const rawType = (params.get("type") || params.get("waterbody_type") || "lake").toLowerCase();
-const waterType = rawType.includes("river") || rawType.includes("stream") ? "river" : "lake";
-const waterId = params.get("id") || params.get("waterbody_id") || "";
-const lat = Number(params.get("lat") || params.get("latitude"));
-const lon = Number(params.get("lon") || params.get("longitude"));
+const $=id=>document.getElementById(id);
+const setText=(id,value)=>$(id).textContent=value;
 
-let currentUser = null;
-let currentLakeRecord = null;
-let isFavorite = false;
-
-const $ = id => document.getElementById(id);
-
-function setText(id, value) {
-  $(id).textContent = value;
+function safeNumber(value,digits=1){
+  const n=Number(value);
+  return Number.isFinite(n)?n.toFixed(digits):"--";
 }
 
-function safeNumber(value, digits = 1) {
-  const n = Number(value);
-  return Number.isFinite(n) ? n.toFixed(digits) : "--";
-}
-
-function weatherDescription(code) {
-  const descriptions = {
-    0:"Clear",
-    1:"Mostly Clear",
-    2:"Partly Cloudy",
-    3:"Cloudy",
-    45:"Fog",
-    48:"Fog",
-    51:"Light Drizzle",
-    53:"Drizzle",
-    55:"Heavy Drizzle",
-    61:"Light Rain",
-    63:"Rain",
-    65:"Heavy Rain",
-    71:"Light Snow",
-    73:"Snow",
-    75:"Heavy Snow",
-    80:"Rain Showers",
-    81:"Rain Showers",
-    82:"Heavy Rain Showers",
-    95:"Thunderstorms",
-    96:"Thunderstorms",
-    99:"Thunderstorms"
+function weatherDescription(code){
+  const descriptions={
+    0:"Clear",1:"Mostly Clear",2:"Partly Cloudy",3:"Cloudy",
+    45:"Fog",48:"Fog",51:"Light Drizzle",53:"Drizzle",
+    55:"Heavy Drizzle",61:"Light Rain",63:"Rain",65:"Heavy Rain",
+    71:"Light Snow",73:"Snow",75:"Heavy Snow",80:"Rain Showers",
+    81:"Rain Showers",82:"Heavy Rain Showers",95:"Thunderstorms",
+    96:"Thunderstorms",99:"Thunderstorms"
   };
-  return descriptions[code] || "Conditions unavailable";
+  return descriptions[code]||"Conditions unavailable";
 }
 
-function directionName(degrees) {
-  if (!Number.isFinite(Number(degrees))) return "--";
-  const directions = ["N","NE","E","SE","S","SW","W","NW"];
-  return directions[Math.round(Number(degrees) / 45) % 8];
+function directionName(degrees){
+  if(!Number.isFinite(Number(degrees)))return "--";
+  const directions=["N","NE","E","SE","S","SW","W","NW"];
+  return directions[Math.round(Number(degrees)/45)%8];
 }
 
-async function loadWeather() {
-  if (!Number.isFinite(lat) || !Number.isFinite(lon) || !params.has("lat") && !params.has("latitude")) {
+async function loadWeather(){
+  if(!Number.isFinite(lat)||!Number.isFinite(lon)||
+     (!params.has("lat")&&!params.has("latitude"))){
     setText("weatherStatus","Coordinates were not provided by the map.");
-    setText("forecast","Forecast unavailable");
+    $("forecast").innerHTML='<p class="empty">Forecast unavailable.</p>';
     return;
   }
 
-  const url = new URL("https://api.open-meteo.com/v1/forecast");
-  url.search = new URLSearchParams({
-    latitude:lat,
-    longitude:lon,
+  const url=new URL("https://api.open-meteo.com/v1/forecast");
+  url.search=new URLSearchParams({
+    latitude:lat,longitude:lon,
     current:"temperature_2m,weather_code,wind_speed_10m,wind_direction_10m",
     daily:"weather_code,temperature_2m_max,temperature_2m_min",
     forecast_days:"5",
@@ -364,353 +224,336 @@ async function loadWeather() {
     timezone:"auto"
   });
 
-  try {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error("Weather service unavailable");
-    const data = await response.json();
-    const c = data.current;
-
-    setText("temperature",safeNumber(c.temperature_2m) + " °F");
+  try{
+    const response=await fetch(url);
+    if(!response.ok)throw new Error("Weather service unavailable");
+    const data=await response.json();
+    const c=data.current;
+    setText("temperature",safeNumber(c.temperature_2m)+" °F");
     setText("conditions",weatherDescription(c.weather_code));
-    setText("wind",safeNumber(c.wind_speed_10m) + " mph");
+    setText("wind",safeNumber(c.wind_speed_10m)+" mph");
     setText("windDirection",directionName(c.wind_direction_10m));
     setText("weatherStatus","Weather information from Open-Meteo.");
 
-    $("forecast").innerHTML = "";
-    data.daily.time.forEach((date,index) => {
-      const day = document.createElement("div");
-      day.className = "forecast-day";
-      const dateLabel = new Date(date + "T12:00:00").toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"});
-      day.innerHTML = `
-        <strong>${dateLabel}</strong>
-        <div>${weatherDescription(data.daily.weather_code[index])}</div>
-        <div class="note">High: ${safeNumber(data.daily.temperature_2m_max[index])} °F</div>
-        <div class="note">Low: ${safeNumber(data.daily.temperature_2m_min[index])} °F</div>
-      `;
+    $("forecast").innerHTML="";
+    data.daily.time.forEach((date,index)=>{
+      const day=document.createElement("div");
+      day.className="forecast-day";
+      const dateLabel=new Date(date+"T12:00:00").toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"});
+      const heading=document.createElement("strong");
+      heading.textContent=dateLabel;
+      const condition=document.createElement("div");
+      condition.textContent=weatherDescription(data.daily.weather_code[index]);
+      const high=document.createElement("p");
+      high.className="note";
+      high.textContent="High: "+safeNumber(data.daily.temperature_2m_max[index])+" °F";
+      const low=document.createElement("p");
+      low.className="note";
+      low.textContent="Low: "+safeNumber(data.daily.temperature_2m_min[index])+" °F";
+      day.append(heading,condition,high,low);
       $("forecast").appendChild(day);
     });
-  } catch(error) {
+  }catch(error){
     setText("weatherStatus","Weather data is currently unavailable.");
-    $("forecast").innerHTML = '<p class="empty">Forecast unavailable.</p>';
+    $("forecast").innerHTML='<p class="empty">Forecast unavailable.</p>';
   }
 }
 
-async function loadWaterConditions() {
-  if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
-    setText("waterStatus","Coordinates are needed to find nearby monitoring stations.");
+async function loadWaterConditions(){
+  if(!Number.isFinite(lat)||!Number.isFinite(lon)){
+    setWaterUnavailable("Coordinates are needed to search for nearby monitoring stations.");
     return;
   }
 
-  try {
-    const box = [
-      lon - 0.35,
-      lat - 0.35,
-      lon + 0.35,
-      lat + 0.35
-    ].join(",");
+  try{
+    const box=[lon-0.35,lat-0.35,lon+0.35,lat+0.35].join(",");
+    const url="https://waterservices.usgs.gov/nwis/iv/?format=json&bBox="+
+      encodeURIComponent(box)+"&parameterCd=00010,00060,00065&siteStatus=active";
 
-    const url = "https://waterservices.usgs.gov/nwis/iv/?format=json&bBox=" +
-      encodeURIComponent(box) +
-      "&parameterCd=00010,00060,00065&siteStatus=active";
+    const response=await fetch(url);
+    if(!response.ok)throw new Error("USGS unavailable");
+    const data=await response.json();
+    const series=data.value.timeSeries||[];
 
-    const response = await fetch(url);
-    if (!response.ok) throw new Error("USGS unavailable");
+    let foundTemperature=false,foundLevel=false,foundFlow=false;
 
-    const data = await response.json();
-    const series = data.value.timeSeries || [];
-    let foundTemperature = false;
-    let foundLevel = false;
-    let foundFlow = false;
+    for(const item of series){
+      const code=item.variable.variableCode[0].value;
+      const values=item.values[0].value;
+      const latest=[...values].reverse().find(v=>v.value!=="-999999");
+      if(!latest)continue;
 
-    for (const item of series) {
-      const code = item.variable.variableCode[0].value;
-      const values = item.values[0].value;
-      const latest = [...values].reverse().find(v => v.value !== "-999999");
-
-      if (!latest) continue;
-
-      if (code === "00010" && !foundTemperature) {
-        setText("waterTemperature",safeNumber(latest.value) + " °C");
-        foundTemperature = true;
+      if(code==="00010"&&!foundTemperature){
+        setText("waterTemperature",safeNumber(latest.value)+" °C");
+        foundTemperature=true;
       }
-      if (code === "00060" && !foundFlow) {
-        setText("riverFlow",safeNumber(latest.value) + " ft³/s");
-        foundFlow = true;
+      if(code==="00060"&&!foundFlow){
+        setText("riverFlow",safeNumber(latest.value)+" ft³/s");
+        foundFlow=true;
       }
-      if (code === "00065" && !foundLevel) {
-        setText("waterLevel",safeNumber(latest.value) + " ft");
-        foundLevel = true;
+      if(code==="00065"&&!foundLevel){
+        setText("waterLevel",safeNumber(latest.value)+" ft");
+        foundLevel=true;
       }
     }
 
+    if(!foundTemperature)setText("waterTemperature","No nearby data");
+    if(!foundLevel)setText("waterLevel","No nearby data");
+    if(!foundFlow)setText("riverFlow","No nearby data");
+
     setText("clarity","Not reported");
-    setText("waterStatus","Nearby USGS measurements are shown when available. Measurements may be from a nearby station, not the exact waterbody.");
+    setText("waterStatus","USGS measurements are from nearby monitoring stations when available. They may not represent the exact waterbody.");
 
-    if (!foundTemperature) setText("waterTemperature","Unavailable");
-    if (!foundLevel) setText("waterLevel","Unavailable");
-    if (!foundFlow) setText("riverFlow","Unavailable");
-
-  } catch(error) {
-    setText("waterStatus","Nearby water measurements are currently unavailable.");
-    setText("waterTemperature","Unavailable");
-    setText("waterLevel","Unavailable");
-    setText("riverFlow","Unavailable");
+    if(!foundTemperature&&!foundLevel&&!foundFlow){
+      setText("waterStatus","No active nearby USGS measurements were found. This does not mean the waterbody has poor conditions.");
+    }
+  }catch(error){
+    setWaterUnavailable("The USGS monitoring service could not be reached. Try again later.");
   }
 }
 
-async function loadCatches() {
-  if (!waterId) {
-    $("catchList").innerHTML = '<p class="empty">A waterbody ID was not provided.</p>';
-    setText("catchCount","--");
+function setWaterUnavailable(message){
+  setText("waterTemperature","No nearby data");
+  setText("waterLevel","No nearby data");
+  setText("riverFlow","No nearby data");
+  setText("clarity","Not reported");
+  setText("waterStatus",message);
+}
+
+async function loadCatches(){
+  if(!waterId){
+    setText("catchCount","0 reports");
+    $("catchList").innerHTML='<p class="empty">No waterbody ID was provided.</p>';
     return;
   }
 
-  const {data,error} = await db
-    .from("catch_reports")
+  const {data,error}=await db.from("catch_reports")
     .select("*")
     .eq("waterbody_type",waterType)
     .eq("waterbody_id",waterId)
     .order("created_at",{ascending:false})
     .limit(30);
 
-  if (error) {
-    $("catchList").innerHTML = '<p class="empty">Could not load catch reports.</p>';
-    setText("catchCount","--");
+  if(error){
+    setText("catchCount","Unavailable");
+    $("catchList").innerHTML='<p class="empty">Could not load catch reports. Database message: '+error.message+'</p>';
     return;
   }
 
-  setText("catchCount",data.length);
+  setText("catchCount",data.length+" reports");
 
-  if (!data.length) {
-    $("catchList").innerHTML = '<p class="empty">No catches have been reported here yet.</p>';
+  if(!data.length){
+    $("catchList").innerHTML='<p class="empty">No catches have been reported here yet. Be the first to share a catch!</p>';
     return;
   }
 
-  $("catchList").innerHTML = "";
-  data.forEach(report => {
-    const item = document.createElement("div");
-    item.className = "item";
-
-    const title = document.createElement("strong");
-    title.textContent = report.species || "Unspecified species";
-
-    const details = document.createElement("p");
-    details.textContent =
-      "Caught: " + (report.caught_at || "Date not provided") +
-      " | Reported by: " + (report.display_name || "Community member");
-
-    const notes = document.createElement("p");
-    notes.textContent = report.notes || "";
-
+  $("catchList").innerHTML="";
+  data.forEach(report=>{
+    const item=document.createElement("div");
+    item.className="item";
+    const title=document.createElement("strong");
+    title.textContent=report.species||"Unspecified species";
+    const details=document.createElement("p");
+    details.textContent="Caught: "+(report.caught_at||"Date not provided")+" | Reported by: "+(report.display_name||"Community member");
+    const notes=document.createElement("p");
+    notes.textContent=report.notes||"";
     item.append(title,details,notes);
 
-    if (report.image_url) {
-      const link = document.createElement("a");
-      link.href = report.image_url;
-      link.target = "_blank";
-      link.rel = "noopener";
-      link.textContent = "View catch photo";
+    if(report.image_url){
+      const link=document.createElement("a");
+      link.href=report.image_url;
+      link.target="_blank";
+      link.rel="noopener";
+      link.textContent="View catch photo";
       item.appendChild(link);
     }
-
     $("catchList").appendChild(item);
   });
 }
 
-async function findLakeRecord() {
-  if (waterType !== "lake" || !waterId) return null;
+async function findLakeRecord(){
+  if(waterType!=="lake"||!waterId)return null;
 
-  const {data,error} = await db
-    .from("lakes")
+  const {data,error}=await db.from("lakes")
     .select("id,waterbody_id,name")
     .eq("waterbody_id",waterId)
     .maybeSingle();
 
-  if (!error) currentLakeRecord = data;
-  return currentLakeRecord;
+  if(error){
+    console.error("Lake lookup error:",error);
+    return null;
+  }
+  currentLakeRecord=data;
+  return data;
 }
 
-async function loadReviews() {
-  const lake = await findLakeRecord();
+async function loadReviews(){
+  const lake=await findLakeRecord();
 
-  if (!lake) {
-    $("reviewList").innerHTML =
-      '<p class="empty">Reviews are currently available for lakes with a matching database record.</p>';
+  if(!lake){
+    setText("averageRating","No ratings yet");
+    setText("ratingCount","0 reviews");
+    $("reviewList").innerHTML='<p class="empty">No reviews are available yet for this waterbody.</p>';
     return;
   }
 
-  const {data,error} = await db
-    .from("reviews")
+  const {data,error}=await db.from("reviews")
     .select("*")
     .eq("lake_id",lake.id)
     .order("created_at",{ascending:false})
     .limit(30);
 
-  if (error) {
-    $("reviewList").innerHTML = '<p class="empty">Could not load reviews.</p>';
+  if(error){
+    setText("averageRating","Unavailable");
+    setText("ratingCount","Could not load reviews");
+    $("reviewList").innerHTML='<p class="empty">Review database error: '+error.message+'</p>';
     return;
   }
 
-  if (!data.length) {
-    setText("averageRating","--");
-    setText("ratingCount","No reviews yet");
-    $("reviewList").innerHTML = '<p class="empty">Be the first to review this lake.</p>';
+  if(!data.length){
+    setText("averageRating","No ratings yet");
+    setText("ratingCount","0 reviews");
+    $("reviewList").innerHTML='<p class="empty">Be the first to review this lake!</p>';
     return;
   }
 
-  const average = data.reduce((sum,r) => sum + Number(r.rating),0) / data.length;
-  setText("averageRating",average.toFixed(1) + " / 5");
-  setText("ratingCount",data.length + " review(s)");
+  const average=data.reduce((sum,r)=>sum+Number(r.rating),0)/data.length;
+  setText("averageRating",average.toFixed(1)+" / 5");
+  setText("ratingCount",data.length+" reviews");
 
-  $("reviewList").innerHTML = "";
-  data.forEach(review => {
-    const item = document.createElement("div");
-    item.className = "item";
-
-    const heading = document.createElement("strong");
-    heading.textContent = Number(review.rating) + " / 5 stars";
-
-    const author = document.createElement("p");
-    author.textContent = "By " + (review.display_name || "Community member");
-
-    const body = document.createElement("p");
-    body.textContent = review.review_text || "";
-
+  $("reviewList").innerHTML="";
+  data.forEach(review=>{
+    const item=document.createElement("div");
+    item.className="item";
+    const heading=document.createElement("strong");
+    heading.textContent=Number(review.rating)+" / 5 stars";
+    const author=document.createElement("p");
+    author.textContent="By "+(review.display_name||"Community member");
+    const body=document.createElement("p");
+    body.textContent=review.review_text||"";
     item.append(heading,author,body);
     $("reviewList").appendChild(item);
   });
 }
 
-async function updateAuth() {
-  const {data} = await db.auth.getSession();
-  currentUser = data.session?.user || null;
+async function updateAuth(){
+  const {data}=await db.auth.getSession();
+  currentUser=data.session?.user||null;
 
   setText("authStatus",currentUser
-    ? "Signed in as " + currentUser.email
-    : "You are not signed in. Sign in or create an account to post reviews and save Favorites.");
+    ?"Signed in as "+currentUser.email
+    :"You are not signed in. Sign in or create an account to post reviews and save Favorites.");
 
-  $("authForms").hidden = !!currentUser;
-  $("signOutButton").hidden = !currentUser;
-
+  $("authForms").hidden=!!currentUser;
+  $("signOutButton").hidden=!currentUser;
   await updateFavorite();
 }
 
-async function updateFavorite() {
-  if (!currentUser || !waterId) {
-    $("favoriteButton").disabled = true;
+async function updateFavorite(){
+  if(!currentUser||!waterId){
+    $("favoriteButton").disabled=true;
     setText("favoriteStatus","Sign in to save this waterbody to your Favorites.");
     return;
   }
 
-  $("favoriteButton").disabled = false;
+  $("favoriteButton").disabled=false;
 
-  const {data,error} = await db
-    .from("favorites")
+  const {data,error}=await db.from("favorites")
     .select("id")
     .eq("user_id",currentUser.id)
     .eq("waterbody_type",waterType)
     .eq("waterbody_id",waterId)
     .maybeSingle();
 
-  if (error) {
+  if(error){
     setText("favoriteStatus","Could not check Favorites.");
     return;
   }
 
-  isFavorite = !!data;
-  setText("favoriteButton",isFavorite ? "Remove from Favorites" : "Save to Favorites");
-  setText("favoriteStatus",isFavorite ? "This waterbody is saved to your Favorites." : "This waterbody is not saved yet.");
+  isFavorite=!!data;
+  setText("favoriteButton",isFavorite?"Remove from Favorites":"Save to Favorites");
+  setText("favoriteStatus",isFavorite?"This waterbody is saved to your Favorites.":"This waterbody is not saved yet.");
 }
 
-async function toggleFavorite() {
-  if (!currentUser || !waterId) return;
+async function toggleFavorite(){
+  if(!currentUser||!waterId)return;
 
-  if (isFavorite) {
-    const {error} = await db.from("favorites")
-      .delete()
+  if(isFavorite){
+    const {error}=await db.from("favorites").delete()
       .eq("user_id",currentUser.id)
       .eq("waterbody_type",waterType)
       .eq("waterbody_id",waterId);
-
-    if (error) {
-      setText("favoriteStatus","Could not remove Favorite: " + error.message);
+    if(error){
+      setText("favoriteStatus","Could not remove Favorite: "+error.message);
       return;
     }
-  } else {
-    const {error} = await db.from("favorites").insert({
+  }else{
+    const {error}=await db.from("favorites").insert({
       user_id:currentUser.id,
       waterbody_type:waterType,
       waterbody_id:waterId,
       waterbody_name:waterName,
-      latitude:Number.isFinite(lat) ? lat : null,
-      longitude:Number.isFinite(lon) ? lon : null
+      latitude:Number.isFinite(lat)?lat:null,
+      longitude:Number.isFinite(lon)?lon:null
     });
-
-    if (error) {
-      setText("favoriteStatus","Could not save Favorite: " + error.message);
+    if(error){
+      setText("favoriteStatus","Could not save Favorite: "+error.message);
       return;
     }
   }
-
   await updateFavorite();
 }
 
-async function signIn() {
-  const email = $("email").value.trim();
-  const password = $("password").value;
-
-  const {error} = await db.auth.signInWithPassword({email,password});
-  if (error) {
+async function signIn(){
+  const email=$("email").value.trim();
+  const password=$("password").value;
+  const {error}=await db.auth.signInWithPassword({email,password});
+  if(error){
     setText("authStatus",error.message);
     return;
   }
   await updateAuth();
 }
 
-async function signUp() {
-  const email = $("email").value.trim();
-  const password = $("password").value;
-
-  const {error} = await db.auth.signUp({
-    email,
-    password,
-    options:{
-      emailRedirectTo:location.origin + "/cast-and-blast/map.html"
-    }
+async function signUp(){
+  const email=$("email").value.trim();
+  const password=$("password").value;
+  const {error}=await db.auth.signUp({
+    email,password,
+    options:{emailRedirectTo:location.origin+"/cast-and-blast/map.html"}
   });
-
-  setText("authStatus",error ? error.message : "Account created. Check your email if confirmation is required.");
+  setText("authStatus",error?error.message:"Account created. Check your email if confirmation is required.");
 }
 
-async function signOut() {
+async function signOut(){
   await db.auth.signOut();
   await updateAuth();
 }
 
-async function submitReview() {
-  if (!currentUser) {
+async function submitReview(){
+  if(!currentUser){
     setText("reviewMessage","Please sign in before submitting a review.");
     return;
   }
 
-  const lake = await findLakeRecord();
-  if (!lake) {
+  const lake=await findLakeRecord();
+  if(!lake){
     setText("reviewMessage","A matching lake record could not be found.");
     return;
   }
 
-  const rating = Number($("reviewRating").value);
-  const reviewText = $("reviewText").value.trim();
+  const rating=Number($("reviewRating").value);
+  const reviewText=$("reviewText").value.trim();
 
-  if (!reviewText) {
+  if(!reviewText){
     setText("reviewMessage","Please write a review first.");
     return;
   }
 
-  const displayName = currentUser.user_metadata?.display_name ||
-    currentUser.email?.split("@")[0] || "Community member";
+  const displayName=currentUser.user_metadata?.display_name||
+    currentUser.email?.split("@")[0]||"Community member";
 
-  const {error} = await db.from("reviews").insert({
+  const {error}=await db.from("reviews").insert({
     lake_id:lake.id,
     rating,
     review_text:reviewText,
@@ -718,26 +561,26 @@ async function submitReview() {
     display_name:displayName
   });
 
-  if (error) {
-    setText("reviewMessage","Could not submit review: " + error.message);
+  if(error){
+    setText("reviewMessage","Could not submit review: "+error.message);
     return;
   }
 
-  $("reviewText").value = "";
+  $("reviewText").value="";
   setText("reviewMessage","Your review was submitted.");
   await loadReviews();
 }
 
-function initializePage() {
+function initializePage(){
   setText("waterName",waterName);
-  setText("waterType",waterType === "river" ? "River / Stream" : "Lake / Pond");
-  setText("coordinates",Number.isFinite(lat) && Number.isFinite(lon)
-    ? lat.toFixed(4) + ", " + lon.toFixed(4)
-    : "Not provided");
+  setText("waterType",waterType==="river"?"River / Stream":"Lake / Pond");
+  setText("coordinates",Number.isFinite(lat)&&Number.isFinite(lon)
+    ?lat.toFixed(4)+", "+lon.toFixed(4)
+    :"Not provided");
 
   setText("waterSubtitle",waterId
-    ? "Waterbody ID: " + waterId
-    : "Waterbody ID was not provided by the map.");
+    ?"Waterbody ID: "+waterId
+    :"Waterbody ID was not provided by the map.");
 
   loadWeather();
   loadWaterConditions();
@@ -752,12 +595,11 @@ $("signOutButton").addEventListener("click",signOut);
 $("favoriteButton").addEventListener("click",toggleFavorite);
 $("submitReview").addEventListener("click",submitReview);
 
-db.auth.onAuthStateChange(() => {
+db.auth.onAuthStateChange(()=>{
   setTimeout(updateAuth,0);
 });
 
 initializePage();
 </script>
-
 </body>
 </html>
