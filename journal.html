@@ -32,44 +32,13 @@ const qs=new URLSearchParams(location.search);
  if(error){document.getElementById("status").textContent="Could not load your journal: "+error.message;return;}
  const rows=c||[],saved=identifications||[],species=new Set(rows.map(x=>x.species).filter(Boolean)).size,photos=rows.filter(x=>x.image_url).length;
  document.getElementById("stats").innerHTML=[[""+rows.length,"Total catches"],[""+species,"Different catch species"],[""+photos,"Catch photos"],[""+saved.length,"AI identifications"]].map(x=>"<div class='stat'><strong>"+x[0]+"</strong><span>"+x[1]+"</span></div>").join("");
- document.getElementById("entries").innerHTML=rows.length?rows.map(x=>"<article class='catch-card'><div class='row'><strong>"+esc(x.species)+"</strong><span class='catch-meta'>"+esc(dateText(x.caught_at))+"</span></div><div class='catch-meta'>"+esc(x.waterbody_name||"Fishing location not listed")+"</div>"+(x.notes?"<p>"+esc(x.notes)+"</p>":"")+(safePhoto(x.image_url)?"<img src='"+esc(safePhoto(x.image_url))+"' alt='Catch photo' loading='lazy'>":"")+"<div class='row' style='justify-content:flex-end;margin-top:10px'><button class='edit-catch secondary' data-id='"+esc(x.id)+"' type='button'>Edit Catch</button><button class='delete-catch' data-id='"+esc(x.id)+"' type='button' style='background:#8b3939'>Delete Catch</button></div></article>").join(""):"Your catch log is empty. Share your first catch from Fishing Locations!";
+ document.getElementById("entries").innerHTML=rows.length?rows.map(x=>"<article class='catch-card'><div class='row'><strong>"+esc(x.species)+"</strong><span class='catch-meta'>"+esc(dateText(x.caught_at))+"</span></div><div class='catch-meta'>"+esc(x.waterbody_name||"Fishing location not listed")+"</div>"+(x.notes?"<p>"+esc(x.notes)+"</p>":"")+(safePhoto(x.image_url)?"<img src='"+esc(safePhoto(x.image_url))+"' alt='Catch photo' loading='lazy'>":"")+"<div class='row' style='justify-content:flex-end;margin-top:10px'><button class='delete-catch' data-id='"+esc(x.id)+"' type='button' style='background:#8b3939'>Delete Catch</button></div></article>").join(""):"Your catch log is empty. Share your first catch from Fishing Locations!";
  const identifiedRoot=document.getElementById("identifiedEntries");
  if(identificationError){
   identifiedRoot.textContent="Could not load saved identifications: "+identificationError.message;
  }else{
   identifiedRoot.innerHTML=saved.length?saved.map(x=>"<article class='catch-card'><div class='row'><strong>"+esc(x.species)+"</strong><span class='catch-meta'>"+esc(new Date(x.identified_at).toLocaleString())+"</span></div>"+(x.scientific_name?"<div class='catch-meta'>"+esc(x.scientific_name)+"</div>":"")+(x.confidence!==null&&x.confidence!==undefined?"<div class='catch-meta'>AI confidence: "+esc(x.confidence)+"%</div>":"")+(safePhoto(x.image_url)?"<img src='"+esc(safePhoto(x.image_url))+"' alt='Identified fish photo' loading='lazy'>":"")+"<div class='row' style='justify-content:flex-end;margin-top:10px'><button class='delete-identification' data-id='"+esc(x.id)+"' type='button' style='background:#8b3939'>Delete Identification</button></div></article>").join(""):"No AI identifications saved yet. Identify a fish and choose Save to Journal.";
  }
- document.addEventListener("click",async event=>{
-  const editButton=event.target.closest(".edit-catch");
-  if(!editButton)return;
-  const id=editButton.dataset.id;
-  const current=rows.find(x=>String(x.id)===String(id));
-  if(!current)return;
-  const speciesValue=prompt("Fish species:",current.species||"");
-  if(speciesValue===null)return;
-  const species=speciesValue.trim();
-  if(!species){alert("Please enter a fish species.");return;}
-  const locationValue=prompt("Fishing location:",current.waterbody_name||"");
-  if(locationValue===null)return;
-  const waterbodyName=locationValue.trim();
-  if(!waterbodyName){alert("Please enter a fishing location.");return;}
-  const dateValue=prompt("Date caught (YYYY-MM-DD):",current.caught_at?String(current.caught_at).slice(0,10):"");
-  if(dateValue===null)return;
-  const caughtAt=dateValue.trim();
-  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(caughtAt)||Number.isNaN(Date.parse(caughtAt+"T12:00:00"))){alert("Please enter the date as YYYY-MM-DD.");return;}
-  const notesValue=prompt("Notes (optional):",current.notes||"");
-  if(notesValue===null)return;
-  editButton.disabled=true;editButton.textContent="Saving…";
-  const {data:updated,error:updateError}=await db.from("catch_reports").update({
-   species,waterbody_name:waterbodyName,caught_at:caughtAt,notes:notesValue.trim()||null
-  }).eq("id",id).eq("user_id",user.id).select("id");
-  if(updateError||!updated||updated.length===0){
-   document.getElementById("status").textContent="Could not update catch: "+(updateError?.message||"No record was updated. Check your permissions.");
-   editButton.disabled=false;editButton.textContent="Edit Catch";
-   return;
-  }
-  location.reload();
- });
  document.addEventListener("click",async event=>{
   const catchButton=event.target.closest(".delete-catch");
   const identificationButton=event.target.closest(".delete-identification");
