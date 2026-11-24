@@ -158,6 +158,13 @@ a{color:var(--green)}
     <h3 class="section-title">Fishing Outlook</h3>
     <div class="panel"><div class="location-name" id="fishingRating">Calculating...</div><p class="notice" id="fishingReason">Suggested fishing windows are estimated from weather conditions, not live fish tracking.</p><div class="grid" id="bestTimes"></div></div>
 
+    <h3 class="section-title">Species to Consider</h3>
+    <div class="panel">
+      <p class="notice" id="speciesReason">Suggestions are based on the season, broad region, and current weather.</p>
+      <div class="grid" id="speciesSuggestions"></div>
+      <p class="notice">These are general suggestions, not live fish-location data. Species availability varies by individual waterbody. Check local fishing regulations, seasons, and advisories before fishing.</p>
+    </div>
+
     <h3 class="section-title">Five-Day Forecast</h3>
     <div class="grid" id="forecast"></div>
 
@@ -284,6 +291,7 @@ async function searchPlace(){
     const place=geoData.results[0];
     const lat=Number(place.latitude);
     const lon=Number(place.longitude);
+    window.forecastPlace=place;
 
     $("placeName").textContent=place.name;
     $("placeDetail").textContent=
@@ -309,6 +317,75 @@ async function searchPlace(){
   }
 }
 
+function renderSpeciesSuggestions(place,current){
+  const month=new Date().getMonth()+1;
+  const state=String(place.admin1||"").toLowerCase();
+  const country=String(place.country||"").toLowerCase();
+  const temp=Number(current.temperature_2m);
+  const wind=Number(current.wind_speed_10m);
+  const code=Number(current.weather_code);
+  const northern=["washington","oregon","california","nevada","idaho","montana","wyoming","utah","colorado","arizona","new mexico","alaska","hawaii"];
+  const southern=["texas","oklahoma","louisiana","mississippi","alabama","georgia","florida","south carolina"];
+  const midwest=["north dakota","south dakota","nebraska","kansas","minnesota","iowa","missouri","wisconsin","illinois","michigan","indiana","ohio"];
+  const east=["maine","new hampshire","vermont","massachusetts","rhode island","connecticut","new york","pennsylvania","new jersey","maryland","delaware","west virginia","virginia","north carolina","kentucky","tennessee","arkansas"];
+  let region="general U.S.";
+  if(country.includes("united states")||country==="usa"){
+    if(northern.includes(state))region="western U.S.";
+    else if(southern.includes(state))region="southern U.S.";
+    else if(midwest.includes(state))region="Midwest";
+    else if(east.includes(state))region="eastern U.S.";
+  }
+  const season=month===12||month<=2?"winter":month<=5?"spring":month<=8?"summer":"fall";
+  const sets={
+    "western U.S.":{
+      winter:[["Rainbow trout","Cool-season option for stocked lakes and streams"],["Brown trout","Worth considering in suitable rivers and lakes"],["Smallmouth bass","A possibility in milder rivers and reservoirs"]],
+      spring:[["Rainbow trout","Often a good seasonal option in suitable waters"],["Largemouth bass","Warming shallows can make bass worth targeting"],["Smallmouth bass","Look for suitable rocky areas and current"]],
+      summer:[["Largemouth bass","Try shaded cover during warmer parts of the day"],["Bluegill","Often found around shallow cover"],["Channel catfish","A common warm-season option where present"]],
+      fall:[["Largemouth bass","Cooling water can make bass worth targeting"],["Rainbow trout","A seasonal option in stocked and suitable cold waters"],["Crappie","Look around deeper cover where present"]]
+    },
+    "southern U.S.":{
+      winter:[["Largemouth bass","Try slower presentations during cooler periods"],["Crappie","Look around brush and deeper structure"],["Channel catfish","A year-round option in many waters"]],
+      spring:[["Largemouth bass","A popular spring target in suitable waters"],["Bluegill","Shallow areas may hold active panfish"],["Crappie","Check submerged cover"]],
+      summer:[["Largemouth bass","Try shaded cover and lower-light periods"],["Channel catfish","A common option in warm water"],["Bluegill","Look near vegetation and docks"]],
+      fall:[["Largemouth bass","Cooling conditions can improve feeding windows"],["Crappie","Check brush and deeper cover"],["Channel catfish","Often available through fall"]]
+    },
+    "Midwest":{
+      winter:[["Bluegill","A common cold-season panfish where accessible"],["Crappie","Try deeper structure where present"],["Yellow perch","A regional option in suitable lakes"]],
+      spring:[["Crappie","Look around emerging vegetation and structure"],["Largemouth bass","Warming water can make bass a good target"],["Bluegill","Shallow areas can attract panfish"]],
+      summer:[["Largemouth bass","Try weed edges and shaded cover"],["Bluegill","Look around vegetation and docks"],["Channel catfish","A common warm-season target"]],
+      fall:[["Walleye","A regional option in suitable lakes and rivers"],["Crappie","Check deeper cover"],["Smallmouth bass","Try rocky areas and current"]]
+    },
+    "eastern U.S.":{
+      winter:[["Trout","A cold-water option in suitable streams and lakes"],["Crappie","Try deeper cover where present"],["Yellow perch","Available in many suitable regional waters"]],
+      spring:[["Largemouth bass","A popular spring target"],["Trout","Check suitable cold-water streams"],["Crappie","Look around submerged structure"]],
+      summer:[["Largemouth bass","Try shade and lower-light periods"],["Bluegill","Look near shallow cover"],["Channel catfish","A common option in many waters"]],
+      fall:[["Smallmouth bass","Try rocky areas and current"],["Largemouth bass","Cooling water can create good opportunities"],["Trout","A seasonal option in suitable waters"]]
+    },
+    "general U.S.":{
+      winter:[["Trout","Where cold-water habitat and local seasons allow"],["Crappie","Try deeper structure where present"],["Bluegill","A common panfish in many regions"]],
+      spring:[["Largemouth bass","A common spring target where present"],["Crappie","Look around submerged structure"],["Trout","Where suitable cold water is available"]],
+      summer:[["Largemouth bass","Try shaded cover and lower-light periods"],["Bluegill","Look around shallow cover"],["Channel catfish","A common warm-water option"]],
+      fall:[["Largemouth bass","Cooling water can create opportunities"],["Crappie","Check deeper cover"],["Trout","Where suitable cold-water habitat exists"]]
+    }
+  };
+  let choices=(sets[region]||sets["general U.S."])[season].slice();
+  let reason="Based on the "+season+", "+region+", and the local weather forecast.";
+  if(Number.isFinite(temp)&&temp<48){
+    reason+=" Cooler air suggests focusing on cold-water species or slower presentations.";
+    if(!choices.some(x=>/trout/i.test(x[0])))choices[2]=["Trout","Consider only in suitable cold-water habitat and open seasons"];
+  }else if(Number.isFinite(temp)&&temp>82){
+    reason+=" Warm conditions suggest looking for shade, deeper water, or lower-light periods.";
+  }else if(Number.isFinite(temp)){
+    reason+=" The current air temperature is moderate; check local water temperature before choosing a presentation.";
+  }
+  if(Number.isFinite(wind)&&wind>15)reason+=" Wind is elevated, so choose a sheltered, safe area and use caution.";
+  if([95,96,99].includes(code))reason+=" Thunderstorm conditions are in the forecast; postpone fishing until conditions are safe.";
+  $("speciesReason").textContent=reason;
+  $("speciesSuggestions").innerHTML=choices.map((item,index)=>
+    "<div class='metric'><div class='metric-label'>Suggestion "+(index+1)+"</div><div class='metric-value' style='font-size:21px'>"+item[0]+"</div><div class='metric-note'>"+item[1]+"</div></div>"
+  ).join("");
+}
+
 async function loadWeather(lat,lon){
   const url=
     "https://api.open-meteo.com/v1/forecast?latitude="+lat+
@@ -324,6 +401,8 @@ async function loadWeather(lat,lon){
 
   const data=await response.json();
   const current=data.current;
+
+  renderSpeciesSuggestions(window.forecastPlace || {},current);
 
   $("temperature").textContent=
     safeNumber(current.temperature_2m)+"°F";
