@@ -17,6 +17,9 @@ input{width:100%;padding:11px;border:1px solid #527b61;border-radius:7px;backgro
 table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:11px 8px;border-bottom:1px solid var(--border);font-size:14px}th{color:var(--green)}td a{color:var(--white);text-decoration:none}td a:hover{color:var(--green)}
 @media(max-width:650px){header{justify-content:center}nav{justify-content:center}.profile-head{justify-content:center;text-align:center}}
 
+
+/* FishBound: keep the main header visible while scrolling */
+header.fishbound-fixed-header{position:fixed!important;top:0!important;left:0!important;right:0!important;width:100%!important;box-sizing:border-box!important;z-index:10000!important}
 </style>
 </head><body><header><div class="logo">FISH<span>BOUND</span></div><nav><a href="index.html">Home</a><a href="map.html">Fishing Locations</a><a href="community.html">Community</a><a href="journal.html">My Journal</a><a href="achievements.html">Achievements</a><a href="leaderboard.html">Leaderboard</a></nav></header><main><section class="panel"><p class="muted">FISHING MILESTONES</p><h1>Fishing Achievements</h1><p class="muted" id="intro">Loading your achievements...</p><div class="stats" id="stats"></div><div class="grid" id="badges"></div><p class="message" id="status"></p></section></main><script>const SUPABASE_URL="https://ubnmhqxitiigsctbsmqy.supabase.co";
 const SUPABASE_KEY="sb_publishable_g-6tScB0HFIVcVkAhCN5Ug_fpm-jFrq";
@@ -61,4 +64,20 @@ if ("serviceWorker" in navigator) {
 </script>
 
 
+
+<script>
+(function(){
+ const header=document.querySelector('header');
+ if(!header)return;
+ header.classList.add('fishbound-fixed-header');
+ const spacer=document.createElement('div');
+ spacer.setAttribute('aria-hidden','true');
+ spacer.style.width='100%';
+ header.parentNode.insertBefore(spacer,header.nextSibling);
+ const sync=()=>{spacer.style.height=header.getBoundingClientRect().height+'px';};
+ sync();
+ if('ResizeObserver' in window){new ResizeObserver(sync).observe(header);}
+ window.addEventListener('resize',sync);
+})();
+</script>
 </body></html>
