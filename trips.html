@@ -7,7 +7,8 @@
 <style>
 :root{--bg:#101710;--panel:#1b281e;--panel2:#243529;--green:#a9c77b;--white:#f1f4ec;--muted:#aab6a7;--border:#354735}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--white);font-family:Arial,sans-serif}
-header{padding:18px 7%;background:#172319;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
+header{padding:18px 7%;background:#172319;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap
+position:sticky;top:0;z-index:1000;}
 header h1{font-size:22px;color:var(--green)}header a{color:var(--muted);text-decoration:none}
 main{max-width:1000px;margin:auto;padding:30px 20px 65px}.hero{text-align:center;padding:25px 10px 35px}
 .hero small{color:var(--green);letter-spacing:3px;font-weight:bold}.hero h2{font-size:clamp(30px,5vw,44px);margin:12px 0}.hero p{color:var(--muted);line-height:1.7;max-width:680px;margin:auto}
@@ -25,9 +26,6 @@ button.secondary{background:#456b50;color:white}button.danger{background:#75443e
 a{color:var(--green)}
 @media(max-width:550px){header{justify-content:center}}
 
-/* FishBound mobile app navigation */
-.mobile-app-nav{display:none}
-@media(max-width:700px){body{padding-bottom:calc(100px + env(safe-area-inset-bottom))}.mobile-app-nav{position:fixed;z-index:9999;left:0;right:0;bottom:0;display:flex;justify-content:space-around;align-items:stretch;gap:4px;min-height:76px;padding:9px 7px calc(9px + env(safe-area-inset-bottom));background:#172319;border-top:1px solid #456044;box-shadow:0 -5px 18px rgba(0,0,0,.3)}.mobile-app-nav a{flex:1;min-width:0;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:6px 2px;color:#aab6a7;text-decoration:none;font-size:28px;line-height:1.1;border-radius:9px}.mobile-app-nav a small{font-size:12px;font-weight:700;letter-spacing:0}.mobile-app-nav a[aria-current="page"]{color:#a9c77b;background:#243529}.mobile-app-nav a:focus-visible{outline:2px solid #a9c77b;outline-offset:2px}}
 </style>
 </head>
 <body>
@@ -156,20 +154,5 @@ if ("serviceWorker" in navigator) {
 }
 </script>
 
-<nav class="mobile-app-nav" aria-label="Main app navigation">
-  <a href="index.html"><span>⌂</span><small>Home</small></a>
-  <a href="map.html"><span>⌖</span><small>Map</small></a>
-  <a href="identify.html"><span>🐟</span><small>Identify</small></a>
-  <a href="conditions.html"><span>☀</span><small>Forecast</small></a>
-  <a href="journal.html"><span>▤</span><small>Journal</small></a>
-</nav>
-<script>
-(() => {
-  const current = location.pathname.split("/").pop() || "index.html";
-  document.querySelectorAll(".mobile-app-nav a").forEach(link => {
-    const target = link.getAttribute("href");
-    if (target === current || (current === "" && target === "index.html")) link.setAttribute("aria-current", "page");
-  });
-})();
-</script>
+
 </body></html>
