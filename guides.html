@@ -125,6 +125,9 @@ footer{background:#172319;border-top:1px solid var(--border);text-align:center;p
   .mobile-app-nav a[aria-current="page"]{color:#a9c77b;background:#243529}
   .mobile-app-nav a:focus-visible{outline:2px solid #a9c77b;outline-offset:2px}
 }
+
+/* FishBound: keep the main header visible while scrolling */
+header.fishbound-fixed-header{position:fixed!important;top:0!important;left:0!important;right:0!important;width:100%!important;box-sizing:border-box!important;z-index:10000!important}
 </style>
 </head>
 <body>
@@ -859,20 +862,21 @@ if ("serviceWorker" in navigator) {
 }
 </script>
 
-<nav class="mobile-app-nav" aria-label="Main app navigation">
-  <a href="index.html"><span>⌂</span><small>Home</small></a>
-  <a href="map.html"><span>⌖</span><small>Map</small></a>
-  <a href="identify.html"><span>🐟</span><small>Identify</small></a>
-  <a href="conditions.html"><span>☀</span><small>Forecast</small></a>
-  <a href="journal.html"><span>▤</span><small>Journal</small></a>
-</nav>
+
+
 <script>
-(() => {
-  const current = location.pathname.split("/").pop() || "index.html";
-  document.querySelectorAll(".mobile-app-nav a").forEach(link => {
-    const target = link.getAttribute("href");
-    if (target === current || (current === "" && target === "index.html")) link.setAttribute("aria-current", "page");
-  });
+(function(){
+ const header=document.querySelector('header');
+ if(!header)return;
+ header.classList.add('fishbound-fixed-header');
+ const spacer=document.createElement('div');
+ spacer.setAttribute('aria-hidden','true');
+ spacer.style.width='100%';
+ header.parentNode.insertBefore(spacer,header.nextSibling);
+ const sync=()=>{spacer.style.height=header.getBoundingClientRect().height+'px';};
+ sync();
+ if('ResizeObserver' in window){new ResizeObserver(sync).observe(header);}
+ window.addEventListener('resize',sync);
 })();
 </script>
 </body>
