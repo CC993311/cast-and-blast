@@ -8,7 +8,8 @@
 <style>
 :root{--bg:#101710;--panel:#1b281e;--panel2:#243529;--green:#a9c77b;--white:#f1f4ec;--muted:#aab6a7;--border:#354735}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--white);font-family:Arial,sans-serif;line-height:1.6}
-header{background:#172319;border-bottom:1px solid var(--border);padding:17px 7%;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+header{background:#172319;border-bottom:1px solid var(--border);padding:17px 7%;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap
+position:sticky;top:0;z-index:1000;}
 .logo{font-weight:800;font-size:22px;letter-spacing:1px}.logo span{color:var(--green)}nav{display:flex;gap:18px;flex-wrap:wrap}nav a{color:var(--muted);text-decoration:none;font-size:14px;font-weight:bold}nav a:hover{color:var(--green)}
 .hero{text-align:center;padding:55px 6%;background:radial-gradient(ellipse at center,#2c4930,#17271b 55%,#101710)}.eyebrow{color:var(--green);font-size:11px;letter-spacing:3px;font-weight:bold}.hero h1{font-size:clamp(34px,6vw,58px);line-height:1.1;margin:12px 0}.hero h1 span{color:var(--green)}.hero p{max-width:680px;margin:auto;color:#c2cdbf}
 main{max-width:1100px;margin:auto;padding:35px 5% 65px}.tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px}.tab{background:var(--panel2);color:var(--white);border:1px solid var(--border);border-radius:7px;padding:12px 17px;font-weight:bold;cursor:pointer}.tab.active,.tab:hover{border-color:var(--green);color:var(--green)}
@@ -18,27 +19,6 @@ main{max-width:1100px;margin:auto;padding:35px 5% 65px}.tabs{display:flex;gap:10
 footer{text-align:center;color:#899687;padding:25px;font-size:12px;border-top:1px solid var(--border)}
 @media(max-width:600px){header{justify-content:center}nav{justify-content:center}}
 
-/* FishBound mobile app navigation */
-.mobile-app-nav{display:none}
-@media(max-width:700px){
-  body{padding-bottom:calc(100px + env(safe-area-inset-bottom))}
-  .mobile-app-nav{
-    position:fixed;z-index:9999;left:0;right:0;bottom:0;
-    display:flex;justify-content:space-around;align-items:stretch;gap:4px;
-    min-height:76px;padding:9px 7px calc(9px + env(safe-area-inset-bottom));
-    background:#172319;border-top:1px solid #456044;
-    box-shadow:0 -5px 18px rgba(0,0,0,.3)
-  }
-  .mobile-app-nav a{
-    flex:1;min-width:0;min-height:58px;display:flex;
-    flex-direction:column;align-items:center;justify-content:center;
-    gap:5px;padding:6px 2px;color:#aab6a7;text-decoration:none;
-    font-size:28px;line-height:1.1;border-radius:9px
-  }
-  .mobile-app-nav a small{font-size:12px;font-weight:700;letter-spacing:0}
-  .mobile-app-nav a[aria-current="page"]{color:#a9c77b;background:#243529}
-  .mobile-app-nav a:focus-visible{outline:2px solid #a9c77b;outline-offset:2px}
-}
 </style>
 </head>
 <body>
@@ -250,21 +230,6 @@ if ("serviceWorker" in navigator) {
 }
 </script>
 
-<nav class="mobile-app-nav" aria-label="Main app navigation">
-  <a href="index.html"><span>⌂</span><small>Home</small></a>
-  <a href="map.html"><span>⌖</span><small>Map</small></a>
-  <a href="identify.html"><span>🐟</span><small>Identify</small></a>
-  <a href="conditions.html"><span>☀</span><small>Forecast</small></a>
-  <a href="journal.html"><span>▤</span><small>Journal</small></a>
-</nav>
-<script>
-(() => {
-  const current = location.pathname.split("/").pop() || "index.html";
-  document.querySelectorAll(".mobile-app-nav a").forEach(link => {
-    const target = link.getAttribute("href");
-    if (target === current || (current === "" && target === "index.html")) link.setAttribute("aria-current", "page");
-  });
-})();
-</script>
+
 </body>
 </html>
