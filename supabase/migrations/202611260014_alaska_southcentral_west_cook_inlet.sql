@@ -155,8 +155,7 @@ begin
     'Open year-round unless special regulations or an emergency order apply.',
     '2 per day.',
     '2 in possession.',
-    'No size limit is listed in the West Cook Inlet general species table.',
-    'Special drainage regulations and emergency orders may differ.',
+    'No size limit is listed in the West Cook Inlet general species table. Special drainage regulations and emergency orders may differ.',
     jsonb_build_object(
       'season','Open year-round unless special regulations or an emergency order apply.',
       'daily_limit','2 per day.',
