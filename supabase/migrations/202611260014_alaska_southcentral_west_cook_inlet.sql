@@ -68,7 +68,8 @@ begin
     'Southcentral Alaska — West Cook Inlet','southcentral-west-cook-inlet','freshwater',
     'Closed to king salmon fishing in 2026 by emergency order.',
     'No retention; fishing is closed.',
-    'No retention; fishing is closed. The 2026 West Cook Inlet summary identifies a closure by emergency order. This is a 2026 emergency-order status, not a permanent statewide rule; check current ADF&G emergency orders for later changes.',
+    'No retention while the fishery is closed.',
+    'The 2026 West Cook Inlet summary identifies a closure by emergency order. This is a 2026 emergency-order status, not a permanent statewide rule; check current ADF&G emergency orders for later changes.',
     jsonb_build_object(
       '2026_status','King salmon fishing is closed in West Cook Inlet by emergency order.',
       'scope','West Cook Inlet only.',
