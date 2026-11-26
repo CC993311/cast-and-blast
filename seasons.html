@@ -150,6 +150,47 @@ function addRuleLine(label,value){
  line.style.marginBottom="9px";
  ruleNote.appendChild(line);
 }
+function showCaliforniaLargemouthBassRules(waterBody,agencyUrl){
+ ruleNote.replaceChildren();
+ const intro=document.createElement("p");
+ intro.textContent="California 2026 official freshwater rules for black bass (including largemouth bass), from CDFW Title 14 CCR §5.00. These statewide rules apply unless a listed county or water has a special rule.";
+ ruleNote.appendChild(intro);
+ const addSection=(heading,body)=>{
+  const p=document.createElement("p");p.style.marginTop="12px";
+  const strong=document.createElement("strong");strong.textContent=heading+": ";
+  p.appendChild(strong);p.appendChild(document.createTextNode(body));ruleNote.appendChild(p);
+ };
+ addSection("Season","Open all year in the general statewide rules, subject to special closures and local exceptions.");
+ addSection("Lakes, reservoirs and Sacramento–San Joaquin Delta","12-inch minimum total length; 5 fish daily bag limit.");
+ addSection("Rivers, streams, canals and private ponds","No minimum size; 5 fish daily bag limit, unless a special rule applies.");
+ const heading=document.createElement("p");heading.textContent="Important named-water exceptions";heading.style.fontWeight="bold";heading.style.marginTop="16px";ruleNote.appendChild(heading);
+ const list=document.createElement("ul");list.style.paddingLeft="22px";list.style.marginTop="8px";
+ const exceptions=[
+  "Barrett Lake and Upper Otay Lake (San Diego County): catch-and-release only; zero bag.",
+  "Casitas Lake: 12-inch minimum; no more than one bass over 22 inches; 5 daily.",
+  "Castaic Lake: 12-inch minimum; 5 daily.",
+  "Cuyamaca Lake: no size limit for largemouth bass; 5 daily.",
+  "Fish Slough: no size limit; 5 daily. Some fenced portions are closed to all fishing.",
+  "Hodges Lake: 15-inch minimum; 5 daily.",
+  "Lett’s Lake, Plaskett Meadows upper and lower lakes, and Shaver Lake: no size limit; 5 daily.",
+  "Colorado River District: Arizona bag and size rules apply; 13-inch minimum and 6 daily.",
+  "Inyo County and Mono County streams have additional seasonal and size rules; Plumas County has a special no-size-limit rule."
+ ];
+ exceptions.forEach(value=>{const li=document.createElement("li");li.textContent=value;li.style.marginBottom="7px";list.appendChild(li);});
+ ruleNote.appendChild(list);
+ if(waterBody){
+  const note=document.createElement("p");note.style.marginTop="14px";
+  note.textContent="You entered “"+waterBody+"”. If it is not one of the named waters listed above, the applicable county, district and water-specific rules still need to be checked in the official booklet.";
+  ruleNote.appendChild(note);
+ }
+ const source=document.createElement("p");source.style.marginTop="14px";
+ const link=document.createElement("a");link.href="https://nrm.dfg.ca.gov/FileHandler.ashx?DocumentID=209090";link.target="_blank";link.rel="noopener";link.textContent="Open CDFW 2026 Freshwater Sport Fishing Regulations (PDF)";link.style.color="var(--green)";
+ source.appendChild(link);ruleNote.appendChild(source);
+ const caution=document.createElement("p");caution.style.marginTop="10px";caution.textContent="Source: California Department of Fish and Wildlife, 2026 Freshwater Sport Fishing Regulations, updated July 10, 2026, pages 26–27. Check CDFW for later updates and the exact water before fishing.";
+ ruleNote.appendChild(caution);
+ apiStatus.textContent="Showing California's published 2026 black bass rules from the official CDFW booklet. Check local exceptions before fishing.";
+ document.getElementById("dataAttribution").textContent="Source: California Department of Fish and Wildlife (official 2026 freshwater regulations).";
+}
 function showFallback(message,agencyUrl){
  ruleNote.replaceChildren();
  const p=document.createElement("p");
@@ -183,8 +224,12 @@ async function updateResult(){
   const data=await response.json();
   if(thisRequest!==requestNumber)return;
   if(!response.ok||!data.species){
-   apiStatus.textContent="Detailed rules are not available for this state and species in the database.";
-   showFallback("FishBound could not find a verified matching record for this selection. Check the official agency rules for this species and water.",agencyUrl);
+   if(state==="California"&&makeSlug(species)==="largemouth-bass"){
+    showCaliforniaLargemouthBassRules(waterBody,agencyUrl);
+   }else{
+    apiStatus.textContent="Detailed rules are not available for this state and species in the database.";
+    showFallback("FishBound could not find a matching record for this selection. Check the official agency rules for this species and water.",agencyUrl);
+   }
    return;
   }
   const fish=data.species;
