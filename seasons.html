@@ -228,19 +228,61 @@ async function updateResult(){
  const params=new URLSearchParams({state:makeSlug(state),species:makeSlug(species)});
  if(waterBody)params.set("waterbody",waterBody);
  try{
-  const response=await fetch("https://fishregs.hk2.ai/api/regs?"+params.toString(),{headers:{Accept:"application/json"}});
-  const data=await response.json();
+  let response=await fetch("https://fishregs.hk2.ai/api/regs?"+params.toString(),{headers:{Accept:"application/json"}});
+  let data=await response.json();
   if(thisRequest!==requestNumber)return;
-  if(!response.ok||!data.species){
+  let fish=response.ok?data.species:null;
+  let availableSpecies=[];
+  // If the exact species slug is not in the provider, load the state's species
+  // catalog and try common FishBound naming equivalents before showing fallback.
+  if(!fish){
+   try{
+    const stateResponse=await fetch("https://fishregs.hk2.ai/api/regs?state="+encodeURIComponent(makeSlug(state)),{headers:{Accept:"application/json"}});
+    const stateData=await stateResponse.json();
+    if(thisRequest!==requestNumber)return;
+    const speciesMap=stateData.species&&typeof stateData.species==="object"?stateData.species:{};
+    availableSpecies=Object.keys(speciesMap);
+    const requested=makeSlug(species);
+    const aliases={
+     "black-crappie":["crappie"],"white-crappie":["crappie"],
+     "chinook-salmon":["king-salmon"],"king-salmon-chinook":["king-salmon"],
+     "speckled-trout":["spotted-seatrout"],"spotted-sea-trout":["spotted-seatrout"],
+     "redfish":["red-drum"],"red-fish":["red-drum"],
+     "muskie":["muskellunge"],"musky":["muskellunge"],
+     "channel-cat":["channel-catfish"],"blue-cat":["blue-catfish"]
+    };
+    const candidates=[requested,...(aliases[requested]||[])];
+    const matchedKey=availableSpecies.find(key=>{
+     const record=speciesMap[key];
+     return candidates.includes(makeSlug(key))||candidates.includes(makeSlug(record&&record.name||""));
+    });
+    if(matchedKey){
+     fish=speciesMap[matchedKey];
+     data=stateData;
+    }
+   }catch(catalogError){
+    // Keep the original no-record fallback if the state catalog is unavailable.
+   }
+  }
+  if(!fish){
    if(state==="California"&&makeSlug(species)==="largemouth-bass"){
     showCaliforniaLargemouthBassRules(waterBody,agencyUrl);
    }else{
-    apiStatus.textContent="Detailed rules are not available for this state and species in the database.";
-    showFallback("FishBound could not find a matching record for this selection. Check the official agency rules for this species and water.",agencyUrl);
+    apiStatus.textContent="No matching regulation record was found for this species in this state's data.";
+    ruleNote.replaceChildren();
+    const message=document.createElement("p");
+    message.textContent="The regulation database does not currently list this species for "+state+". FishBound will not guess its limits or season. Check the official agency rules for the exact water.";
+    ruleNote.appendChild(message);
+    if(availableSpecies.length){
+     const heading=document.createElement("p");heading.textContent="Species currently listed in the database for "+state+":";heading.style.fontWeight="bold";heading.style.marginTop="12px";ruleNote.appendChild(heading);
+     const list=document.createElement("ul");list.style.paddingLeft="22px";list.style.marginTop="6px";
+     availableSpecies.forEach(key=>{const li=document.createElement("li");li.textContent=key.replace(/-/g," ");list.appendChild(li);});
+     ruleNote.appendChild(list);
+    }
+    const link=document.createElement("a");link.href=agencyUrl;link.target="_blank";link.rel="noopener";link.textContent="Open official state fishing regulations";link.style.display="inline-block";link.style.marginTop="12px";link.style.color="var(--green)";ruleNote.appendChild(link);
    }
    return;
   }
-  const fish=data.species;
   ruleNote.replaceChildren();
   addRuleLine("Season",fish.seasonSummary||fish.seasonWindows);
   addRuleLine("Daily catch limit",fish.dailyBagLimit);
@@ -264,7 +306,7 @@ async function updateResult(){
   const updated=fish.updatedAt||fish.publishedAt||data._meta?.generatedAt;
   addRuleLine("Data updated",updated?new Date(updated).toLocaleDateString():"Date not supplied");
   const source=document.createElement("p");source.style.marginTop="12px";source.textContent="These records are supplied by a third-party regulation database, not directly issued by FishBound. State and local emergency rules may change. Verify every rule with the official agency before fishing.";ruleNote.appendChild(source);
-  apiStatus.textContent="Regulation record found. Review the official agency source before relying on these rules.";
+  apiStatus.textContent="Regulation record found"+(makeSlug(fish.name||"")!==makeSlug(species)?" (matched a related FishBound species name).":"")+". Review the official agency source before relying on these rules.";
   const provider=document.getElementById("dataAttribution");
   provider.textContent="Data provider: fishregs.hk2.ai · Regulation year "+(data._meta?.regulationYear||"not specified")+". Official agency: "+(data._meta?.agency||agency)+".";
   if(data._meta?.agencyUrl)agencyLink.href=data._meta.agencyUrl;
