@@ -143,7 +143,7 @@ const waterBodyInput=document.getElementById("waterBody");
 const apiStatus=document.getElementById("apiStatus");
 const ruleNote=document.getElementById("ruleNote");
 let requestNumber=0;
-function makeSlug(value){return value.trim().toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");}
+function makeSlug(value){return value.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");}
 function addRuleLine(label,value){
  if(value===undefined||value===null||value==="")return;
  const line=document.createElement("p");
