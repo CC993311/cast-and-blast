@@ -221,7 +221,7 @@ async function updateResult(){
  const selectedState=makeSlug(stateSelect.options[stateSelect.selectedIndex]?.textContent||state);
  const selectedSpecies=makeSlug(speciesSelect.options[speciesSelect.selectedIndex]?.textContent||species);
  // Show the official CDFW rules directly for California largemouth bass.
- if(selectedState==="california"&&selectedSpecies.includes("largemouth-bass")){
+ if(state.toLowerCase().includes("california")&&species.toLowerCase().includes("largemouth")){
   showCaliforniaLargemouthBassRules(waterBody,agencyUrl);
   return;
  }
