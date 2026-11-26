@@ -217,8 +217,11 @@ async function updateResult(){
  apiStatus.textContent="Checking the regulation database…";
  ruleNote.textContent="Loading current available regulation information.";
  const waterBody=waterBodyInput.value.trim();
+ // Match the visible selections as well as their values, to avoid selector-value mismatches.
+ const selectedState=makeSlug(stateSelect.options[stateSelect.selectedIndex]?.textContent||state);
+ const selectedSpecies=makeSlug(speciesSelect.options[speciesSelect.selectedIndex]?.textContent||species);
  // Show the official CDFW rules directly for California largemouth bass.
- if(state==="California"&&makeSlug(species)==="largemouth-bass"){
+ if(selectedState==="california"&&selectedSpecies.includes("largemouth-bass")){
   showCaliforniaLargemouthBassRules(waterBody,agencyUrl);
   return;
  }
