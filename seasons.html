@@ -43,7 +43,7 @@ footer{text-align:center;padding:28px;color:#899687;font-size:12px;border-top:1p
   <section class="hero">
     <small>KNOW BEFORE YOU GO</small>
     <h1>Fishing Regulations</h1>
-    <p>Choose a state and one of the fish in the FishBound Species Guide. We'll take you to the official wildlife agency information for that species.</p>
+    <p>Choose a state and species to view verified fishing rules stored in FishBound's own database, with official sources for every record.</p>
   </section>
   <section class="panel">
     <div class="form-grid">
@@ -62,7 +62,7 @@ footer{text-align:center;padding:28px;color:#899687;font-size:12px;border-top:1p
       <a class="action secondary" id="speciesSearchLink" href="#" target="_blank" rel="noopener">SEARCH THIS AGENCY FOR THIS SPECIES</a>
     </div>
     <div class="rule-note" id="ruleNote"></div>
-    <p class="notice" id="dataAttribution">Regulation data provider: fishregs. Always confirm current rules with the official state agency.</p>
+    <p class="notice" id="dataAttribution">Regulation data is stored in FishBound's database. Always confirm current rules with the official state agency.</p>
     <p class="notice">FishBound's Species Guide includes fish from across North America. A species may not occur in every state, and rules may vary by lake, river, management zone, season, or whether you are fishing in state or federal waters. Confirm the exact current rules with the agency before fishing.</p>
     <p class="notice" id="federalNote" style="display:none">For ocean and offshore fishing, federal rules may also apply. Check <a href="https://www.fisheries.noaa.gov/recreational-fishing" target="_blank" rel="noopener">NOAA Fisheries recreational fishing information</a>.</p>
   </section>
@@ -76,7 +76,11 @@ footer{text-align:center;padding:28px;color:#899687;font-size:12px;border-top:1p
 <a href="seasons.html" aria-current="page"><span>⚖</span><small>Rules</small></a>
 <a href="journal.html"><span>▤</span><small>Journal</small></a>
 </nav>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const SUPABASE_URL="https://ubnmhqxitiigsctbsmqy.supabase.co";
+const SUPABASE_KEY="sb_publishable_g-6tScB0HFIVcVkAhCN5Ug_fpm-jFrq";
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const stateAgencies = {
 "Alabama":["Alabama Department of Conservation and Natural Resources","https://www.outdooralabama.com/fishing","outdooralabama.com"],
 "Alaska":["Alaska Department of Fish and Game","https://www.adfg.alaska.gov/index.cfm?adfg=fishregulations.main","adfg.alaska.gov"],
@@ -202,122 +206,89 @@ function showFallback(message,agencyUrl){
  link.style.display="inline-block";link.style.marginTop="12px";link.style.color="var(--green)";
  ruleNote.appendChild(link);
 }
+const STATE_CODES={"Alabama":"AL","Alaska":"AK","Arizona":"AZ","Arkansas":"AR","California":"CA","Colorado":"CO","Connecticut":"CT","Delaware":"DE","Florida":"FL","Georgia":"GA","Hawaii":"HI","Idaho":"ID","Illinois":"IL","Indiana":"IN","Iowa":"IA","Kansas":"KS","Kentucky":"KY","Louisiana":"LA","Maine":"ME","Maryland":"MD","Massachusetts":"MA","Michigan":"MI","Minnesota":"MN","Mississippi":"MS","Missouri":"MO","Montana":"MT","Nebraska":"NE","Nevada":"NV","New Hampshire":"NH","New Jersey":"NJ","New Mexico":"NM","New York":"NY","North Carolina":"NC","North Dakota":"ND","Ohio":"OH","Oklahoma":"OK","Oregon":"OR","Pennsylvania":"PA","Rhode Island":"RI","South Carolina":"SC","South Dakota":"SD","Tennessee":"TN","Texas":"TX","Utah":"UT","Vermont":"VT","Virginia":"VA","Washington":"WA","West Virginia":"WV","Wisconsin":"WI","Wyoming":"WY"};
 async function updateResult(){
  const state=stateSelect.value, species=speciesSelect.value;
  if(!state||!species){result.style.display="none";return;}
  const thisRequest=++requestNumber;
  const [agency,agencyUrl]=stateAgencies[state];
+ const stateCode=STATE_CODES[state];
  document.getElementById("resultTitle").textContent=state+" — "+species;
  document.getElementById("agencyName").textContent="Official rules authority: "+agency;
- const agencyLink=document.getElementById("agencyLink");
- agencyLink.href=agencyUrl;
+ document.getElementById("agencyLink").href=agencyUrl;
  document.getElementById("speciesSearchLink").href="https://www.google.com/search?q="+encodeURIComponent('site:'+stateAgencies[state][2]+' "'+species+'" fishing regulations');
  document.getElementById("federalNote").style.display=/saltwater|tuna|marlin|swordfish|mahi|wahoo|halibut|cod|haddock|pollock|sablefish|mackerel|bonito|barracuda|shark|sheephead|tautog|surfperch|croaker|seabass|sea bass|sanddab|sole|sardine|anchovy|herring|grunion|sculpin|greenling|corbina|queenfish|sturgeon/i.test(species)?"block":"none";
  result.style.display="block";
- apiStatus.textContent="Checking the regulation database…";
- ruleNote.textContent="Loading current available regulation information.";
+ apiStatus.textContent="Checking FishBound's verified regulations database…";
+ ruleNote.textContent="Loading verified rules…";
+ document.getElementById("dataAttribution").textContent="Regulation data is stored and maintained in FishBound's database.";
  const waterBody=waterBodyInput.value.trim();
- // Match the visible selections as well as their values, to avoid selector-value mismatches.
- const selectedState=makeSlug(stateSelect.options[stateSelect.selectedIndex]?.textContent||state);
- const selectedSpecies=makeSlug(speciesSelect.options[speciesSelect.selectedIndex]?.textContent||species);
- // Show the official CDFW rules directly for California largemouth bass.
- if(state.toLowerCase().includes("california")&&species.toLowerCase().includes("largemouth")){
-  showCaliforniaLargemouthBassRules(waterBody,agencyUrl);
-  return;
- }
- const params=new URLSearchParams({state:makeSlug(state),species:makeSlug(species)});
- if(waterBody)params.set("waterbody",waterBody);
  try{
-  let response=await fetch("https://fishregs.hk2.ai/api/regs?"+params.toString(),{headers:{Accept:"application/json"}});
-  let data=await response.json();
+  const speciesKey=makeSlug(species);
+  let query=db.from("regulation_rules")
+   .select("*, regulation_sources(source_title,source_url,regulation_year,agency_name,verification_status)")
+   .eq("state_code",stateCode)
+   .eq("species_key",speciesKey)
+   .eq("verification_status","verified")
+   .or("effective_to.is.null,effective_to.gte."+new Date().toISOString().slice(0,10))
+   .order("rule_scope",{ascending:true});
+  const {data,error}=await query;
   if(thisRequest!==requestNumber)return;
-  let fish=response.ok?data.species:null;
-  let availableSpecies=[];
-  // If the exact species slug is not in the provider, load the state's species
-  // catalog and try common FishBound naming equivalents before showing fallback.
-  if(!fish){
-   try{
-    const stateResponse=await fetch("https://fishregs.hk2.ai/api/regs?state="+encodeURIComponent(makeSlug(state)),{headers:{Accept:"application/json"}});
-    const stateData=await stateResponse.json();
-    if(thisRequest!==requestNumber)return;
-    const speciesMap=stateData.species&&typeof stateData.species==="object"?stateData.species:{};
-    availableSpecies=Object.keys(speciesMap);
-    const requested=makeSlug(species);
-    const aliases={
-     "black-crappie":["crappie"],"white-crappie":["crappie"],
-     "chinook-salmon":["king-salmon"],"king-salmon-chinook":["king-salmon"],
-     "speckled-trout":["spotted-seatrout"],"spotted-sea-trout":["spotted-seatrout"],
-     "redfish":["red-drum"],"red-fish":["red-drum"],
-     "muskie":["muskellunge"],"musky":["muskellunge"],
-     "channel-cat":["channel-catfish"],"blue-cat":["blue-catfish"]
-    };
-    const candidates=[requested,...(aliases[requested]||[])];
-    const matchedKey=availableSpecies.find(key=>{
-     const record=speciesMap[key];
-     return candidates.includes(makeSlug(key))||candidates.includes(makeSlug(record&&record.name||""));
-    });
-    if(matchedKey){
-     fish=speciesMap[matchedKey];
-     data=stateData;
-    }
-   }catch(catalogError){
-    // Keep the original no-record fallback if the state catalog is unavailable.
-   }
-  }
-  if(!fish){
-   if(state==="California"&&makeSlug(species)==="largemouth-bass"){
-    showCaliforniaLargemouthBassRules(waterBody,agencyUrl);
-   }else{
-    apiStatus.textContent="No matching regulation record was found for this species in this state's data.";
-    ruleNote.replaceChildren();
-    const message=document.createElement("p");
-    message.textContent="The regulation database does not currently list this species for "+state+". FishBound will not guess its limits or season. Check the official agency rules for the exact water.";
-    ruleNote.appendChild(message);
-    if(availableSpecies.length){
-     const heading=document.createElement("p");heading.textContent="Species currently listed in the database for "+state+":";heading.style.fontWeight="bold";heading.style.marginTop="12px";ruleNote.appendChild(heading);
-     const list=document.createElement("ul");list.style.paddingLeft="22px";list.style.marginTop="6px";
-     availableSpecies.forEach(key=>{const li=document.createElement("li");li.textContent=key.replace(/-/g," ");list.appendChild(li);});
-     ruleNote.appendChild(list);
-    }
-    const link=document.createElement("a");link.href=agencyUrl;link.target="_blank";link.rel="noopener";link.textContent="Open official state fishing regulations";link.style.display="inline-block";link.style.marginTop="12px";link.style.color="var(--green)";ruleNote.appendChild(link);
-   }
+  if(error)throw error;
+  const today=new Date().toISOString().slice(0,10);
+  const current=(data||[]).filter(rule=>
+    (!rule.effective_from||rule.effective_from<=today)&&
+    (!rule.effective_to||rule.effective_to>=today)
+  );
+  const waterKey=waterBody?makeSlug(waterBody):"";
+  const matched=current.filter(rule=>rule.rule_scope!=="waterbody"&&rule.rule_scope!=="special"&&rule.rule_scope!=="region"&&rule.rule_scope!=="county");
+  const special=waterKey?current.filter(rule=>rule.waterbody_key===waterKey||rule.rule_scope==="special"&&rule.waterbody_key===waterKey):[];
+  const shown=[...special,...matched];
+  ruleNote.replaceChildren();
+  if(!shown.length){
+   apiStatus.textContent="No verified FishBound rule record exists for this selection yet.";
+   const p=document.createElement("p");
+   p.textContent="FishBound's new database is connected, but verified rules for "+species+" in "+state+" have not been entered yet. We will not guess limits or seasons.";
+   ruleNote.appendChild(p);
+   const source=document.createElement("p");source.style.marginTop="12px";source.textContent="Use the official state agency link above for the current rules.";
+   ruleNote.appendChild(source);
+   document.getElementById("dataAttribution").textContent="FishBound database · No verified rule record found.";
    return;
   }
-  ruleNote.replaceChildren();
-  addRuleLine("Season",fish.seasonSummary||fish.seasonWindows);
-  addRuleLine("Daily catch limit",fish.dailyBagLimit);
-  addRuleLine("Possession limit",fish.possessionLimit);
-  addRuleLine("Size limit",fish.sizeLimit);
-  addRuleLine("Slot limit",fish.slotLimit);
-  addRuleLine("Additional rule",fish.trophyRule);
-  if(Array.isArray(fish.gearRestrictions)&&fish.gearRestrictions.length){
-   const heading=document.createElement("p");heading.textContent="Gear and method restrictions:";heading.style.fontWeight="bold";heading.style.margin="12px 0 6px";ruleNote.appendChild(heading);
-   const list=document.createElement("ul");list.style.paddingLeft="22px";
-   fish.gearRestrictions.forEach(item=>{const li=document.createElement("li");li.textContent=item;li.style.marginBottom="5px";list.appendChild(li);});
-   ruleNote.appendChild(list);
-  }
-  const override=data.waterBodyMatch;
-  if(override){
-   const heading=document.createElement("p");heading.textContent="Special rule for "+(override.waterBody||waterBody)+":";heading.style.fontWeight="bold";heading.style.margin="14px 0 6px";ruleNote.appendChild(heading);
-   const p=document.createElement("p");p.textContent=override.rule;ruleNote.appendChild(p);
-  }else if(waterBody){
-   const p=document.createElement("p");p.textContent="No named special-water match was returned for "+waterBody+". Statewide information is shown above; check the official source for local exceptions.";p.style.marginTop="12px";ruleNote.appendChild(p);
-  }
-  const updated=fish.updatedAt||fish.publishedAt||data._meta?.generatedAt;
-  addRuleLine("Data updated",updated?new Date(updated).toLocaleDateString():"Date not supplied");
-  const source=document.createElement("p");source.style.marginTop="12px";source.textContent="These records are supplied by a third-party regulation database, not directly issued by FishBound. State and local emergency rules may change. Verify every rule with the official agency before fishing.";ruleNote.appendChild(source);
-  apiStatus.textContent="Regulation record found"+(makeSlug(fish.name||"")!==makeSlug(species)?" (matched a related FishBound species name).":"")+". Review the official agency source before relying on these rules.";
-  const provider=document.getElementById("dataAttribution");
-  provider.textContent="Data provider: fishregs.hk2.ai · Regulation year "+(data._meta?.regulationYear||"not specified")+". Official agency: "+(data._meta?.agency||agency)+".";
-  if(data._meta?.agencyUrl)agencyLink.href=data._meta.agencyUrl;
+  shown.forEach((fish,index)=>{
+   if(index){const divider=document.createElement("hr");divider.style.margin="16px 0";divider.style.borderColor="var(--border)";ruleNote.appendChild(divider);}
+   const heading=document.createElement("p");heading.style.fontWeight="bold";heading.style.color="var(--green)";
+   heading.textContent=fish.waterbody_name|| (fish.rule_scope==="statewide"?"Statewide rules":fish.rule_scope);
+   ruleNote.appendChild(heading);
+   addRuleLine("Season opens",fish.season_open);
+   addRuleLine("Season closes",fish.season_close);
+   addRuleLine("Daily bag limit",fish.daily_bag_limit);
+   addRuleLine("Possession limit",fish.possession_limit);
+   addRuleLine("Minimum length",fish.minimum_length);
+   addRuleLine("Maximum length",fish.maximum_length);
+   addRuleLine("Slot limit",fish.slot_limit);
+   addRuleLine("Gear restrictions",fish.gear_restrictions);
+   addRuleLine("Special restrictions",fish.special_restrictions);
+   if(fish.rule_details&&Object.keys(fish.rule_details).length){
+    Object.entries(fish.rule_details).forEach(([key,value])=>addRuleLine(key.replace(/([A-Z])/g," $1").replace(/^./,c=>c.toUpperCase()),typeof value==="object"?JSON.stringify(value):value));
+   }
+   const src=fish.regulation_sources;
+   if(src&&src.source_url){
+    const p=document.createElement("p");p.style.marginTop="10px";
+    const a=document.createElement("a");a.href=src.source_url;a.target="_blank";a.rel="noopener";a.style.color="var(--green)";
+    a.textContent="Official source: "+(src.source_title||src.agency_name||"Open publication");
+    p.appendChild(a);ruleNote.appendChild(p);
+   }
+  });
+  apiStatus.textContent="Showing "+shown.length+" verified rule record(s) from FishBound's database. Check the official source for updates.";
+  document.getElementById("dataAttribution").textContent="FishBound regulations database · Source records linked to each rule.";
  }catch(error){
   if(thisRequest!==requestNumber)return;
-  if(state==="California"&&makeSlug(species)==="largemouth-bass"){
-   showCaliforniaLargemouthBassRules(waterBody,agencyUrl);
-  }else{
-   apiStatus.textContent="The regulation database could not be reached.";
-   showFallback("FishBound could not load the regulation database right now. Please use the official state source.",agencyUrl);
-  }
+  apiStatus.textContent="Could not load FishBound's regulations database.";
+  ruleNote.replaceChildren();
+  const p=document.createElement("p");
+  p.textContent="The new database connection returned an error: "+(error.message||"Unknown error")+". Please check the Supabase table setup and permissions.";
+  ruleNote.appendChild(p);
  }
 }
 stateSelect.addEventListener("change",updateResult);
