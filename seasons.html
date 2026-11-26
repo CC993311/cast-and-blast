@@ -270,7 +270,7 @@ async function updateResult(){
    addRuleLine("Gear restrictions",fish.gear_restrictions);
    addRuleLine("Special restrictions",fish.special_restrictions);
    if(fish.rule_details&&Object.keys(fish.rule_details).length){
-    Object.entries(fish.rule_details).forEach(([key,value])=>addRuleLine(key.replace(/([A-Z])/g," $1").replace(/^./,c=>c.toUpperCase()),typeof value==="object"?JSON.stringify(value):value));
+    Object.entries(fish.rule_details).forEach(([key,value])=>addRuleLine(key.replace(/_/g," ").replace(/([A-Z])/g," $1").replace(/^./,c=>c.toUpperCase()),typeof value==="object"?JSON.stringify(value):value));
    }
    const src=fish.regulation_sources;
    if(src&&src.source_url){
