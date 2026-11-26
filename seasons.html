@@ -1,437 +1,175 @@
-x
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Seasons & Regulations | Cast & Blast</title>
-
+<meta name="theme-color" content="#101710">
+<title>Fishing Regulations | FishBound</title>
 <style>
-:root {
-  --bg:#101710;
-  --panel:#1b281e;
-  --panel2:#243529;
-  --green:#a9c77b;
-  --white:#f1f4ec;
-  --muted:#aab6a7;
-  --border:#354735;
-}
-
-* {box-sizing:border-box;margin:0;padding:0}
-
-body {
-  background:var(--bg);
-  color:var(--white);
-  font-family:Arial,sans-serif;
-}
-
-header {
-  padding:18px 7%;
-  background:#172319;
-  border-bottom:1px solid var(--border);
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:15px;
-  flex-wrap:wrap;
-}
-
-.logo {
-  font-size:22px;
-  font-weight:800;
-  letter-spacing:1px;
-}
-
-.logo span {color:var(--green)}
-
-nav {display:flex;gap:20px;flex-wrap:wrap}
-
-nav a {
-  color:var(--muted);
-  text-decoration:none;
-  font-size:14px;
-}
-
-nav a:hover {color:var(--green)}
-
-main {
-  max-width:1100px;
-  margin:auto;
-  padding:65px 22px;
-}
-
-.heading {margin-bottom:35px}
-
-.heading small {
-  color:var(--green);
-  letter-spacing:2px;
-  font-weight:bold;
-}
-
-.heading h1 {
-  font-size:clamp(30px,5vw,46px);
-  margin:12px 0;
-}
-
-.heading p {
-  color:var(--muted);
-  line-height:1.7;
-  max-width:700px;
-}
-
-.panel {
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:25px;
-  margin-bottom:22px;
-}
-
-label {
-  display:block;
-  font-weight:bold;
-  margin-bottom:12px;
-}
-
-select {
-  width:100%;
-  max-width:500px;
-  padding:14px;
-  background:var(--panel2);
-  color:var(--white);
-  border:1px solid var(--border);
-  border-radius:7px;
-  font-size:15px;
-}
-
-.toggle-row {
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-  margin-top:15px;
-}
-
-.toggle {
-  padding:12px 17px;
-  background:var(--panel2);
-  border:1px solid var(--border);
-  color:var(--muted);
-  border-radius:7px;
-  cursor:pointer;
-  font-weight:bold;
-}
-
-.toggle.active {
-  background:var(--green);
-  color:#142016;
-  border-color:var(--green);
-}
-
-.toggle:hover {border-color:var(--green)}
-
-.species-grid {
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(145px,1fr));
-  gap:12px;
-  margin-top:18px;
-}
-
-.species-button {
-  padding:16px 12px;
-  background:var(--panel2);
-  border:1px solid var(--border);
-  color:var(--white);
-  border-radius:8px;
-  cursor:pointer;
-  font-size:14px;
-  font-weight:bold;
-}
-
-.species-button:hover,
-.species-button.active {
-  border-color:var(--green);
-  color:var(--green);
-}
-
-.result {
-  margin-top:22px;
-  padding:25px;
-  background:#172319;
-  border:1px solid var(--border);
-  border-radius:10px;
-  display:none;
-}
-
-.result h2 {
-  color:var(--green);
-  margin-bottom:12px;
-}
-
-.result p {
-  color:var(--muted);
-  line-height:1.7;
-  margin-bottom:15px;
-}
-
-.source-link {
-  display:inline-block;
-  margin-top:8px;
-  padding:13px 18px;
-  background:var(--green);
-  color:#142016;
-  text-decoration:none;
-  border-radius:6px;
-  font-weight:bold;
-  font-size:13px;
-}
-
-.notice {
-  color:var(--muted);
-  font-size:13px;
-  line-height:1.7;
-  margin-top:15px;
-}
-
-.back {
-  display:inline-block;
-  color:var(--green);
-  text-decoration:none;
-  margin-top:30px;
-}
-
-footer {
-  text-align:center;
-  padding:30px;
-  color:#899687;
-  font-size:12px;
-  border-top:1px solid var(--border);
-}
-
-@media(max-width:600px) {
-  header {justify-content:center}
-  nav {justify-content:center}
-  main {padding:45px 16px}
-  .panel {padding:19px}
-}
+:root{--bg:#101710;--panel:#1b281e;--panel2:#243529;--green:#a9c77b;--white:#f1f4ec;--muted:#aab6a7;--border:#354735}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--white);font-family:Arial,sans-serif;min-height:100vh}
+header{padding:17px 7%;background:#172319;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
+.logo{font-size:22px;font-weight:800;letter-spacing:1px}.logo span{color:var(--green)}
+header a{color:var(--muted);text-decoration:none;font-size:14px}header a:hover{color:var(--green)}
+main{max-width:1000px;margin:auto;padding:48px 20px 70px}
+.hero{text-align:center;margin-bottom:32px}.hero small{color:var(--green);font-weight:bold;letter-spacing:3px}
+.hero h1{font-size:clamp(32px,5vw,48px);margin:13px 0}.hero p{max-width:690px;margin:auto;color:var(--muted);line-height:1.7}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:18px}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+label{display:block;font-weight:bold;margin-bottom:10px}
+select{width:100%;padding:14px;background:var(--panel2);color:var(--white);border:1px solid var(--border);border-radius:8px;font-size:15px}
+select:focus{outline:2px solid var(--green);outline-offset:2px}
+.hint{color:var(--muted);font-size:12px;line-height:1.6;margin-top:9px}
+#loadStatus{color:var(--muted);font-size:13px;line-height:1.6;margin-top:15px}
+.result{display:none}.result h2{font-size:25px;color:var(--green);margin-bottom:8px}
+.result .agency{color:var(--muted);line-height:1.6;margin-bottom:18px}
+.actions{display:flex;gap:11px;flex-wrap:wrap;margin:16px 0}
+.action{display:inline-block;padding:13px 17px;border-radius:7px;background:var(--green);color:#142016;text-decoration:none;font-size:13px;font-weight:bold}
+.action.secondary{background:var(--panel2);border:1px solid var(--border);color:var(--white)}
+.rule-note{background:var(--panel2);border:1px solid var(--border);padding:16px;border-radius:9px;color:var(--muted);font-size:13px;line-height:1.7;margin-top:18px}
+.notice{color:var(--muted);font-size:13px;line-height:1.7;margin-top:20px}
+footer{text-align:center;padding:28px;color:#899687;font-size:12px;border-top:1px solid var(--border)}
+@media(max-width:650px){header{justify-content:center}.form-grid{grid-template-columns:1fr}main{padding:35px 15px 55px}.panel{padding:18px}}
+/* FishBound mobile app navigation */
+.mobile-app-nav{display:none}
+@media(max-width:700px){body{padding-bottom:calc(100px + env(safe-area-inset-bottom))}.mobile-app-nav{position:fixed;z-index:9999;left:0;right:0;bottom:0;display:flex;justify-content:space-around;align-items:stretch;gap:4px;min-height:76px;padding:9px 7px calc(9px + env(safe-area-inset-bottom));background:#172319;border-top:1px solid #456044;box-shadow:0 -5px 18px rgba(0,0,0,.3)}.mobile-app-nav a{flex:1;min-width:0;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:6px 2px;color:#aab6a7;text-decoration:none;font-size:25px;line-height:1.1;border-radius:9px}.mobile-app-nav a small{font-size:11px;font-weight:700}.mobile-app-nav a[aria-current=page]{color:#a9c77b;background:#243529}}
 </style>
 </head>
-
 <body>
-
-<header>
-  <div class="logo">CAST <span>&</span> BLAST</div>
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="map.html">Maps</a>
-    <a href="guides.html">Fishing Guides</a>
-    <a href="conditions.html">Water & Weather</a>
-  </nav>
-</header>
-
+<header><div class="logo">FISH<span>BOUND</span></div><a href="index.html">← Home</a></header>
 <main>
-
-  <div class="heading">
+  <section class="hero">
     <small>KNOW BEFORE YOU GO</small>
-    <h1>Seasons & Regulations</h1>
-    <p>
-      Choose a state and a species to find official fishing
-      regulations, season information, and wildlife conservation
-      resources from state agencies.
-    </p>
-  </div>
-
-  <div class="panel">
-    <label for="stateSelect">Choose a State</label>
-    <select id="stateSelect">
-      <option value="">Select a state</option>
-    </select>
-  </div>
-
-  <div class="panel">
-    <label>Choose a Category</label>
-    <div class="toggle-row">
-      <button class="toggle active" id="fishingTab" type="button">
-        Fishing Species
-      </button>
-      <button class="toggle" id="wildlifeTab" type="button">
-        Wildlife & Conservation
-      </button>
+    <h1>Fishing Regulations</h1>
+    <p>Choose a state and one of the fish in the FishBound Species Guide. We'll take you to the official wildlife agency information for that species.</p>
+  </section>
+  <section class="panel">
+    <div class="form-grid">
+      <div><label for="stateSelect">1. Choose a state</label><select id="stateSelect"><option value="">Select a state</option></select><p class="hint">Choose the state where you plan to fish.</p></div>
+      <div><label for="speciesSelect">2. Choose a species</label><select id="speciesSelect" disabled><option value="">Loading FishBound species…</option></select><p class="hint">This list is loaded from the Fish Species Guide and stays in sync with it.</p></div>
     </div>
-
-    <div id="speciesGrid" class="species-grid"></div>
-
-    <div id="result" class="result">
-      <h2 id="resultTitle"></h2>
-      <p id="resultDescription"></p>
-      <a id="sourceLink" class="source-link"
-         href="#" target="_blank" rel="noopener">
-        FIND OFFICIAL STATE INFORMATION
-      </a>
-      <p class="notice" id="resultNotice"></p>
+    <div id="loadStatus" role="status">Loading all species from the FishBound Species Guide…</div>
+  </section>
+  <section class="panel result" id="result" aria-live="polite">
+    <h2 id="resultTitle"></h2>
+    <p class="agency" id="agencyName"></p>
+    <div class="actions">
+      <a class="action" id="agencyLink" href="#" target="_blank" rel="noopener">OPEN OFFICIAL STATE FISHING RULES</a>
+      <a class="action secondary" id="speciesSearchLink" href="#" target="_blank" rel="noopener">SEARCH THIS AGENCY FOR THIS SPECIES</a>
     </div>
-  </div>
-
-  <p class="notice">
-    Regulations vary by state and may change throughout the year.
-    Always check the current information published by the official
-    state agency before making plans. Cast & Blast is not a
-    government agency and does not issue licenses or permits.
-  </p>
-
-  <a class="back" href="index.html">← Back to Homepage</a>
-
+    <div class="rule-note" id="ruleNote"></div>
+    <p class="notice">FishBound's Species Guide includes fish from across North America. A species may not occur in every state, and rules may vary by lake, river, management zone, season, or whether you are fishing in state or federal waters. Confirm the exact current rules with the agency before fishing.</p>
+    <p class="notice" id="federalNote" style="display:none">For ocean and offshore fishing, federal rules may also apply. Check <a href="https://www.fisheries.noaa.gov/recreational-fishing" target="_blank" rel="noopener">NOAA Fisheries recreational fishing information</a>.</p>
+  </section>
+  <p class="notice">This finder links to official government sources. It does not invent or estimate size limits, bag limits, seasons, or license rules. Always follow the current official regulations for the exact water you plan to fish.</p>
 </main>
-
-<footer>
-  CAST & BLAST | EXPLORE. DISCOVER. RESPECT THE OUTDOORS.
-  <br><br>© 2026 Cast & Blast
-</footer>
-
+<footer>FISHBOUND | EXPLORE. DISCOVER. RESPECT THE WATER.<br><br>© 2026 FishBound</footer>
+<nav class="mobile-app-nav" aria-label="Main navigation">
+<a href="index.html"><span>⌂</span><small>Home</small></a>
+<a href="map.html"><span>⌖</span><small>Map</small></a>
+<a href="guides.html"><span>♧</span><small>Guides</small></a>
+<a href="seasons.html" aria-current="page"><span>⚖</span><small>Rules</small></a>
+<a href="journal.html"><span>▤</span><small>Journal</small></a>
+</nav>
 <script>
-const states = [
-"Alabama","Alaska","Arizona","Arkansas","California",
-"Colorado","Connecticut","Delaware","Florida","Georgia",
-"Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas",
-"Kentucky","Louisiana","Maine","Maryland","Massachusetts",
-"Michigan","Minnesota","Mississippi","Missouri","Montana",
-"Nebraska","Nevada","New Hampshire","New Jersey",
-"New Mexico","New York","North Carolina","North Dakota",
-"Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island",
-"South Carolina","South Dakota","Tennessee","Texas","Utah",
-"Vermont","Virginia","Washington","West Virginia",
-"Wisconsin","Wyoming"
-];
-
-const fishingSpecies = [
-"Trout","Bass","Salmon","Catfish","Crappie",
-"Bluegill","Walleye","Pike","Perch","Carp",
-"Striped Bass","Sturgeon","Redfish","Snook",
-"Flounder","Other Fish"
-];
-
-const wildlifeSpecies = [
-"Deer","Elk","Moose","Black Bear","Turkey",
-"Waterfowl","Rabbit","Squirrel","Fox",
-"Mountain Lion","Bighorn Sheep","Other Wildlife"
-];
-
-const stateSelect = document.getElementById("stateSelect");
-const speciesGrid = document.getElementById("speciesGrid");
-const fishingTab = document.getElementById("fishingTab");
-const wildlifeTab = document.getElementById("wildlifeTab");
-const result = document.getElementById("result");
-
-let category = "fishing";
-let selectedSpecies = "";
-
-states.forEach(state => {
-  const option = document.createElement("option");
-  option.value = state;
-  option.textContent = state;
-  stateSelect.appendChild(option);
-});
-
-function renderSpecies() {
-  speciesGrid.innerHTML = "";
-  result.style.display = "none";
-  selectedSpecies = "";
-
-  const list = category === "fishing"
-    ? fishingSpecies
-    : wildlifeSpecies;
-
-  list.forEach(species => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "species-button";
-    button.textContent = species;
-
-    button.addEventListener("click", () => {
-      document.querySelectorAll(".species-button")
-        .forEach(item => item.classList.remove("active"));
-
-      button.classList.add("active");
-      selectedSpecies = species;
-      showInformation();
-    });
-
-    speciesGrid.appendChild(button);
-  });
+const stateAgencies = {
+"Alabama":["Alabama Department of Conservation and Natural Resources","https://www.outdooralabama.com/fishing","outdooralabama.com"],
+"Alaska":["Alaska Department of Fish and Game","https://www.adfg.alaska.gov/index.cfm?adfg=fishregulations.main","adfg.alaska.gov"],
+"Arizona":["Arizona Game and Fish Department","https://www.azgfd.com/fishing/","azgfd.com"],
+"Arkansas":["Arkansas Game and Fish Commission","https://www.agfc.com/fishing/","agfc.com"],
+"California":["California Department of Fish and Wildlife","https://wildlife.ca.gov/Regulations","wildlife.ca.gov"],
+"Colorado":["Colorado Parks and Wildlife","https://cpw.state.co.us/thingstodo/Pages/Fishing.aspx","cpw.state.co.us"],
+"Connecticut":["Connecticut Department of Energy and Environmental Protection","https://portal.ct.gov/deep/fishing","portal.ct.gov"],
+"Delaware":["Delaware Department of Natural Resources and Environmental Control","https://dnrec.delaware.gov/fish-wildlife/","dnrec.delaware.gov"],
+"Florida":["Florida Fish and Wildlife Conservation Commission","https://myfwc.com/fishing/","myfwc.com"],
+"Georgia":["Georgia Department of Natural Resources","https://georgiawildlife.com/fishing","georgiawildlife.com"],
+"Hawaii":["Hawaii Department of Land and Natural Resources","https://dlnr.hawaii.gov/dar/","dlnr.hawaii.gov"],
+"Idaho":["Idaho Department of Fish and Game","https://idfg.idaho.gov/rules/fish","idfg.idaho.gov"],
+"Illinois":["Illinois Department of Natural Resources","https://www.ifishillinois.org/regulations/","ifishillinois.org"],
+"Indiana":["Indiana Department of Natural Resources","https://www.in.gov/dnr/fish-and-wildlife/","in.gov"],
+"Iowa":["Iowa Department of Natural Resources","https://www.iowadnr.gov/fishing","iowadnr.gov"],
+"Kansas":["Kansas Department of Wildlife and Parks","https://ksoutdoors.gov/Fishing","ksoutdoors.gov"],
+"Kentucky":["Kentucky Department of Fish and Wildlife Resources","https://fw.ky.gov/Fish/Pages/default.aspx","fw.ky.gov"],
+"Louisiana":["Louisiana Department of Wildlife and Fisheries","https://www.wlf.louisiana.gov/page/fishing","wlf.louisiana.gov"],
+"Maine":["Maine Department of Inland Fisheries and Wildlife","https://www.maine.gov/ifw/fishing-boating/fishing/index.html","maine.gov"],
+"Maryland":["Maryland Department of Natural Resources","https://dnr.maryland.gov/fisheries/Pages/default.aspx","dnr.maryland.gov"],
+"Massachusetts":["Massachusetts Division of Fisheries and Wildlife","https://www.mass.gov/freshwater-fishing","mass.gov"],
+"Michigan":["Michigan Department of Natural Resources","https://www.michigan.gov/dnr/things-to-do/fishing","michigan.gov"],
+"Minnesota":["Minnesota Department of Natural Resources","https://www.dnr.state.mn.us/fishing/index.html","dnr.state.mn.us"],
+"Mississippi":["Mississippi Department of Wildlife, Fisheries, and Parks","https://www.mdwfp.com/fishing-boating","mdwfp.com"],
+"Missouri":["Missouri Department of Conservation","https://mdc.mo.gov/fishing","mdc.mo.gov"],
+"Montana":["Montana Fish, Wildlife and Parks","https://fwp.mt.gov/fish","fwp.mt.gov"],
+"Nebraska":["Nebraska Game and Parks Commission","https://outdoornebraska.gov/fishing/","outdoornebraska.gov"],
+"Nevada":["Nevada Department of Wildlife","https://www.ndow.org/get-outside/fishing/","ndow.org"],
+"New Hampshire":["New Hampshire Fish and Game Department","https://www.wildlife.nh.gov/fishing","wildlife.nh.gov"],
+"New Jersey":["New Jersey Division of Fish and Wildlife","https://dep.nj.gov/njfw/fishing/","dep.nj.gov"],
+"New Mexico":["New Mexico Department of Game and Fish","https://wildlife.dgf.nm.gov/fishing/","wildlife.dgf.nm.gov"],
+"New York":["New York State Department of Environmental Conservation","https://dec.ny.gov/things-to-do/freshwater-fishing","dec.ny.gov"],
+"North Carolina":["North Carolina Wildlife Resources Commission","https://www.ncwildlife.gov/fishing","ncwildlife.gov"],
+"North Dakota":["North Dakota Game and Fish Department","https://gf.nd.gov/fishing","gf.nd.gov"],
+"Ohio":["Ohio Department of Natural Resources, Division of Wildlife","https://ohiodnr.gov/discover-and-learn/safety-conservation/about-ODNR/wildlife/fishing","ohiodnr.gov"],
+"Oklahoma":["Oklahoma Department of Wildlife Conservation","https://www.wildlifedepartment.com/fishing","wildlifedepartment.com"],
+"Oregon":["Oregon Department of Fish and Wildlife","https://myodfw.com/recreation-report/fishing-report","myodfw.com"],
+"Pennsylvania":["Pennsylvania Fish and Boat Commission","https://www.pa.gov/agencies/fishandboat/fishing.html","pa.gov"],
+"Rhode Island":["Rhode Island Department of Environmental Management","https://dem.ri.gov/natural-resources-bureau/fish-wildlife","dem.ri.gov"],
+"South Carolina":["South Carolina Department of Natural Resources","https://www.dnr.sc.gov/fishing.html","dnr.sc.gov"],
+"South Dakota":["South Dakota Game, Fish and Parks","https://gfp.sd.gov/fishing/","gfp.sd.gov"],
+"Tennessee":["Tennessee Wildlife Resources Agency","https://www.tn.gov/twra/fishing.html","tn.gov"],
+"Texas":["Texas Parks and Wildlife Department","https://tpwd.texas.gov/regulations/outdoor-annual/fishing","tpwd.texas.gov"],
+"Utah":["Utah Division of Wildlife Resources","https://wildlife.utah.gov/fishing.html","wildlife.utah.gov"],
+"Vermont":["Vermont Fish and Wildlife Department","https://vtfishandwildlife.com/fish","vtfishandwildlife.com"],
+"Virginia":["Virginia Department of Wildlife Resources","https://dwr.virginia.gov/fishing/regulations/","dwr.virginia.gov"],
+"Washington":["Washington Department of Fish and Wildlife","https://wdfw.wa.gov/fishing/regulations","wdfw.wa.gov"],
+"West Virginia":["West Virginia Division of Natural Resources","https://wvdnr.gov/fishing/","wvdnr.gov"],
+"Wisconsin":["Wisconsin Department of Natural Resources","https://dnr.wisconsin.gov/topic/Fishing","dnr.wisconsin.gov"],
+"Wyoming":["Wyoming Game and Fish Department","https://wgfd.wyo.gov/fishing-boating","wgfd.wyo.gov"]
+};
+const stateSelect=document.getElementById("stateSelect");
+const speciesSelect=document.getElementById("speciesSelect");
+const loadStatus=document.getElementById("loadStatus");
+const result=document.getElementById("result");
+const states=Object.keys(stateAgencies).sort((a,b)=>a.localeCompare(b));
+states.forEach(state=>{const option=document.createElement("option");option.value=state;option.textContent=state;stateSelect.appendChild(option);});
+function updateResult(){
+ const state=stateSelect.value, species=speciesSelect.value;
+ if(!state||!species){result.style.display="none";return;}
+ const [agency,url,domain]=stateAgencies[state];
+ document.getElementById("resultTitle").textContent=state+" — "+species;
+ document.getElementById("agencyName").textContent="Official source: "+agency;
+ const agencyLink=document.getElementById("agencyLink");
+ agencyLink.href=url;
+ const query=encodeURIComponent('site:'+domain+' "'+species+'" fishing regulations');
+ const searchLink=document.getElementById("speciesSearchLink");
+ searchLink.href="https://www.google.com/search?q="+query;
+ document.getElementById("ruleNote").textContent="Look for the current species rules in the official "+state+" fishing guide. Check the season, minimum or maximum size, daily bag and possession limits, gear restrictions, and any special rules for the exact lake, river, or management area. The official agency publication is the authority.";
+ const saltwater=/saltwater|tuna|marlin|swordfish|mahi|wahoo|halibut|cod|haddock|pollock|sablefish|mackerel|bonito|barracuda|shark|sheephead|tautog|surfperch|croaker|seabass|sea bass|sanddab|sole|sardine|anchovy|herring|grunion|sculpin|greenling|corbina|queenfish|sturgeon/i.test(species);
+ document.getElementById("federalNote").style.display=saltwater?"block":"none";
+ result.style.display="block";
 }
-
-function showInformation() {
-  const state = stateSelect.value;
-
-  if (!state) {
-    result.style.display = "block";
-    document.getElementById("resultTitle").textContent =
-      "Choose a state first";
-    document.getElementById("resultDescription").textContent =
-      "Select a state above to find information for " + selectedSpecies + ".";
-    document.getElementById("sourceLink").style.display = "none";
-    document.getElementById("resultNotice").textContent = "";
-    return;
-  }
-
-  const title = document.getElementById("resultTitle");
-  const description = document.getElementById("resultDescription");
-  const link = document.getElementById("sourceLink");
-  const notice = document.getElementById("resultNotice");
-
-  title.textContent = state + " — " + selectedSpecies;
-  link.style.display = "inline-block";
-
-  let searchText;
-
-  if (category === "fishing") {
-    description.textContent =
-      "Find the official " + state +
-      " fishing regulations and season information for " +
-      selectedSpecies + ". Check the state agency's current rules, " +
-      "license information, protected waters, and species restrictions.";
-
-    searchText = state + " official " + selectedSpecies +
-      " fishing regulations season site:gov OR site:us";
-    notice.textContent =
-      "Use the official state agency publication to verify current dates, limits, and restrictions.";
-  } else {
-    description.textContent =
-      "Find official " + state + " wildlife conservation information for " +
-      selectedSpecies + ", including conservation status, habitat, " +
-      "protected-species information, and state wildlife resources.";
-
-    searchText = state + " official " + selectedSpecies +
-      " wildlife conservation protected species site:gov";
-    notice.textContent =
-      "This section focuses on wildlife conservation and protected-species information.";
-  }
-
-  link.href = "https://www.google.com/search?q=" +
-    encodeURIComponent(searchText);
-
-  result.style.display = "block";
+stateSelect.addEventListener("change",updateResult);
+speciesSelect.addEventListener("change",updateResult);
+async function loadSpecies(){
+ try{
+  const response=await fetch("guides.html",{cache:"no-store"});
+  if(!response.ok)throw new Error("Species guide could not be loaded.");
+  const html=await response.text();
+  const match=html.match(/const fishData = \[([\s\S]*?)\n\];/);
+  if(!match)throw new Error("Could not find the species list in guides.html.");
+  const names=[...match[1].matchAll(/^\s*\[\s*"([^"]+)"/gm)].map(item=>item[1]);
+  for(const item of html.matchAll(/fishData\.push\(\[\s*\n?\s*"([^"]+)"/g))names.push(item[1]);
+  const unique=[...new Map(names.map(name=>[name.toLocaleLowerCase(),name])).values()].sort((a,b)=>a.localeCompare(b));
+  if(!unique.length)throw new Error("The Species Guide did not contain any species.");
+  speciesSelect.innerHTML='<option value="">Select a species</option>';
+  unique.forEach(name=>{const option=document.createElement("option");option.value=name;option.textContent=name;speciesSelect.appendChild(option);});
+  speciesSelect.disabled=false;
+  loadStatus.textContent=unique.length+" unique species loaded from the FishBound Species Guide.";
+ }catch(error){
+  speciesSelect.innerHTML='<option value="">Species could not be loaded</option>';
+  loadStatus.textContent=error.message+" Open the Species Guide and try again.";
+ }
 }
-
-fishingTab.addEventListener("click", () => {
-  category = "fishing";
-  fishingTab.classList.add("active");
-  wildlifeTab.classList.remove("active");
-  renderSpecies();
-});
-
-wildlifeTab.addEventListener("click", () => {
-  category = "wildlife";
-  wildlifeTab.classList.add("active");
-  fishingTab.classList.remove("active");
-  renderSpecies();
-});
-
-stateSelect.addEventListener("change", () => {
-  if (selectedSpecies) showInformation();
-});
-
-renderSpecies();
+loadSpecies();
 </script>
-
 </body>
 </html>
