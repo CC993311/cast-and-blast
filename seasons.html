@@ -262,8 +262,12 @@ async function updateResult(){
   if(data._meta?.agencyUrl)agencyLink.href=data._meta.agencyUrl;
  }catch(error){
   if(thisRequest!==requestNumber)return;
-  apiStatus.textContent="The regulation database could not be reached.";
-  showFallback("FishBound could not load the regulation database right now. Please use the official state source.",agencyUrl);
+  if(state==="California"&&makeSlug(species)==="largemouth-bass"){
+   showCaliforniaLargemouthBassRules(waterBody,agencyUrl);
+  }else{
+   apiStatus.textContent="The regulation database could not be reached.";
+   showFallback("FishBound could not load the regulation database right now. Please use the official state source.",agencyUrl);
+  }
  }
 }
 stateSelect.addEventListener("change",updateResult);
