@@ -1,0 +1,140 @@
+-- FishBound: California species batch 3 (30 species)
+-- Official sources: CDFW 2026 Freshwater Sport Fishing Regulations (updated July 10, 2026)
+-- and 2026 Ocean Sport Fishing Regulations (updated July 17, 2026).
+-- Water-specific exceptions and in-season changes still apply.
+-- Safe to run more than once.
+
+do $$
+declare
+  v_fresh_source_id uuid;
+  v_ocean_source_id uuid;
+  r record;
+  v_source_id uuid;
+begin
+  select id into v_fresh_source_id
+  from public.regulation_sources
+  where state_code='CA'
+    and source_title='CDFW 2026 Freshwater Sport Fishing Regulations — Species Batch 3'
+  order by created_at desc limit 1;
+
+  if v_fresh_source_id is null then
+    insert into public.regulation_sources (
+      state_code, agency_name, source_title, source_url, regulation_year,
+      checked_at, source_type, verification_status, notes
+    ) values (
+      'CA',
+      'California Department of Fish and Wildlife',
+      'CDFW 2026 Freshwater Sport Fishing Regulations — Species Batch 3',
+      'https://nrm.dfg.ca.gov/FileHandler.ashx?DocumentID=209090',
+      2026, now(), 'official', 'verified',
+      'Official 2026 Freshwater Sport Fishing Regulations, updated July 10, 2026. Water-specific regulations in Sections 7.40 and 7.50 and later in-season changes can override statewide summaries.'
+    ) returning id into v_fresh_source_id;
+  end if;
+
+  select id into v_ocean_source_id
+  from public.regulation_sources
+  where state_code='CA'
+    and source_title='CDFW 2026 Ocean Sport Fishing Regulations — Species Batch 3'
+  order by created_at desc limit 1;
+
+  if v_ocean_source_id is null then
+    insert into public.regulation_sources (
+      state_code, agency_name, source_title, source_url, regulation_year,
+      checked_at, source_type, verification_status, notes
+    ) values (
+      'CA',
+      'California Department of Fish and Wildlife',
+      'CDFW 2026 Ocean Sport Fishing Regulations — Species Batch 3',
+      'https://nrm.dfg.ca.gov/FileHandler.ashx?DocumentID=239985',
+      2026, now(), 'official', 'verified',
+      'Official 2026 Ocean Sport Fishing Regulations, last updated July 17, 2026. Ocean rules may change in-season; groundfish management areas, marine protected areas and regional exceptions apply.'
+    ) returning id into v_ocean_source_id;
+  end if;
+
+  for r in
+    select * from (values
+      ('fresh','Brown Trout','brown-trout','Open all year in inland lakes, reservoirs and ponds. Streams and rivers generally open from the last Saturday in April through November 15; November 16 through the Friday before opening has a zero-trout limit.','5 trout daily in lakes/reservoirs; 5 trout daily during the general stream season','10 trout in possession','No statewide minimum size in the general trout rule','Check Sections 7.40 and 7.50 for water-specific seasons, limits, size and gear rules. Brown trout count toward the combined trout limit with rainbow, golden and cutthroat trout.','T14 CCR §5.85; Sections 7.40 and 7.50.',
+       '{"daily_bag_limit":"5 trout daily in lakes, reservoirs and ponds; 5 during the general stream season","possession_limit":"10 trout","season":"Lakes/reservoirs/ponds: year-round. General streams/rivers: last Saturday in April-November 15; zero-trout limit during the closed period.","minimum_size":"No general statewide minimum size in §5.85.","combined_limit":"Brown trout count toward the combined trout limit with other trout species.","waterbody_exceptions":"Sections 7.40 and 7.50 may set different rules for individual waters."}'::jsonb),
+      ('fresh','Walleye','walleye','All year, subject to district and water-specific closures.','No statewide species-specific limit under the other-species provision','No statewide species-specific possession limit under the other-species provision','No statewide species-specific minimum size listed','Other fish species may be taken by angling in any number and at any time unless a district or special-water regulation says otherwise.','T14 CCR §5.95.',
+       '{"daily_bag_limit":"No statewide species-specific limit under §5.95.","possession_limit":"No statewide species-specific limit under §5.95.","season":"Any time of year, except district or special-water closures.","methods":"Angling only under the §5.95 other-species provision.","important":"District and water-specific restrictions still apply."}'::jsonb),
+      ('fresh','Yellow Perch','yellow-perch','All year, except for closures listed under district or special regulations.','No limit','No limit','No size limit listed','Check district and water-specific closures.','T14 CCR §5.91.',
+       '{"daily_bag_limit":"No limit.","possession_limit":"No limit specified.","season":"All year except district or special-regulation closures.","minimum_size":"No size limit listed."}'::jsonb),
+      ('fresh','Kokanee Salmon','kokanee-salmon','All year.','5 fish daily; 10 fish in possession','10 fish','No size limit','Bucks Lake, New Bullards Bar Reservoir, Pardee Lake and Trinity Lake: 10 daily and 20 in possession.','T14 CCR §5.41.',
+       '{"daily_bag_limit":"5 fish daily.","possession_limit":"10 fish.","minimum_size":"No size limit.","season":"All year.","waterbody_exceptions":"Bucks Lake, New Bullards Bar Reservoir, Pardee Lake and Trinity Lake: 10 daily and 20 in possession."}'::jsonb),
+      ('fresh','Lake Trout','lake-trout','General trout seasons apply; lakes, reservoirs and ponds are generally open year-round.','Included in the general trout limit: 5 daily','10 trout in possession','No general statewide minimum size in the general trout rule','Lake trout are treated under the general trout rules; water-specific exceptions in Sections 7.40 and 7.50 may override.','T14 CCR §5.85; Sections 7.40 and 7.50.',
+       '{"daily_bag_limit":"5 trout daily under the general lake/reservoir trout rule.","possession_limit":"10 trout.","season":"Inland lakes/reservoirs/ponds generally year-round; stream rules differ.","minimum_size":"No general statewide minimum size in §5.85.","waterbody_exceptions":"Check Sections 7.40 and 7.50 for the exact water."}'::jsonb),
+      ('fresh','Shoal Bass','shoal-bass','All year, subject to district and water-specific closures.','No statewide species-specific limit under the other-species provision','No statewide species-specific possession limit under the other-species provision','No statewide species-specific minimum size listed','Other fish species may be taken by angling in any number and at any time unless a district or special-water regulation says otherwise.','T14 CCR §5.95.',
+       '{"daily_bag_limit":"No statewide species-specific limit under §5.95.","possession_limit":"No statewide species-specific limit under §5.95.","season":"Any time of year, except district or special-water closures.","methods":"Angling only under the §5.95 other-species provision.","important":"District and water-specific restrictions still apply."}'::jsonb),
+      ('fresh','Redeye Bass','redeye-bass','All year, subject to district and water-specific closures.','No statewide species-specific limit under the other-species provision','No statewide species-specific possession limit under the other-species provision','No statewide species-specific minimum size listed','Other fish species may be taken by angling in any number and at any time unless a district or special-water regulation says otherwise.','T14 CCR §5.95.',
+       '{"daily_bag_limit":"No statewide species-specific limit under §5.95.","possession_limit":"No statewide species-specific possession limit.","season":"Any time of year, except district or special-water closures.","methods":"Angling only under the §5.95 other-species provision.","important":"District and water-specific restrictions still apply."}'::jsonb),
+      ('fresh','Common Carp','common-carp','All year, subject to district and water-specific closures.','No statewide species-specific limit under the other-species provision','No statewide species-specific possession limit under the other-species provision','No statewide species-specific minimum size listed','Other fish species may be taken by angling in any number and at any time unless a district or special-water regulation says otherwise.','T14 CCR §5.95.',
+       '{"daily_bag_limit":"No statewide species-specific limit under §5.95.","possession_limit":"No statewide species-specific possession limit.","season":"Any time of year, except district or special-water closures.","methods":"Angling only under the §5.95 other-species provision.","important":"District and water-specific restrictions still apply."}'::jsonb),
+      ('fresh','Bighead Carp','bighead-carp','All year, subject to district and water-specific closures.','No statewide species-specific limit under the other-species provision','No statewide species-specific possession limit under the other-species provision','No statewide species-specific minimum size listed','Other fish species may be taken by angling in any number and at any time unless a district or special-water regulation says otherwise.','T14 CCR §5.95.',
+       '{"daily_bag_limit":"No statewide species-specific limit under §5.95.","possession_limit":"No statewide species-specific possession limit.","season":"Any time of year, except district or special-water closures.","methods":"Angling only under the §5.95 other-species provision.","important":"District and water-specific restrictions still apply."}'::jsonb),
+      ('fresh','Freshwater Drum','freshwater-drum','All year, subject to district and water-specific closures.','No statewide species-specific limit under the other-species provision','No statewide species-specific possession limit under the other-species provision','No statewide species-specific minimum size listed','Other fish species may be taken by angling in any number and at any time unless a district or special-water regulation says otherwise.','T14 CCR §5.95.',
+       '{"daily_bag_limit":"No statewide species-specific limit under §5.95.","possession_limit":"No statewide species-specific possession limit.","season":"Any time of year, except district or special-water closures.","methods":"Angling only under the §5.95 other-species provision.","important":"District and water-specific restrictions still apply."}'::jsonb),
+      ('fresh','Bowfin','bowfin','All year, subject to district and water-specific closures.','No statewide species-specific limit under the other-species provision','No statewide species-specific possession limit under the other-species provision','No statewide species-specific minimum size listed','Other fish species may be taken by angling in any number and at any time unless a district or special-water regulation says otherwise.','T14 CCR §5.95.',
+       '{"daily_bag_limit":"No statewide species-specific limit under §5.95.","possession_limit":"No statewide species-specific possession limit.","season":"Any time of year, except district or special-water closures.","methods":"Angling only under the §5.95 other-species provision.","important":"District and water-specific restrictions still apply."}'::jsonb),
+      ('fresh','Longnose Gar','longnose-gar','All year, subject to district and water-specific closures.','No statewide species-specific limit under the other-species provision','No statewide species-specific possession limit under the other-species provision','No statewide species-specific minimum size listed','Other fish species may be taken by angling in any number and at any time unless a district or special-water regulation says otherwise.','T14 CCR §5.95.',
+       '{"daily_bag_limit":"No statewide species-specific limit under §5.95.","possession_limit":"No statewide species-specific possession limit.","season":"Any time of year, except district or special-water closures.","methods":"Angling only under the §5.95 other-species provision.","important":"District and water-specific restrictions still apply."}'::jsonb),
+      ('fresh','Alewife','alewife','All year, subject to district and water-specific closures.','No statewide species-specific limit under the other-species provision','No statewide species-specific possession limit under the other-species provision','No statewide species-specific minimum size listed','Other fish species may be taken by angling in any number and at any time unless a district or special-water regulation says otherwise.','T14 CCR §5.95.',
+       '{"daily_bag_limit":"No statewide species-specific limit under §5.95.","possession_limit":"No statewide species-specific possession limit.","season":"Any time of year, except district or special-water closures.","methods":"Angling only under the §5.95 other-species provision.","important":"District and water-specific restrictions still apply."}'::jsonb),
+      ('fresh','Blueback Herring','blueback-herring','All year, subject to district and water-specific closures.','No statewide species-specific limit under the other-species provision','No statewide species-specific possession limit under the other-species provision','No statewide species-specific minimum size listed','Other fish species may be taken by angling in any number and at any time unless a district or special-water regulation says otherwise.','T14 CCR §5.95.',
+       '{"daily_bag_limit":"No statewide species-specific limit under §5.95.","possession_limit":"No statewide species-specific possession limit.","season":"Any time of year, except district or special-water closures.","methods":"Angling only under the §5.95 other-species provision.","important":"District and water-specific restrictions still apply."}'::jsonb),
+      ('fresh','American Eel','american-eel','All year, subject to district and water-specific closures.','No statewide species-specific limit under the other-species provision','No statewide species-specific possession limit under the other-species provision','No statewide species-specific minimum size listed','Other fish species may be taken by angling in any number and at any time unless a district or special-water regulation says otherwise.','T14 CCR §5.95.',
+       '{"daily_bag_limit":"No statewide species-specific limit under §5.95.","possession_limit":"No statewide species-specific possession limit.","season":"Any time of year, except district or special-water closures.","methods":"Angling only under the §5.95 other-species provision.","important":"District and water-specific restrictions still apply."}'::jsonb),
+      ('fresh','Brook Trout','brook-trout','All year, except Red Lake (Alpine County) and waters listed in Section 7.50 have exceptions.','10 brook trout under 10 inches, in addition to the statewide trout daily limit','10 brook trout under 10 inches, in addition to the statewide trout possession limit','Brook trout retained under the special allowance must be less than 10 inches total length','Brook trout limits are cumulative with the statewide trout limit; special-water exceptions apply.','T14 CCR §5.84 and §5.85; Section 7.50.',
+       '{"daily_bag_limit":"10 brook trout less than 10 inches, in addition to the statewide trout daily bag limit.","possession_limit":"10 brook trout less than 10 inches, in addition to the statewide trout possession limit.","minimum_size":"The special brook trout allowance is for fish less than 10 inches total length.","season":"All year, subject to listed exceptions.","exceptions":"Red Lake (Alpine County) and all waters listed in Section 7.50 are exceptions.","combined_limit":"Brook trout limits are cumulative with statewide trout limits."}'::jsonb),
+      ('fresh','Cutthroat Trout','cutthroat-trout','Open all year in inland lakes, reservoirs and ponds. General streams and rivers open from the last Saturday in April through November 15; zero-trout limit during the closed period.','5 trout daily under the general statewide trout rule','10 trout in possession','No general statewide minimum size in §5.85','Cutthroat trout count toward the combined trout limit. Water-specific rules can set different limits, minimum sizes or catch-and-release requirements.','T14 CCR §5.85; Sections 7.40 and 7.50.',
+       '{"daily_bag_limit":"5 trout daily under the general statewide trout rule.","possession_limit":"10 trout.","season":"Lakes/reservoirs/ponds: year-round. General streams/rivers: last Saturday in April-November 15; zero-trout limit during the closed period.","minimum_size":"No general statewide minimum size in §5.85.","combined_limit":"Cutthroat trout count toward the combined trout limit.","waterbody_exceptions":"Sections 7.40 and 7.50 may set different limits, size rules or catch-and-release rules."}'::jsonb),
+      ('fresh','Golden Trout','golden-trout','Open all year in inland lakes, reservoirs and ponds. General streams and rivers open from the last Saturday in April through November 15; zero-trout limit during the closed period.','5 trout daily under the general statewide trout rule','10 trout in possession','No general statewide minimum size in §5.85','Golden trout count toward the combined trout limit. Water-specific rules can set different limits, minimum sizes or catch-and-release requirements.','T14 CCR §5.85; Sections 7.40 and 7.50.',
+       '{"daily_bag_limit":"5 trout daily under the general statewide trout rule.","possession_limit":"10 trout.","season":"Lakes/reservoirs/ponds: year-round. General streams/rivers: last Saturday in April-November 15; zero-trout limit during the closed period.","minimum_size":"No general statewide minimum size in §5.85.","combined_limit":"Golden trout count toward the combined trout limit.","waterbody_exceptions":"Sections 7.40 and 7.50 may set different limits, size rules or catch-and-release rules."}'::jsonb),
+      ('fresh','Sockeye Salmon','sockeye-salmon','Salmon seasons and retention rules are waterbody-specific; consult the current Section 7.40 regulations for the exact river or lake.','Varies by waterbody and season; no single statewide daily limit','Varies by waterbody and season','Varies by waterbody and season','Do not rely on a statewide number for salmon. Check the exact waterbody in Section 7.40 and any in-season CDFW updates before fishing.','T14 CCR §§1.73, 5.89 and 7.40; CDFW 2026 Freshwater Sport Fishing Regulations.',
+       '{"daily_bag_limit":"Varies by waterbody and season; no single statewide daily limit.","possession_limit":"Varies by waterbody and season.","season":"Waterbody-specific under Section 7.40 and district regulations.","minimum_size":"Waterbody-specific.","important":"Select the exact river or lake and check current CDFW in-season updates. Salmon rules must not be guessed from a statewide summary."}'::jsonb),
+      ('fresh','Coho Salmon','coho-salmon','Inland salmon seasons and retention rules are waterbody-specific. Take of coho salmon is prohibited in ocean waters.','Varies by inland waterbody; prohibited in ocean waters','Varies by inland waterbody; prohibited in ocean waters','Varies by inland waterbody','Check the exact inland waterbody under Section 7.40 and current in-season updates. Coho salmon may not be taken or possessed in ocean waters.','T14 CCR §§1.73, 5.89 and 7.40; CDFW 2026 Ocean Sport Fishing Regulations.',
+       '{"daily_bag_limit":"Inland: varies by waterbody and season. Ocean: zero; take prohibited.","possession_limit":"Inland: varies by waterbody and season. Ocean: zero; possession prohibited.","season":"Inland seasons are waterbody-specific. Coho salmon are prohibited in ocean waters.","important":"Check exact inland waterbody and current CDFW in-season updates."}'::jsonb),
+      ('fresh','Chum Salmon','chum-salmon','Salmon seasons and retention rules are waterbody-specific; consult the current Section 7.40 regulations for the exact river or lake.','Varies by waterbody and season; no single statewide daily limit','Varies by waterbody and season','Varies by waterbody and season','Do not rely on a statewide number for salmon. Check the exact waterbody in Section 7.40 and any in-season CDFW updates before fishing.','T14 CCR §§1.73, 5.89 and 7.40.',
+       '{"daily_bag_limit":"Varies by waterbody and season; no single statewide daily limit.","possession_limit":"Varies by waterbody and season.","season":"Waterbody-specific under Section 7.40 and district regulations.","minimum_size":"Waterbody-specific.","important":"Select the exact river or lake and check current CDFW in-season updates."}'::jsonb),
+      ('fresh','Pink Salmon','pink-salmon','Salmon seasons and retention rules are waterbody-specific; consult the current Section 7.40 regulations for the exact river or lake.','Varies by waterbody and season; no single statewide daily limit','Varies by waterbody and season','Varies by waterbody and season','Do not rely on a statewide number for salmon. Check the exact waterbody in Section 7.40 and any in-season CDFW updates before fishing.','T14 CCR §§1.73, 5.89 and 7.40.',
+       '{"daily_bag_limit":"Varies by waterbody and season; no single statewide daily limit.","possession_limit":"Varies by waterbody and season.","season":"Waterbody-specific under Section 7.40 and district regulations.","minimum_size":"Waterbody-specific.","important":"Select the exact river or lake and check current CDFW in-season updates."}'::jsonb),
+      ('fresh','Steelhead','steelhead','Inland steelhead retention is controlled by water-specific regulations. Wild steelhead must be released unless a specific regulation allows retention of a hatchery fish.','Varies by waterbody; wild steelhead generally must be released','Varies by waterbody','Varies by waterbody','A Steelhead Fishing Report and Restoration Card is required while fishing for or taking steelhead in anadromous inland waters. In ocean waters, steelhead take is prohibited.','T14 CCR §§5.85, 5.88 and 7.40; CDFW 2026 Ocean Sport Fishing Regulations.',
+       '{"daily_bag_limit":"Waterbody-specific; wild steelhead must be released unless a specific rule authorizes retention.","possession_limit":"Waterbody-specific.","season":"Waterbody-specific inland seasons. Steelhead take is prohibited in ocean waters.","report_card":"Steelhead Fishing Report and Restoration Card required in anadromous inland waters.","important":"Check the exact river and current Section 7.40 rules. Hatchery fish are identified by a healed adipose-fin clip."}'::jsonb),
+      ('ocean','Pacific Cod','pacific-cod','Open year-round in all depths except Groundfish Exclusion Areas, where take and possession are prohibited. In-season changes may apply.','General ocean finfish limit: 20 fish combined, no more than 10 of any one species','General ocean finfish limit: 20 fish combined, no more than 10 of any one species','No species-specific minimum size listed','When angling, no more than two hooks and one line. Descending device must be available when taking or possessing federal groundfish from a vessel.','T14 CCR §§27.20, 27.60 and 28.49.',
+       '{"daily_bag_limit":"20 finfish combined, with no more than 10 of any one species.","possession_limit":"20 finfish combined, with no more than 10 of any one species.","season":"Year-round in all depths except Groundfish Exclusion Areas.","minimum_size":"No species-specific minimum size listed.","gear":"No more than two hooks and one line when angling. Descending device required aboard vessels when taking or possessing federal groundfish.","important":"CDFW may change groundfish rules in-season; check current groundfish summaries and map."}'::jsonb),
+      ('ocean','Yellowtail Amberjack','yellowtail-amberjack','Open year-round.','10 fish','10 fish','24 inches fork length; up to 5 fish under 24 inches may be retained','The allowance for undersized fish is limited to five fish. General ocean rules and area closures still apply.','T14 CCR §28.37.',
+       '{"daily_bag_limit":"10 fish.","possession_limit":"10 fish.","minimum_size":"24 inches fork length; up to 5 fish under 24 inches may be retained.","season":"Year-round."}'::jsonb),
+      ('ocean','Jacksmelt','jacksmelt','Open year-round.','No limit','No limit','No minimum size listed','Jacksmelt is specifically listed among ocean finfish species with no limit under the general limit provision.','T14 CCR §27.60(b).',
+       '{"daily_bag_limit":"No limit.","possession_limit":"No limit.","minimum_size":"No minimum size listed.","season":"Year-round."}'::jsonb),
+      ('ocean','Surfperch','surfperch','Open year-round except surfperch may not be taken or possessed in San Francisco Bay and San Pablo Bay from April 1 through July 31. Shiner perch are exempt from that closure.','20 surfperch combined outside San Francisco/San Pablo bays; 5 combined in those bays. No more than 10 of any one species. Shiner perch limit is 20.','Same as daily bag limit','Redtail surfperch: 10.5 inches total length. Other surfperch: no minimum size.','Surfperch limits are combined across species. Shiner perch have a separate limit of 20.','T14 CCR §28.59.',
+       '{"daily_bag_limit":"20 surfperch combined outside San Francisco and San Pablo bays; 5 combined inside those bays. No more than 10 of any one species. Shiner perch limit: 20.","possession_limit":"Same as daily bag limit.","season":"Year-round except San Francisco Bay and San Pablo Bay closure April 1-July 31; shiner perch exempt.","minimum_size":"Redtail surfperch: 10.5 inches total length. All other surfperch: no minimum size.","important":"Surfperch bag limit is shared across species."}'::jsonb),
+      ('ocean','Albacore Tuna','albacore-tuna','Open year-round.','South of Point Conception: 10 fish. North of Point Conception: 25 fish. These limits are in addition to the general 20-finfish limit.','Same as daily bag limit','No minimum size listed','Point Conception is the boundary for the two albacore limits.','T14 CCR §28.38(a).',
+       '{"daily_bag_limit":"South of Point Conception: 10. North of Point Conception: 25. Albacore limits are in addition to the general 20-finfish limit.","possession_limit":"Same as daily bag limit.","minimum_size":"No minimum size listed.","season":"Year-round."}'::jsonb),
+      ('ocean','Yellowfin Tuna','yellowfin-tuna','Open year-round.','10 fish; counts toward the general 20-finfish combined limit','10 fish; counts toward the general 20-finfish combined limit','No minimum size listed','Yellowfin tuna limit is included within, not added to, the general 20-finfish combined limit.','T14 CCR §§27.60 and 28.38(d).',
+       '{"daily_bag_limit":"10 fish, included within the general 20-finfish combined limit.","possession_limit":"10 fish, included within the general 20-finfish combined limit.","minimum_size":"No minimum size listed.","season":"Year-round."}'::jsonb),
+      ('ocean','Pacific Mackerel','pacific-mackerel','Open year-round.','No limit','No limit','No minimum size listed','Pacific mackerel is specifically listed among ocean finfish species with no limit under the general limit provision.','T14 CCR §27.60(b).',
+       '{"daily_bag_limit":"No limit.","possession_limit":"No limit.","minimum_size":"No minimum size listed.","season":"Year-round."}'::jsonb)
+    ) as species(source_group,species_name,species_key,season_open,daily_bag_limit,possession_limit,minimum_length,special_restrictions,official_reference,rule_details)
+  loop
+    v_source_id := case when r.source_group='ocean' then v_ocean_source_id else v_fresh_source_id end;
+
+    if not exists (
+      select 1 from public.regulation_rules
+      where state_code='CA'
+        and species_key=r.species_key
+        and rule_scope='statewide'
+        and source_id=v_source_id
+    ) then
+      insert into public.regulation_rules (
+        state_code,species_name,species_key,rule_scope,season_open,
+        daily_bag_limit,possession_limit,minimum_length,
+        special_restrictions,rule_details,official_reference,
+        source_id,verification_status,verified_at
+      ) values (
+        'CA',r.species_name,r.species_key,'statewide',r.season_open,
+        r.daily_bag_limit,r.possession_limit,r.minimum_length,
+        r.special_restrictions,r.rule_details,r.official_reference,
+        v_source_id,'verified',now()
+      );
+    end if;
+  end loop;
+end $$;
