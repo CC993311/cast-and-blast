@@ -17,6 +17,7 @@ main{max-width:1000px;margin:auto;padding:48px 20px 70px}
 .hero h1{font-size:clamp(32px,5vw,48px);margin:13px 0}.hero p{max-width:690px;margin:auto;color:var(--muted);line-height:1.7}
 .panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:18px}
 .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+#waterBody{width:100%;padding:14px;background:var(--panel2);color:var(--white);border:1px solid var(--border);border-radius:8px;font-size:15px}
 label{display:block;font-weight:bold;margin-bottom:10px}
 select{width:100%;padding:14px;background:var(--panel2);color:var(--white);border:1px solid var(--border);border-radius:8px;font-size:15px}
 select:focus{outline:2px solid var(--green);outline-offset:2px}
@@ -48,17 +49,20 @@ footer{text-align:center;padding:28px;color:#899687;font-size:12px;border-top:1p
     <div class="form-grid">
       <div><label for="stateSelect">1. Choose a state</label><select id="stateSelect"><option value="">Select a state</option></select><p class="hint">Choose the state where you plan to fish.</p></div>
       <div><label for="speciesSelect">2. Choose a species</label><select id="speciesSelect" disabled><option value="">Loading FishBound species…</option></select><p class="hint">This list is loaded from the Fish Species Guide and stays in sync with it.</p></div>
+      <div><label for="waterBody">3. Lake or river (optional)</label><input id="waterBody" type="text" placeholder="Example: Lake Fork" autocomplete="off"><p class="hint">Add a water name to check for a matching special rule.</p></div>
     </div>
     <div id="loadStatus" role="status">Loading all species from the FishBound Species Guide…</div>
   </section>
   <section class="panel result" id="result" aria-live="polite">
     <h2 id="resultTitle"></h2>
     <p class="agency" id="agencyName"></p>
+    <p class="hint" id="apiStatus" role="status">Choose a state and species to load regulations.</p>
     <div class="actions">
       <a class="action" id="agencyLink" href="#" target="_blank" rel="noopener">OPEN OFFICIAL STATE FISHING RULES</a>
       <a class="action secondary" id="speciesSearchLink" href="#" target="_blank" rel="noopener">SEARCH THIS AGENCY FOR THIS SPECIES</a>
     </div>
     <div class="rule-note" id="ruleNote"></div>
+    <p class="notice" id="dataAttribution">Regulation data provider: fishregs. Always confirm current rules with the official state agency.</p>
     <p class="notice">FishBound's Species Guide includes fish from across North America. A species may not occur in every state, and rules may vary by lake, river, management zone, season, or whether you are fishing in state or federal waters. Confirm the exact current rules with the agency before fishing.</p>
     <p class="notice" id="federalNote" style="display:none">For ocean and offshore fishing, federal rules may also apply. Check <a href="https://www.fisheries.noaa.gov/recreational-fishing" target="_blank" rel="noopener">NOAA Fisheries recreational fishing information</a>.</p>
   </section>
@@ -131,24 +135,95 @@ const loadStatus=document.getElementById("loadStatus");
 const result=document.getElementById("result");
 const states=Object.keys(stateAgencies).sort((a,b)=>a.localeCompare(b));
 states.forEach(state=>{const option=document.createElement("option");option.value=state;option.textContent=state;stateSelect.appendChild(option);});
-function updateResult(){
+const waterBodyInput=document.getElementById("waterBody");
+const apiStatus=document.getElementById("apiStatus");
+const ruleNote=document.getElementById("ruleNote");
+let requestNumber=0;
+function makeSlug(value){return value.trim().toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");}
+function addRuleLine(label,value){
+ if(value===undefined||value===null||value==="")return;
+ const line=document.createElement("p");
+ const strong=document.createElement("strong");
+ strong.textContent=label+": ";
+ line.appendChild(strong);
+ line.appendChild(document.createTextNode(String(value)));
+ line.style.marginBottom="9px";
+ ruleNote.appendChild(line);
+}
+function showFallback(message,agencyUrl){
+ ruleNote.replaceChildren();
+ const p=document.createElement("p");
+ p.textContent=message+" No limits or seasons are being guessed.";
+ ruleNote.appendChild(p);
+ const link=document.createElement("a");
+ link.href=agencyUrl;link.target="_blank";link.rel="noopener";
+ link.textContent="Open the official state fishing regulations";
+ link.style.display="inline-block";link.style.marginTop="12px";link.style.color="var(--green)";
+ ruleNote.appendChild(link);
+}
+async function updateResult(){
  const state=stateSelect.value, species=speciesSelect.value;
  if(!state||!species){result.style.display="none";return;}
- const [agency,url,domain]=stateAgencies[state];
+ const thisRequest=++requestNumber;
+ const [agency,agencyUrl]=stateAgencies[state];
  document.getElementById("resultTitle").textContent=state+" — "+species;
- document.getElementById("agencyName").textContent="Official source: "+agency;
+ document.getElementById("agencyName").textContent="Official rules authority: "+agency;
  const agencyLink=document.getElementById("agencyLink");
- agencyLink.href=url;
- const query=encodeURIComponent('site:'+domain+' "'+species+'" fishing regulations');
- const searchLink=document.getElementById("speciesSearchLink");
- searchLink.href="https://www.google.com/search?q="+query;
- document.getElementById("ruleNote").textContent="Look for the current species rules in the official "+state+" fishing guide. Check the season, minimum or maximum size, daily bag and possession limits, gear restrictions, and any special rules for the exact lake, river, or management area. The official agency publication is the authority.";
- const saltwater=/saltwater|tuna|marlin|swordfish|mahi|wahoo|halibut|cod|haddock|pollock|sablefish|mackerel|bonito|barracuda|shark|sheephead|tautog|surfperch|croaker|seabass|sea bass|sanddab|sole|sardine|anchovy|herring|grunion|sculpin|greenling|corbina|queenfish|sturgeon/i.test(species);
- document.getElementById("federalNote").style.display=saltwater?"block":"none";
+ agencyLink.href=agencyUrl;
+ document.getElementById("speciesSearchLink").href="https://www.google.com/search?q="+encodeURIComponent('site:'+stateAgencies[state][2]+' "'+species+'" fishing regulations');
+ document.getElementById("federalNote").style.display=/saltwater|tuna|marlin|swordfish|mahi|wahoo|halibut|cod|haddock|pollock|sablefish|mackerel|bonito|barracuda|shark|sheephead|tautog|surfperch|croaker|seabass|sea bass|sanddab|sole|sardine|anchovy|herring|grunion|sculpin|greenling|corbina|queenfish|sturgeon/i.test(species)?"block":"none";
  result.style.display="block";
+ apiStatus.textContent="Checking the regulation database…";
+ ruleNote.textContent="Loading current available regulation information.";
+ const params=new URLSearchParams({state:makeSlug(state),species:makeSlug(species)});
+ const waterBody=waterBodyInput.value.trim();
+ if(waterBody)params.set("waterbody",waterBody);
+ try{
+  const response=await fetch("https://fishregs.hk2.ai/api/regs?"+params.toString(),{headers:{Accept:"application/json"}});
+  const data=await response.json();
+  if(thisRequest!==requestNumber)return;
+  if(!response.ok||!data.species){
+   apiStatus.textContent="Detailed rules are not available for this state and species in the database.";
+   showFallback("FishBound could not find a verified matching record for this selection. Check the official agency rules for this species and water.",agencyUrl);
+   return;
+  }
+  const fish=data.species;
+  ruleNote.replaceChildren();
+  addRuleLine("Season",fish.seasonSummary||fish.seasonWindows);
+  addRuleLine("Daily catch limit",fish.dailyBagLimit);
+  addRuleLine("Possession limit",fish.possessionLimit);
+  addRuleLine("Size limit",fish.sizeLimit);
+  addRuleLine("Slot limit",fish.slotLimit);
+  addRuleLine("Additional rule",fish.trophyRule);
+  if(Array.isArray(fish.gearRestrictions)&&fish.gearRestrictions.length){
+   const heading=document.createElement("p");heading.textContent="Gear and method restrictions:";heading.style.fontWeight="bold";heading.style.margin="12px 0 6px";ruleNote.appendChild(heading);
+   const list=document.createElement("ul");list.style.paddingLeft="22px";
+   fish.gearRestrictions.forEach(item=>{const li=document.createElement("li");li.textContent=item;li.style.marginBottom="5px";list.appendChild(li);});
+   ruleNote.appendChild(list);
+  }
+  const override=data.waterBodyMatch;
+  if(override){
+   const heading=document.createElement("p");heading.textContent="Special rule for "+(override.waterBody||waterBody)+":";heading.style.fontWeight="bold";heading.style.margin="14px 0 6px";ruleNote.appendChild(heading);
+   const p=document.createElement("p");p.textContent=override.rule;ruleNote.appendChild(p);
+  }else if(waterBody){
+   const p=document.createElement("p");p.textContent="No named special-water match was returned for "+waterBody+". Statewide information is shown above; check the official source for local exceptions.";p.style.marginTop="12px";ruleNote.appendChild(p);
+  }
+  const updated=fish.updatedAt||fish.publishedAt||data._meta?.generatedAt;
+  addRuleLine("Data updated",updated?new Date(updated).toLocaleDateString():"Date not supplied");
+  const source=document.createElement("p");source.style.marginTop="12px";source.textContent="These records are supplied by a third-party regulation database, not directly issued by FishBound. State and local emergency rules may change. Verify every rule with the official agency before fishing.";ruleNote.appendChild(source);
+  apiStatus.textContent="Regulation record found. Review the official agency source before relying on these rules.";
+  const provider=document.getElementById("dataAttribution");
+  provider.textContent="Data provider: fishregs.hk2.ai · Regulation year "+(data._meta?.regulationYear||"not specified")+". Official agency: "+(data._meta?.agency||agency)+".";
+  if(data._meta?.agencyUrl)agencyLink.href=data._meta.agencyUrl;
+ }catch(error){
+  if(thisRequest!==requestNumber)return;
+  apiStatus.textContent="The regulation database could not be reached.";
+  showFallback("FishBound could not load the regulation database right now. Please use the official state source.",agencyUrl);
+ }
 }
 stateSelect.addEventListener("change",updateResult);
 speciesSelect.addEventListener("change",updateResult);
+waterBodyInput.addEventListener("change",updateResult);
 async function loadSpecies(){
  try{
   const response=await fetch("guides.html",{cache:"no-store"});
