@@ -94,7 +94,7 @@ begin
     'Flowing waters: April 15-June 14 catch-and-release only; June 15-April 14 open. Lakes: open year-round.',
     '2 per day combined for rainbow/steelhead trout.',
     '2 in possession combined for rainbow/steelhead trout.',
-    'Only 1 of the 2 fish may be 20 inches or longer.',
+    null,
     'Annual limit of 2 rainbow/steelhead trout 20 inches or longer taken north of the latitude of Point Adam from the listed Southcentral areas; harvest must be recorded immediately. Special drainage rules and emergency orders may differ.',
     jsonb_build_object(
       'combined_species','Rainbow Trout and Steelhead.',
