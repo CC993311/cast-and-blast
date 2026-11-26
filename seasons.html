@@ -154,6 +154,37 @@ function addRuleLine(label,value){
  line.style.marginBottom="9px";
  ruleNote.appendChild(line);
 }
+function addDetailValue(label,value){
+ if(value===undefined||value===null||value==="")return;
+ if(Array.isArray(value)){
+  addRuleLine(label,value.map(item=>typeof item==="object"?Object.entries(item).map(([key,val])=>key.replace(/_/g," ")+": "+val).join(", "):String(item)).join("; "));
+  return;
+ }
+ if(typeof value==="object"){
+  const section=document.createElement("div");
+  section.style.marginTop="12px";
+  section.style.marginBottom="12px";
+  const heading=document.createElement("p");
+  heading.textContent=label;
+  heading.style.fontWeight="bold";
+  heading.style.color="var(--green)";
+  heading.style.marginBottom="7px";
+  section.appendChild(heading);
+  Object.entries(value).forEach(([key,val])=>{
+   if(val===undefined||val===null||val==="")return;
+   const line=document.createElement("p");
+   line.style.marginBottom="6px";
+   const strong=document.createElement("strong");
+   strong.textContent=key.replace(/_/g," ").replace(/([A-Z])/g," $1").replace(/^./,c=>c.toUpperCase())+": ";
+   line.appendChild(strong);
+   line.appendChild(document.createTextNode(Array.isArray(val)?val.join(", "):String(val)));
+   section.appendChild(line);
+  });
+  ruleNote.appendChild(section);
+  return;
+ }
+ addRuleLine(label,value);
+}
 function showCaliforniaLargemouthBassRules(waterBody,agencyUrl){
  ruleNote.replaceChildren();
  const intro=document.createElement("p");
@@ -270,7 +301,7 @@ async function updateResult(){
    addRuleLine("Gear restrictions",fish.gear_restrictions);
    addRuleLine("Special restrictions",fish.special_restrictions);
    if(fish.rule_details&&Object.keys(fish.rule_details).length){
-    Object.entries(fish.rule_details).forEach(([key,value])=>addRuleLine(key.replace(/_/g," ").replace(/([A-Z])/g," $1").replace(/^./,c=>c.toUpperCase()),typeof value==="object"?JSON.stringify(value):value));
+    Object.entries(fish.rule_details).forEach(([key,value])=>addDetailValue(key.replace(/_/g," ").replace(/([A-Z])/g," $1").replace(/^./,c=>c.toUpperCase()),value));
    }
    const src=fish.regulation_sources;
    if(src&&src.source_url){
