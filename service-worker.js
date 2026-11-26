@@ -1,4 +1,4 @@
-const CACHE_NAME = "fishbound-shell-v3";
+const CACHE_NAME = "fishbound-shell-v4";
 const APP_SHELL = [
   "/fishbound/",
   "/fishbound/index.html",
